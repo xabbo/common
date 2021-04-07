@@ -6,6 +6,12 @@ namespace Xabbo.Messages
     public interface IMessageManager
     {
         /// <summary>
+        /// Loads the messages for the specified client type
+        /// using the messages file path if it is needed.
+        /// </summary>
+        void Load(ClientType clientType, string? messagesPath);
+
+        /// <summary>
         /// Gets the incoming headers.
         /// </summary>
         Incoming In { get; }

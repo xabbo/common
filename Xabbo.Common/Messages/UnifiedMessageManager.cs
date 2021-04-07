@@ -1,21 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using Microsoft.Extensions.Configuration;
 
 using Xabbo.Serialization;
-using Xabbo.Utility;
 
 namespace Xabbo.Messages
 {
-    public class MessageManager : IMessageManager
+    /// <summary>
+    /// Manages messages of the Unity and Flash clients
+    /// using a message map file and a Harble API file if needed.
+    /// </summary>
+    public class UnifiedMessageManager : IMessageManager
     {
-        private const int
-            INDEX_VALUE = 0,
-            INDEX_HASH = 1,
-            INDEX_ALIASES = 2;
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
+        private readonly string _messageMapPath;
+        private readonly MessageMap _messageMap;
 
         private readonly List<MessageInfo> _messageInfos = new();
+
+        private readonly Dictionary<short, MessageInfo>
+            _incomingHeaderMap = new(), _outgoingHeaderMap = new();
 
         private readonly Dictionary<string, MessageInfo>
             _incomingHashMap = new(), _outgoingHashMap = new();
@@ -29,62 +43,62 @@ namespace Xabbo.Messages
 
         public Header this[Identifier identifier] => GetHeaders(identifier.Destination)[identifier.Name];
 
-        public MessageManager(ClientType clientType, string messagesPath, string harblePath)
+        public UnifiedMessageManager(IConfiguration config)
         {
             In = new Incoming();
             Out = new Outgoing();
 
-            Load(clientType, messagesPath, harblePath);
+            _messageMapPath = config.GetValue("Messages:MapFilePath", "messages.json");
+
+            if (!File.Exists(_messageMapPath))
+                throw new FileNotFoundException("Unable to find message map file.", _messageMapPath);
+
+            _messageMap = JsonSerializer.Deserialize<MessageMap>(_messageMapPath, _jsonSerializerOptions)
+                ?? throw new InvalidOperationException("Failed to load message map.");
         }
 
-        private void LoadMessages(Ini messages, Destination destination)
+        /// <summary>
+        /// Initializes the messages from the message map
+        /// </summary>
+        private void InitializeMessages(Destination destination)
         {
-            string sectionName = destination == Destination.Client ?
-                "Incoming" : "Outgoing";
-
-            foreach (var (unityName, value) in messages[sectionName])
+            List<MessageMapItem>? list = destination switch
             {
-                string[] values = value.Split(';');
-                if (values.Length == 0)
-                    throw new FormatException("Invalid message file format");
+                Destination.Client => _messageMap.Incoming,
+                Destination.Server => _messageMap.Outgoing,
+                _ => null
+            };
 
-                short header = short.Parse(values[INDEX_VALUE]);
-                string hash = string.Empty;
-                HashSet<string> aliases = new(StringComparer.OrdinalIgnoreCase);
+            if (list is null) return;
 
-                if (values.Length > INDEX_HASH)
+            foreach (MessageMapItem item in list)
+            {
+                _messageInfos.Add(new MessageInfo()
                 {
-                    hash = values[INDEX_HASH];
-                }
-
-                if (values.Length > INDEX_ALIASES)
-                {
-                    foreach (string alias in values[INDEX_ALIASES].Split(','))
-                        aliases.Add(alias);
-                }
-
-                _messageInfos.Add(new MessageInfo {
                     Destination = destination,
-                    UnityHeader = header,
-                    Hash = hash,
-                    Name = unityName,
-                    Aliases = aliases
+                    UnityHeader = item.Header,
+                    Hash = item.Hash,
+                    Name = item.Name,
+                    Aliases = new HashSet<string>(
+                        item.Aliases,
+                        StringComparer.OrdinalIgnoreCase
+                    )
                 });
             }
         }
 
-        private void Load(ClientType clientType, string messagesPath, string harblePath)
+        public void Load(ClientType clientType, string? messagesPath)
         {
-            Ini messagesIni = Ini.Load(messagesPath);
+            _messageInfos.Clear();
 
-            LoadMessages(messagesIni, Destination.Client);
-            LoadMessages(messagesIni, Destination.Server);
+            foreach (Destination destination in Enum.GetValues<Destination>())
+                InitializeMessages(destination);
 
             foreach (MessageInfo messageInfo in _messageInfos)
             {
                 Dictionary<string, MessageInfo>
-                    nameDict = messageInfo.Destination == Destination.Client ? _incomingMessageNames : _outgoingMessageNames,
-                    hashDict = messageInfo.Destination == Destination.Client ? _incomingHashMap : _outgoingHashMap;
+                    nameDict = messageInfo.IsOutgoing ? _outgoingMessageNames : _incomingMessageNames,
+                    hashDict = messageInfo.IsOutgoing ? _outgoingHashMap : _incomingHashMap;
 
                 nameDict[messageInfo.Name] = messageInfo;
                 foreach (string alias in messageInfo.Aliases)
@@ -93,27 +107,33 @@ namespace Xabbo.Messages
 
             if (clientType == ClientType.Unity)
             {
-                In.Load(messagesIni["Incoming"].ToDictionary(
-                    k => k.Key,
-                    v => short.Parse(v.Value.Split(';')[0])
+                In.Load(_messageInfos.Where(x => x.IsIncoming).ToDictionary(
+                    k => k.Name,
+                    v => v.UnityHeader
                 ));
-                Out.Load(messagesIni["Outgoing"].ToDictionary(
-                    k => k.Key,
-                    v => short.Parse(v.Value.Split(';')[0])
+                Out.Load(_messageInfos.Where(x => x.IsOutgoing).ToDictionary(
+                    k => k.Name,
+                    v => v.UnityHeader
                 ));
             }
             else if (clientType == ClientType.Flash)
             {
-                if (string.IsNullOrWhiteSpace(harblePath))
+                if (string.IsNullOrWhiteSpace(messagesPath))
                 {
                     throw new Exception("Harble API cache file path not specified");
                 }
 
-                HarbleMessages harbleMessages = HarbleMessages.Load(harblePath);
+                HarbleMessages harbleMessages = HarbleMessages.Load(messagesPath);
 
                 Dictionary<string, short>
                     incomingMap = new(),
                     outgoingMap = new();
+
+                foreach (HarbleMessage message in Enumerable.Concat(harbleMessages.Incoming, harbleMessages.Outgoing))
+                {
+                    Dictionary<string, short> dict = message.IsOutgoing ? outgoingMap : incomingMap;
+                    dict[message.Name] = message.Id;
+                }
 
                 foreach (MessageInfo messageInfo in _messageInfos)
                 {
