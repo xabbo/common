@@ -53,7 +53,7 @@ namespace Xabbo.Messages
             if (!File.Exists(_messageMapPath))
                 throw new FileNotFoundException("Unable to find message map file.", _messageMapPath);
 
-            _messageMap = JsonSerializer.Deserialize<MessageMap>(_messageMapPath, _jsonSerializerOptions)
+            _messageMap = JsonSerializer.Deserialize<MessageMap>(File.ReadAllText(_messageMapPath), _jsonSerializerOptions)
                 ?? throw new InvalidOperationException("Failed to load message map.");
         }
 
