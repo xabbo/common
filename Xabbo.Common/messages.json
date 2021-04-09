@@ -119,22 +119,22 @@
     {
       "Name": "UsersInRoom",
       "Header": 28,
-      "Aliases": []
+      "Aliases": [ "Users" ]
     },
     {
       "Name": "UserLoggedOut",
       "Header": 29,
-      "Aliases": []
+      "Aliases": [ "UserRemove" ]
     },
     {
       "Name": "StackingHeightmap",
       "Header": 31,
-      "Aliases": []
+      "Aliases": [ "HeightMap" ]
     },
     {
       "Name": "ActiveObjects",
       "Header": 32,
-      "Aliases": []
+      "Aliases": [ "Objects" ]
     },
     {
       "Name": "Error",
@@ -144,7 +144,7 @@
     {
       "Name": "Status",
       "Header": 34,
-      "Aliases": []
+      "Aliases": [ "UserUpdate" ]
     },
     {
       "Name": "UserBanned",
@@ -189,7 +189,7 @@
     {
       "Name": "FlatProperty",
       "Header": 46,
-      "Aliases": []
+      "Aliases": [ "RoomProperty" ]
     },
     {
       "Name": "YouAreOwner",
@@ -334,12 +334,12 @@
     {
       "Name": "UpdateItem",
       "Header": 85,
-      "Aliases": []
+      "Aliases": [ "ItemUpdate" ]
     },
     {
       "Name": "StuffDataUpdate",
       "Header": 88,
-      "Aliases": []
+      "Aliases": [ "ItemDataUpdate" ]
     },
     {
       "Name": "DoorOut",
@@ -694,7 +694,7 @@
     {
       "Name": "SelectedBadges",
       "Header": 228,
-      "Aliases": []
+      "Aliases": [ "HabboUserBadges" ]
     },
     {
       "Name": "AvailableBadges",
@@ -919,7 +919,7 @@
     {
       "Name": "HabboGroupBadge",
       "Header": 309,
-      "Aliases": []
+      "Aliases": [ "HabboGroupBadges" ]
     },
     {
       "Name": "FavoriteMembershipUpdate",
@@ -1084,7 +1084,7 @@
     {
       "Name": "ClientLatencyPingResponse",
       "Header": 354,
-      "Aliases": []
+      "Aliases": [ "LatencyPingResponse" ]
     },
     {
       "Name": "ShowMysteryBoxWait",
@@ -1159,7 +1159,7 @@
     {
       "Name": "RoomEventEventInfo",
       "Header": 370,
-      "Aliases": []
+      "Aliases": [ "RoomEvent" ]
     },
     {
       "Name": "RoomAdAllowedRooms",
@@ -1334,7 +1334,7 @@
     {
       "Name": "FloorHeightmap",
       "Header": 470,
-      "Aliases": []
+      "Aliases": [ "FloorHeightMap" ]
     },
     {
       "Name": "RoomEntryInfo",
@@ -1379,12 +1379,12 @@
     {
       "Name": "RoomDance",
       "Header": 480,
-      "Aliases": []
+      "Aliases": [ "Dance" ]
     },
     {
       "Name": "RoomExpression",
       "Header": 481,
-      "Aliases": []
+      "Aliases": [ "Expression" ]
     },
     {
       "Name": "RoomCarryObject",
@@ -1809,7 +1809,7 @@
     {
       "Name": "SelectableClubGiftInfo",
       "Header": 623,
-      "Aliases": []
+      "Aliases": [ "ClubGiftNotification" ]
     },
     {
       "Name": "ClubGiftSelected",
@@ -1999,7 +1999,7 @@
     {
       "Name": "GameYouArePlayer",
       "Header": 700,
-      "Aliases": []
+      "Aliases": [ "YouArePlayingGame" ]
     },
     {
       "Name": "GameNumberValue",
@@ -2189,7 +2189,7 @@
     {
       "Name": "PossibleAchievement",
       "Header": 913,
-      "Aliases": []
+      "Aliases": [ "Achievement" ]
     },
     {
       "Name": "RelationshipStatusInfo",
@@ -2369,7 +2369,7 @@
     {
       "Name": "Navigator2SearchResultBlocks",
       "Header": 1021,
-      "Aliases": []
+      "Aliases": [ "NavigatorSearchResultBlocks" ]
     },
     {
       "Name": "Navigator2LiftArea",
@@ -2881,7 +2881,7 @@
     {
       "Name": "SubscriptionGetUserInfo",
       "Header": 26,
-      "Aliases": []
+      "Aliases": [ "ScrGetUserInfo" ]
     },
     {
       "Name": "SubscriptionGetKickbackInfo",
@@ -3026,7 +3026,7 @@
     {
       "Name": "Move",
       "Header": 75,
-      "Aliases": []
+      "Aliases": [ "MoveAvatar" ]
     },
     {
       "Name": "ThrowDice",
@@ -3116,7 +3116,7 @@
     {
       "Name": "Expression",
       "Header": 94,
-      "Aliases": []
+      "Aliases": [ "AvatarExpression" ]
     },
     {
       "Name": "KickUser",
@@ -3156,7 +3156,7 @@
     {
       "Name": "ShowSign",
       "Header": 104,
-      "Aliases": []
+      "Aliases": [ "Sign" ]
     },
     {
       "Name": "PlaceRoomItem",
@@ -3481,7 +3481,7 @@
     {
       "Name": "ClientLatencyPingRequest",
       "Header": 315,
-      "Aliases": []
+      "Aliases": [ "LatencyPingRequest" ]
     },
     {
       "Name": "ClientLatencyPingReport",
@@ -3611,7 +3611,7 @@
     {
       "Name": "UseAvatarEffect",
       "Header": 372,
-      "Aliases": []
+      "Aliases": [ "AvatarEffectSelected", "AvatarEffectSelectedComposer" ]
     },
     {
       "Name": "ActivateAvatarEffect",
@@ -3701,7 +3701,7 @@
     {
       "Name": "FlatOpc",
       "Header": 391,
-      "Aliases": []
+      "Aliases": [ "OpenConnection" ]
     },
     {
       "Name": "UseStuff",
@@ -4051,7 +4051,7 @@
     {
       "Name": "LogToEventLog",
       "Header": 482,
-      "Aliases": []
+      "Aliases": [ "EventLog" ]
     },
     {
       "Name": "ToggleRoomStaffPick",
@@ -4401,7 +4401,7 @@
     {
       "Name": "Navigator2Search",
       "Header": 1021,
-      "Aliases": []
+      "Aliases": [ "NewNavigatorSearch", "NewNavigatorSearchComposer" ]
     },
     {
       "Name": "Navigator2AddSavedSearch",
