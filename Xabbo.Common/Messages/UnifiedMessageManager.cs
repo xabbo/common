@@ -29,14 +29,12 @@ namespace Xabbo.Messages
         private readonly List<MessageInfo> _messageInfos = new();
 
         private readonly Dictionary<short, MessageInfo>
-            _incomingHeaderMap = new(), _outgoingHeaderMap = new();
+            _incomingHeaderMap = new(),
+            _outgoingHeaderMap = new();
 
         private readonly Dictionary<string, MessageInfo>
-            _incomingHashMap = new(), _outgoingHashMap = new();
-
-        private readonly Dictionary<string, MessageInfo>
-            _incomingMessageNames = new(StringComparer.OrdinalIgnoreCase),
-            _outgoingMessageNames = new(StringComparer.OrdinalIgnoreCase);
+            _incomingNameMap = new(StringComparer.Ordinal),
+            _outgoingNameMap = new(StringComparer.Ordinal);
 
         public Incoming In { get; private set; }
         public Outgoing Out { get; private set; }
@@ -60,12 +58,12 @@ namespace Xabbo.Messages
         /// <summary>
         /// Initializes the messages from the message map
         /// </summary>
-        private void InitializeMessages(Destination destination)
+        private void InitializeMessages(Direction direction)
         {
-            List<MessageMapItem>? list = destination switch
+            List<MessageMapItem>? list = direction switch
             {
-                Destination.Client => _messageMap.Incoming,
-                Destination.Server => _messageMap.Outgoing,
+                Direction.Incoming => _messageMap.Incoming,
+                Direction.Outgoing => _messageMap.Outgoing,
                 _ => null
             };
 
@@ -75,9 +73,8 @@ namespace Xabbo.Messages
             {
                 _messageInfos.Add(new MessageInfo()
                 {
-                    Destination = destination,
-                    UnityHeader = item.Header,
-                    Hash = item.Hash,
+                    Direction = direction,
+                    Header = item.Header,
                     Name = item.Name,
                     Aliases = new HashSet<string>(
                         item.Aliases,
@@ -90,30 +87,52 @@ namespace Xabbo.Messages
         public void Load(ClientType clientType, string? messagesPath)
         {
             _messageInfos.Clear();
+            _incomingHeaderMap.Clear();
+            _outgoingHeaderMap.Clear();
+            _incomingNameMap.Clear();
+            _outgoingNameMap.Clear();
 
-            foreach (Destination destination in Enum.GetValues<Destination>())
-                InitializeMessages(destination);
+            InitializeMessages(Direction.Incoming);
+            InitializeMessages(Direction.Outgoing);
 
             foreach (MessageInfo messageInfo in _messageInfos)
             {
-                Dictionary<string, MessageInfo>
-                    nameDict = messageInfo.IsOutgoing ? _outgoingMessageNames : _incomingMessageNames,
-                    hashDict = messageInfo.IsOutgoing ? _outgoingHashMap : _incomingHashMap;
+                Dictionary<string, MessageInfo> nameMap =
+                    messageInfo.IsIncoming ? _incomingNameMap : _outgoingNameMap;
 
-                nameDict[messageInfo.Name] = messageInfo;
+                if (nameMap.ContainsKey(messageInfo.Name))
+                {
+                    throw new Exception($"Duplicate {messageInfo.Direction.ToString().ToLower()} message name: '{messageInfo.Name}'");
+                }
+
+                nameMap[messageInfo.Name] = messageInfo;
+
                 foreach (string alias in messageInfo.Aliases)
-                    nameDict[alias] = messageInfo;
+                {
+                    if (nameMap.ContainsKey(alias))
+                    {
+                        throw new Exception($"{messageInfo.Direction} message name conflict for alias '{alias}'");
+                    }
+
+                    nameMap[alias] = messageInfo;
+                }
+
+                if (clientType != ClientType.Unity)
+                {
+                    messageInfo.Header = -1;
+                }
             }
 
             if (clientType == ClientType.Unity)
             {
                 In.Load(_messageInfos.Where(x => x.IsIncoming).ToDictionary(
                     k => k.Name,
-                    v => v.UnityHeader
+                    v => v.Header
                 ));
+
                 Out.Load(_messageInfos.Where(x => x.IsOutgoing).ToDictionary(
                     k => k.Name,
-                    v => v.UnityHeader
+                    v => v.Header
                 ));
             }
             else if (clientType == ClientType.Flash)
@@ -129,27 +148,33 @@ namespace Xabbo.Messages
                     incomingMap = new(),
                     outgoingMap = new();
 
-                foreach (HarbleMessage message in Enumerable.Concat(harbleMessages.Incoming, harbleMessages.Outgoing))
+                foreach (HarbleMessage harbleMessage in Enumerable.Concat(harbleMessages.Incoming, harbleMessages.Outgoing))
                 {
-                    Dictionary<string, short> dict = message.IsOutgoing ? outgoingMap : incomingMap;
-                    dict[message.Name] = message.Id;
-                }
+                    Dictionary<string, MessageInfo> nameMap =
+                        harbleMessage.IsOutgoing ? _outgoingNameMap : _incomingNameMap;
 
-                foreach (MessageInfo messageInfo in _messageInfos)
-                {
-                    List<HarbleMessage> list = messageInfo.Destination == Destination.Client
-                        ? harbleMessages.Incoming : harbleMessages.Outgoing;
+                    Dictionary<string, short> headerMap =
+                        harbleMessage.IsOutgoing ? outgoingMap : incomingMap;
 
-                    Dictionary<string, short> map = messageInfo.Destination == Destination.Client
-                        ? incomingMap : outgoingMap;
-
-                    if (!string.IsNullOrWhiteSpace(messageInfo.Hash))
+                    // Attempt to convert to the Unity message name
+                    if (nameMap.TryGetValue(harbleMessage.Name, out MessageInfo? messageInfo))
                     {
-                        HarbleMessage? message = list.FirstOrDefault(x => x.Hash.Equals(messageInfo.Hash, StringComparison.OrdinalIgnoreCase));
-                        if (message is not null)
+                        headerMap[messageInfo.Name] = harbleMessage.Id;
+                    }
+                    else
+                    {
+                        // Not found, use the harble message name
+                        headerMap[harbleMessage.Name] = harbleMessage.Id;
+
+                        messageInfo = new MessageInfo
                         {
-                            map.Add(messageInfo.Name, message.Id);
-                        }
+                            Direction = harbleMessage.IsOutgoing ? Direction.Outgoing : Direction.Incoming,
+                            Name = harbleMessage.Name,
+                            Header = harbleMessage.Id
+                        };
+
+                        _messageInfos.Add(messageInfo);
+                        nameMap[harbleMessage.Name] = messageInfo;
                     }
                 }
 
@@ -180,22 +205,6 @@ namespace Xabbo.Messages
         public bool TryGetHeader(Identifier identifier, [MaybeNullWhen(false)] out Header header)
         {
             return TryGetHeaderByName(identifier.Destination, identifier.Name, out header);
-        }
-
-        public bool TryGetHeaderByHash(Destination destination, string hash, [MaybeNullWhen(false)] out Header header)
-        {
-            Dictionary<string, MessageInfo> hashMap = destination == Destination.Client
-                ? _incomingHashMap : _outgoingHashMap;
-
-            if (hashMap.TryGetValue(hash, out MessageInfo? messageInfo))
-            {
-                return GetHeaders(destination).TryGetHeader(messageInfo.Header, out header);
-            }
-            else
-            {
-                header = Header.Unknown;
-                return false;
-            }
         }
 
         public bool TryGetHeaderByValue(Destination destination, short value, [MaybeNullWhen(false)] out Header header)

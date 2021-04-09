@@ -34,21 +34,16 @@ namespace Xabbo.Messages
         /// <summary>
         /// Attempts to get a header by its identifier.
         /// </summary>
-        bool TryGetHeader(Identifier identifier, [MaybeNullWhen(false)] out Header header);
+        bool TryGetHeader(Identifier identifier, [NotNullWhen(true)] out Header? header);
 
         /// <summary>
         /// Attempts to get a header by its destination and value.
         /// </summary>
-        bool TryGetHeaderByValue(Destination destination, short value, [MaybeNullWhen(false)] out Header header);
+        bool TryGetHeaderByValue(Destination destination, short value, [NotNullWhen(true)] out Header? header);
 
         /// <summary>
         /// Attempts to get a header by its destination and name.
         /// </summary>
-        bool TryGetHeaderByName(Destination destination, string name, [MaybeNullWhen(false)] out Header header);
-
-        /// <summary>
-        /// Attempts to get a header by its destination and hash.
-        /// </summary>
-        bool TryGetHeaderByHash(Destination destination, string hash, [MaybeNullWhen(false)] out Header header);
+        bool TryGetHeaderByName(Destination destination, string name, [NotNullWhen(true)] out Header? header);
     }
 }

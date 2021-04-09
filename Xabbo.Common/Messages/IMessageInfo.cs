@@ -27,16 +27,6 @@ namespace Xabbo.Messages
         string Name { get; }
 
         /// <summary>
-        /// The hash of the message class in the Flash client.
-        /// </summary>
-        string Hash { get; }
-
-        /// <summary>
-        /// The header value of the message as it exists in the Unity client, or <c>-1</c> if it does not exist.
-        /// </summary>
-        short UnityHeader { get; }
-
-        /// <summary>
         /// The header value of the message for the current client, or <c>-1</c> if it is unresolved.
         /// </summary>
         short Header { get; }
@@ -45,10 +35,5 @@ namespace Xabbo.Messages
         /// The aliases of the message name.
         /// </summary>
         IReadOnlyCollection<string> Aliases { get; }
-
-        /// <summary>
-        /// The packet structure of the message.
-        /// </summary>
-        string Structure { get; }
     }
 }
