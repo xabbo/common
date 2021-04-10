@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Interceptor.Binding
+namespace Xabbo.Interceptor.Dispatcher
 {
     internal class InterceptorBinding
     {

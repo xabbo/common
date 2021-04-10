@@ -3,7 +3,7 @@ using System.Text;
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Binding
+namespace Xabbo.Interceptor.Dispatcher
 {
     public class UnknownIdentifiersException : Exception
     {

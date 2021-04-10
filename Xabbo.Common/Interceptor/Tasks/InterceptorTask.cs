@@ -58,12 +58,12 @@ namespace Xabbo.Interceptor.Tasks
 
         protected virtual void Bind()
         {
-            _interceptor.Binder.Bind(this);
+            _interceptor.Dispatcher.Bind(this);
         }
 
         protected virtual void Release()
         {
-            _interceptor.Binder.Release(this);
+            _interceptor.Dispatcher.Release(this);
         }
 
         protected abstract ValueTask OnExecuteAsync();

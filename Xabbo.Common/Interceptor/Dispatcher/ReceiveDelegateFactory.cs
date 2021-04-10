@@ -4,7 +4,7 @@ using System.Reflection;
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Binding
+namespace Xabbo.Interceptor.Dispatcher
 {
     internal static class ReceiveDelegateFactory
     {

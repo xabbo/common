@@ -2,7 +2,7 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Binding
+namespace Xabbo.Interceptor.Dispatcher
 {
     internal abstract class ReceiveCallback : BindingCallback
     {

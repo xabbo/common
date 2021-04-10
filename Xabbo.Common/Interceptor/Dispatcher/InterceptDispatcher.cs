@@ -8,9 +8,9 @@ using System.Reflection;
 using Xabbo.Messages;
 using Xabbo.Utility;
 
-namespace Xabbo.Interceptor.Binding
+namespace Xabbo.Interceptor.Dispatcher
 {
-    public class InterceptorBinder : IInterceptorBinder
+    public class InterceptDispatcher : IInterceptDispatcher
     {
         private static ReceiveCallback CreateCallback(short header, object target, MethodInfo method)
         {
@@ -31,8 +31,6 @@ namespace Xabbo.Interceptor.Binding
         private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(short _)
             => new List<InterceptCallback>();
 
-        private bool _disposed;
-
         private readonly ConcurrentDictionary<object, InterceptorBinding> _bindings;
         private readonly ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback>> _receiveCallbacks;
         private readonly ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>> _incomingInterceptCallbacks;
@@ -42,36 +40,16 @@ namespace Xabbo.Interceptor.Binding
             GetInterceptCallbackDictionary(Destination destination) =>
             destination == Destination.Server ? _outgoingInterceptCallbacks : _incomingInterceptCallbacks;
 
-        public IInterceptor Interceptor { get; }
-        public IMessageManager Messages => Interceptor.Messages;
+        public IMessageManager Messages { get; }
 
-        public InterceptorBinder(IInterceptor interceptor)
+        public InterceptDispatcher(IMessageManager messages)
         {
-            Interceptor = interceptor;
+            Messages = messages;
 
             _bindings = new ConcurrentDictionary<object, InterceptorBinding>();
             _receiveCallbacks = new ConcurrentDictionary<short, IReadOnlyList<ReceiveCallback>>();
             _incomingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
             _outgoingInterceptCallbacks = new ConcurrentDictionary<short, IReadOnlyList<InterceptCallback>>();
-
-            Interceptor.Intercepted += Interceptor_Intercepted;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            _disposed = true;
-
-            if (disposing)
-            {
-                Interceptor.Intercepted -= Interceptor_Intercepted;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         private static bool IsValidParameter(ParameterInfo param)
@@ -84,7 +62,7 @@ namespace Xabbo.Interceptor.Binding
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
 
-            var parameters = methodInfo.GetParameters();
+            ParameterInfo[] parameters = methodInfo.GetParameters();
             if (!parameters.All(param => IsValidParameter(param)))
                 return false;
 
@@ -104,37 +82,24 @@ namespace Xabbo.Interceptor.Binding
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
 
-            var parameters = methodInfo.GetParameters();
+            ParameterInfo[] parameters = methodInfo.GetParameters();
             return
                 parameters.Length == 1 &&
                 parameters[0].ParameterType.Equals(typeof(InterceptArgs)) &&
                 parameters.All(param => IsValidParameter(param));
         }
 
-        private void Interceptor_Intercepted(object? sender, InterceptArgs e)
+        public void DispatchMessage(object? sender, IReadOnlyPacket packet)
         {
-            if (e.IsIncoming)
-                DispatchMessage(Interceptor, e.Packet);
-
-            DispatchIntercept(e);
-        }
-
-        private void DispatchMessage(object sender, IReadOnlyPacket packet)
-        {
-            // Global callbacks
-            if (_receiveCallbacks.TryGetValue(-1, out IReadOnlyList<ReceiveCallback>? list))
-                InvokeReceiverCallbacks(list, sender, packet);
-
-            // Message bound callbacks
-            if (_receiveCallbacks.TryGetValue(packet.Header, out list))
+            if (_receiveCallbacks.TryGetValue(packet.Header, out IReadOnlyList<ReceiveCallback>? list))
                 InvokeReceiverCallbacks(list, sender, packet);
         }
 
-        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object sender, IReadOnlyPacket packet)
+        private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object? sender, IReadOnlyPacket packet)
         {
             short header = packet.Header;
 
-            foreach (var callback in callbacks)
+            foreach (ReceiveCallback callback in callbacks)
             {
                 try
                 {
@@ -161,7 +126,7 @@ namespace Xabbo.Interceptor.Binding
             }
         }
 
-        private void DispatchIntercept(InterceptArgs e)
+        public void DispatchIntercept(InterceptArgs e)
         {
             if (GetInterceptCallbackDictionary(e.Destination)
                 .TryGetValue(e.Packet.Header, out IReadOnlyList<InterceptCallback>? list))
@@ -174,7 +139,7 @@ namespace Xabbo.Interceptor.Binding
         {
             short header = e.Packet.Header;
 
-            foreach (var callback in callbacks)
+            foreach (InterceptCallback callback in callbacks)
             {
                 try
                 {
@@ -189,7 +154,7 @@ namespace Xabbo.Interceptor.Binding
                         ex = ex.InnerException;
                     }
 
-                    var map = e.IsOutgoing ? (HeaderDictionary)Messages.Out : Messages.In;
+                    HeaderDictionary map = e.IsOutgoing ? (HeaderDictionary)Messages.Out : Messages.In;
                     string messageName = map.TryGetIdentifier(header, out string? name) ? $"{name} ({header})" : $"{header}";
 
                     Debug.WriteLine(
@@ -222,7 +187,7 @@ namespace Xabbo.Interceptor.Binding
                 }
                 else
                 {
-                    var list = previousList.ToList();
+                    List<ReceiveCallback> list = previousList.ToList();
                     list.Add(new ClosedReceiveCallback(header, handler.Target, handler));
                     newList = list;
 
@@ -243,7 +208,7 @@ namespace Xabbo.Interceptor.Binding
             {
                 previousList = _receiveCallbacks.GetOrAdd(header, ReceiverCallbackListFactory);
 
-                var callback = previousList.FirstOrDefault(x => handler.Equals(x.Delegate));
+                ReceiveCallback? callback = previousList.FirstOrDefault(x => handler.Equals(x.Delegate));
                 if (callback == null)
                 {
                     newList = previousList;
@@ -252,7 +217,7 @@ namespace Xabbo.Interceptor.Binding
                 }
                 else
                 {
-                    var list = previousList.ToList();
+                    List<ReceiveCallback> list = previousList.ToList();
                     list.Remove(callback);
                     newList = list;
 
@@ -279,8 +244,8 @@ namespace Xabbo.Interceptor.Binding
         /// </summary>
         public void Bind(object target)
         {
-            var targetType = target.GetType();
-            var methodInfos = targetType.FindAllMethods();
+            Type targetType = target.GetType();
+            MethodInfo[] methodInfos = targetType.FindAllMethods().ToArray();
 
             Identifiers
                 unknownIdentifiers = new(),
@@ -290,10 +255,9 @@ namespace Xabbo.Interceptor.Binding
                 Detect unknown, invalid identifiers
             */
             {
-                var classIdentifiersAttributes = targetType.GetCustomAttributes<IdentifiersAttribute>();
-                foreach (var attribute in classIdentifiersAttributes)
+                foreach (IdentifiersAttribute attribute in targetType.GetCustomAttributes<IdentifiersAttribute>())
                 {
-                    foreach (var identifier in attribute.Identifiers)
+                    foreach (Identifier identifier in attribute.Identifiers)
                     {
                         if (!Messages.IdentifierExists(identifier))
                         {
@@ -307,11 +271,11 @@ namespace Xabbo.Interceptor.Binding
                 }
             }
 
-            foreach (var methodInfo in methodInfos)
+            foreach (MethodInfo methodInfo in methodInfos)
             {
-                foreach (var attribute in methodInfo.GetCustomAttributes<IdentifiersAttribute>())
+                foreach (IdentifiersAttribute attribute in methodInfo.GetCustomAttributes<IdentifiersAttribute>())
                 {
-                    foreach (var identifier in attribute.Identifiers)
+                    foreach (Identifier identifier in attribute.Identifiers)
                     {
                         if (!Messages.IdentifierExists(identifier))
                         {
@@ -330,15 +294,15 @@ namespace Xabbo.Interceptor.Binding
                 throw new InterceptorBindingFailedException(target, unknownIdentifiers, unresolvedIdentifiers);
             }
 
-            var callbackList = new List<BindingCallback>();
+            List<BindingCallback> callbackList = new();
 
             /*
                 Generate receive/intercept callbacks
             */
-            foreach (var methodInfo in methodInfos)
+            foreach (MethodInfo methodInfo in methodInfos)
             {
                 // Receive
-                var receiveAttribute = methodInfo.GetCustomAttribute<ReceiveAttribute>();
+                ReceiveAttribute? receiveAttribute = methodInfo.GetCustomAttribute<ReceiveAttribute>();
                 if (receiveAttribute != null)
                 {
                     if (!VerifyReceiveMethodSignature(methodInfo))
@@ -349,29 +313,22 @@ namespace Xabbo.Interceptor.Binding
                         );
                     }
 
-                    if (receiveAttribute.Identifiers.Count > 0)
+                    HashSet<short> uniqueHeaders = new();
+                    foreach (Identifier identifier in receiveAttribute.Identifiers)
                     {
-                        var uniqueHeaders = new HashSet<short>();
-                        foreach (var identifier in receiveAttribute.Identifiers)
-                        {
-                            short header = Messages[identifier];
-                            if (!uniqueHeaders.Add(header)) continue;
+                        short header = Messages[identifier];
+                        if (!uniqueHeaders.Add(header)) continue;
 
-                            callbackList.Add(CreateCallback(header, target, methodInfo));
-                        }
-                    }
-                    else
-                    {
-                        callbackList.Add(CreateCallback(-1, target, methodInfo));
+                        callbackList.Add(CreateCallback(header, target, methodInfo));
                     }
                 }
 
                 // Intercept
-                var interceptAttributes = methodInfo.GetCustomAttributes<InterceptAttribute>();
+                IEnumerable<InterceptAttribute> interceptAttributes = methodInfo.GetCustomAttributes<InterceptAttribute>();
                 if (interceptAttributes.Count() > 1)
                     throw new Exception($"Multiple intercept attributes defined for method {targetType.Name}.{methodInfo.Name}");
 
-                var interceptAttribute = interceptAttributes.FirstOrDefault();
+                InterceptAttribute? interceptAttribute = interceptAttributes.FirstOrDefault();
                 if (interceptAttribute != null)
                 {
                     if (!VerifyInterceptorMethodSignature(methodInfo))
@@ -382,21 +339,13 @@ namespace Xabbo.Interceptor.Binding
                         );
                     }
 
-                    if (interceptAttribute.Identifiers.Count > 0)
+                    HashSet<short> uniqueHeaders = new();
+                    foreach (Identifier identifier in interceptAttribute.Identifiers)
                     {
-                        var uniqueHeaders = new HashSet<short>();
-                        foreach (var identifier in interceptAttribute.Identifiers)
-                        {
-                            short header = Messages[identifier];
-                            if (!uniqueHeaders.Add(header)) continue;
+                        short header = Messages[identifier];
+                        if (!uniqueHeaders.Add(header)) continue;
 
-                            callbackList.Add(CreateInterceptCallback(identifier.Destination, header, target, methodInfo));
-                        }
-                    }
-                    else
-                    {
-                        var destination = (interceptAttribute is InterceptOutAttribute) ? Destination.Server : Destination.Client;
-                        callbackList.Add(CreateInterceptCallback(destination, -1, target, methodInfo));
+                        callbackList.Add(CreateInterceptCallback(identifier.Destination, header, target, methodInfo));
                     }
                 }
             }
@@ -404,7 +353,7 @@ namespace Xabbo.Interceptor.Binding
             if (!callbackList.Any())
                 throw new Exception("No attributes found to bind to");
 
-            var binding = new InterceptorBinding(target, callbackList);
+            InterceptorBinding binding = new(target, callbackList);
 
             if (!_bindings.TryAdd(target, binding))
                 throw new InvalidOperationException($"The target '{targetType.FullName}' is already bound.");
@@ -452,7 +401,7 @@ namespace Xabbo.Interceptor.Binding
             if (!_bindings.TryRemove(target, out InterceptorBinding? binding))
                 return false;
 
-            foreach (var callback in binding.Callbacks)
+            foreach (BindingCallback callback in binding.Callbacks)
                 callback.Unsubscribe();
 
             // Receivers
@@ -469,7 +418,7 @@ namespace Xabbo.Interceptor.Binding
                         break;
 
                     newList = previousList.ToList();
-                    foreach (var callback in callbackGroup)
+                    foreach (ReceiveCallback callback in callbackGroup)
                         newList.Remove(callback);
                 }
                 while (!_receiveCallbacks.TryUpdate(header, newList, previousList));
@@ -492,7 +441,7 @@ namespace Xabbo.Interceptor.Binding
                         break;
 
                     newList = previousList.ToList();
-                    foreach (var callback in callbackGroup)
+                    foreach (InterceptCallback callback in callbackGroup)
                         newList.Remove(callback);
                 }
                 while (!map.TryUpdate(header, newList, previousList));
@@ -503,13 +452,13 @@ namespace Xabbo.Interceptor.Binding
         #endregion
 
         #region - Intercepts -
-        public bool AddInterceptIn(Header header, Action<InterceptArgs> callback)
+        public void AddInterceptIn(Header header, Action<InterceptArgs> callback)
             => AddIntercept(Destination.Client, header, callback);
 
-        public bool AddInterceptOut(Header header, Action<InterceptArgs> callback)
+        public void AddInterceptOut(Header header, Action<InterceptArgs> callback)
             => AddIntercept(Destination.Server, header, callback);
 
-        public bool AddIntercept(Destination destination, Header header, Action<InterceptArgs> callback)
+        public void AddIntercept(Destination destination, Header header, Action<InterceptArgs> callback)
         {
             if (header.Value < 0)
                 throw new InvalidOperationException("Invalid header specified for intercept");
@@ -517,7 +466,6 @@ namespace Xabbo.Interceptor.Binding
             if (callback.Target is null)
                 throw new InvalidOperationException("The target of the specified callback cannot be null");
 
-            bool result;
             IReadOnlyList<InterceptCallback> previousList, newList;
             var dict = GetInterceptCallbackDictionary(destination);
 
@@ -527,20 +475,16 @@ namespace Xabbo.Interceptor.Binding
 
                 if (previousList.Any(x => x.Delegate.Equals(callback)))
                 {
-                    newList = previousList;
-                    result = false;
+                    throw new InvalidOperationException("The specified intercept callback has already been added.");
                 }
                 else
                 {
-                    var list = previousList.ToList();
+                    List<InterceptCallback> list = previousList.ToList();
                     list.Add(new ClosedInterceptCallback(destination, header, callback.Target, callback.Method, callback));
                     newList = list;
-                    result = true;
                 }
             }
             while (!dict.TryUpdate(header, newList, previousList));
-
-            return result;
         }
 
         public bool RemoveInterceptIn(Header header, Action<InterceptArgs> action)
@@ -559,10 +503,10 @@ namespace Xabbo.Interceptor.Binding
             {
                 previousList = dict.GetOrAdd(header, InterceptCallbackListFactory);
 
-                var callback = previousList.FirstOrDefault(x => x.Delegate.Equals(action));
+                InterceptCallback? callback = previousList.FirstOrDefault(x => x.Delegate.Equals(action));
                 if (callback != null)
                 {
-                    var list = previousList.ToList();
+                    List<InterceptCallback> list = previousList.ToList();
                     result = list.Remove(callback);
                     newList = list;
                 }

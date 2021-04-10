@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
-using Xabbo.Interceptor.Binding;
+using Xabbo.Interceptor.Dispatcher;
 
 namespace Xabbo.Interceptor
 {
@@ -14,9 +14,9 @@ namespace Xabbo.Interceptor
         IMessageManager Messages { get; }
 
         /// <summary>
-        /// Gets the message binder associated with this interceptor.
+        /// Gets the dispatcher associated with this interceptor.
         /// </summary>
-        IInterceptorBinder Binder { get; }
+        IInterceptDispatcher Dispatcher { get; }
 
         /// <summary>
         /// Gets whether the game is currently connected or not.
