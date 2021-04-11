@@ -32,7 +32,7 @@ namespace Xabbo.Interceptor.Tasks
                 _interceptor.Dispatcher.RemoveIntercept(_destination, header, OnIntercept);
         }
 
-        protected override ValueTask OnExecuteAsync() => ValueTask.CompletedTask;
+        protected override Task OnExecuteAsync() => Task.CompletedTask;
 
         private void OnIntercept(InterceptArgs e)
         {

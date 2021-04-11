@@ -56,21 +56,21 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Sends a packet with the specified header and values to the server.
         /// </summary>
-        ValueTask<bool> SendToServerAsync(Header header, params object[] values);
+        Task SendToServerAsync(Header header, params object[] values);
 
         /// <summary>
         /// Sends the specified packet to the server.
         /// </summary>
-        ValueTask<bool> SendToServerAsync(IReadOnlyPacket packet);
+        Task SendToServerAsync(IReadOnlyPacket packet);
 
         /// <summary>
         /// Sends a packet with the specified header and values to the client.
         /// </summary>
-        ValueTask<bool> SendToClientAsync(Header header, params object[] values);
+        Task SendToClientAsync(Header header, params object[] values);
 
         /// <summary>
         /// Sends the specified packet to the client.
         /// </summary>
-        ValueTask<bool> SendToClientAsync(IReadOnlyPacket packet);
+        Task SendToClientAsync(IReadOnlyPacket packet);
     }
 }

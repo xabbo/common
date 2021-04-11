@@ -66,7 +66,7 @@ namespace Xabbo.Interceptor.Tasks
             _interceptor.Dispatcher.Release(this);
         }
 
-        protected abstract ValueTask OnExecuteAsync();
+        protected abstract Task OnExecuteAsync();
 
         protected virtual async Task<TResult> ExecuteAsync()
         {
@@ -78,10 +78,10 @@ namespace Xabbo.Interceptor.Tasks
         protected bool SetCanceled() => _completion.TrySetCanceled();
         protected bool SetException(Exception ex) => _completion.TrySetException(ex);
 
-        protected ValueTask<bool> SendAsync(short header, params object[] values) => _interceptor.SendToServerAsync(header, values);
-        protected ValueTask<bool> SendAsync(IReadOnlyPacket packet) => _interceptor.SendToServerAsync(packet);
+        protected Task SendAsync(short header, params object[] values) => _interceptor.SendToServerAsync(header, values);
+        protected Task SendAsync(IReadOnlyPacket packet) => _interceptor.SendToServerAsync(packet);
 
-        protected ValueTask<bool> SendToClientAsync(short header, params object[] values) => _interceptor.SendToClientAsync(header, values);
-        protected ValueTask<bool> SendToClientAsync(IReadOnlyPacket packet) => _interceptor.SendToClientAsync(packet);
+        protected Task SendToClientAsync(short header, params object[] values) => _interceptor.SendToClientAsync(header, values);
+        protected Task SendToClientAsync(IReadOnlyPacket packet) => _interceptor.SendToClientAsync(packet);
     }
 }
