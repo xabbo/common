@@ -7,6 +7,6 @@ namespace Xabbo.Messages
     /// </summary>
     public interface IComposable
     {
-        void Compose(IReadOnlyPacket packet, ClientType clientType = ClientType.Unknown);
+        void Compose(IPacket packet, ClientType clientType = ClientType.Unknown);
     }
 }
