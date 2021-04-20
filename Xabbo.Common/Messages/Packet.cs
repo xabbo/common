@@ -574,5 +574,70 @@ namespace Xabbo.Messages
         }
         IPacket IPacket.ReplaceValues(object[] newValues, int position) => ReplaceValues(newValues, position);
         #endregion
+
+        #region - Legacy -
+        public short ReadLegacyShort()
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => ReadShort(),
+                ClientType.Flash => (short)ReadInt(),
+                _ => throw new InvalidOperationException("Cannot read legacy short, unknown protocol type.")
+            };
+        }
+
+        public float ReadLegacyFloat()
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => ReadFloat(),
+                ClientType.Flash => ReadFloatAsString(),
+                _ => throw new InvalidOperationException("Cannot read legacy float, unknown protocol type.")
+            };
+        }
+
+        public long ReadLegacyLong()
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => ReadLong(),
+                ClientType.Flash => ReadInt(),
+                _ => throw new InvalidOperationException("Cannot read legacy long, unknown protocol type.")
+            };
+        }
+
+        public Packet WriteLegacyShort(short value)
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => WriteShort(value),
+                ClientType.Flash => WriteInt(value),
+                _ => throw new InvalidOperationException("Cannot write legacy short, unknown protocol type.")
+            };
+        }
+        IPacket IPacket.WriteLegacyShort(short value) => WriteLegacyShort(value);
+
+        public Packet WriteLegacyFloat(float value)
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => WriteFloat(value),
+                ClientType.Flash => WriteFloatAsString(value),
+                _ => throw new InvalidOperationException("Cannot write legacy float, unknown protocol type.")
+            };
+        }
+        IPacket IPacket.WriteLegacyFloat(float value) => WriteLegacyFloat(value);
+
+        public Packet WriteLegacyLong(long value)
+        {
+            return Protocol switch
+            {
+                ClientType.Unity => WriteLong(value),
+                ClientType.Flash => WriteInt((int)value),
+                _ => throw new InvalidOperationException("Cannot write legacy long, unknown protocol type.")
+            };
+        }
+        IPacket IPacket.WriteLegacyLong(long value) => WriteLegacyLong(value);
+        #endregion
     }
 }

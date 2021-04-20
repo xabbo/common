@@ -140,5 +140,26 @@ namespace Xabbo.Messages
         /// Copies from the specified position in the packet into the <see cref="Span{T}"/>
         /// </summary>
         void ReadBytes(Span<byte> buffer, int position);
+
+        /// <summary>
+        /// Reads a short if the packet's protocol is Unity,
+        /// an int if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        short ReadLegacyShort();
+
+        /// <summary>
+        /// Reads a float if the packet's protocol is Unity,
+        /// a float (as a string) if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        float ReadLegacyFloat();
+
+        /// <summary>
+        /// Reads a long if the packet's protocol is Unity,
+        /// an int if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        long ReadLegacyLong();
     }
 }

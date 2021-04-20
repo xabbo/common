@@ -145,5 +145,26 @@ namespace Xabbo.Messages
         /// Creates a copy of the packet.
         /// </summary>
         IPacket Clone();
+
+        /// <summary>
+        /// Writes a short if the packet's protocol is Unity,
+        /// an int if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        IPacket WriteLegacyShort(short value);
+
+        /// <summary>
+        /// Writes a float if the packet's protocol is Unity,
+        /// a float (as a string) if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        IPacket WriteLegacyFloat(float value);
+
+        /// <summary>
+        /// Writes a long if the packet's protocol is Unity,
+        /// an int if it is Flash,
+        /// or throws if unknown.
+        /// </summary>
+        IPacket WriteLegacyLong(long value);
     }
 }
