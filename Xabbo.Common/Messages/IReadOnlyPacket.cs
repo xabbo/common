@@ -5,14 +5,9 @@ namespace Xabbo.Messages
     public interface IReadOnlyPacket
     {
         /// <summary>
-        /// Gets the internal data buffer of the packet as <see cref="ReadOnlyMemory{T}"/>.
+        /// Gets or sets the protocol hint of the packet.
         /// </summary>
-        ReadOnlyMemory<byte> GetBuffer();
-
-        /// <summary>
-        /// Copies the data of the packet into a <see cref="Span{T}"/>.
-        /// </summary>
-        void CopyTo(Span<byte> destination);
+        ClientType Protocol { get; set; }
 
         /// <summary>
         /// Gets the message header of the packet.
@@ -33,6 +28,16 @@ namespace Xabbo.Messages
         /// Gets the number of available bytes left in the packet.
         /// </summary>
         int Available { get; }
+
+        /// <summary>
+        /// Gets the internal data buffer of the packet as <see cref="ReadOnlyMemory{T}"/>.
+        /// </summary>
+        ReadOnlyMemory<byte> GetBuffer();
+
+        /// <summary>
+        /// Copies the data of the packet into a <see cref="Span{T}"/>.
+        /// </summary>
+        void CopyTo(Span<byte> destination);
 
         /// <summary>
         /// Gets if a boolean can be read from the current position in the packet.

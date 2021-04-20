@@ -23,6 +23,7 @@ namespace Xabbo.Messages
 
         public void CopyTo(Span<byte> destination) => _buffer.Span[0..Length].CopyTo(destination);
 
+        public ClientType Protocol { get; set; } = ClientType.Unknown;
         public Header Header { get; set; } = Header.Unknown;
 
         private int _position;
@@ -41,13 +42,19 @@ namespace Xabbo.Messages
 
         public int Available => Length - Position;
 
+        private Memory<byte> _buffer;
+
         public Packet()
         {
-            Header = Header.Unknown;
             _buffer = new byte[8];
         }
 
-        private Memory<byte> _buffer;
+        public Packet(ClientType protocol)
+        {
+            _buffer = new byte[8];
+
+            Protocol = protocol;
+        }
 
         public Packet(ReadOnlySpan<byte> buffer)
         {
@@ -61,13 +68,13 @@ namespace Xabbo.Messages
             _buffer = new byte[32];
         }
 
-        public Packet(Header header, ReadOnlySpan<byte> span)
+        public Packet(Header header, ReadOnlySpan<byte> buffer)
         {
             Header = header;
-            _buffer = new Memory<byte>(span.ToArray());
+            _buffer = new Memory<byte>(buffer.ToArray());
 
             Position = 0;
-            Length = span.Length;
+            Length = buffer.Length;
         }
 
         private void Grow(int length) => GrowToSize(Position + length);
@@ -96,10 +103,10 @@ namespace Xabbo.Messages
 
         public static Packet Compose(Header header, params object[] values) => Compose(ClientType.Unknown, header, values);
 
-        public static Packet Compose(ClientType clientType, Header header, params object[] values)
+        public static Packet Compose(ClientType protocol, Header header, params object[] values)
         {
-            var packet = new Packet(header);
-            packet.WriteValues(clientType, values);
+            var packet = new Packet(header) { Protocol = protocol };
+            packet.WriteValues(values);
             return packet;
         }
 
@@ -272,103 +279,132 @@ namespace Xabbo.Messages
             return ReadFloatAsString();
         }
 
-        public void WriteByte(byte value)
+        public Packet Write(IComposable composable)
+        {
+            composable.Compose(this);
+            return this;
+        }
+        IPacket IPacket.Write(IComposable composable) => Write(composable);
+
+        public Packet WriteByte(byte value)
         {
             Grow(1);
             _buffer.Span[Position++] = value;
+            return this;
         }
+        IPacket IPacket.WriteByte(byte value) => WriteByte(value);
 
-        public void WriteByte(byte value, int position)
+        public Packet WriteByte(byte value, int position)
         {
             Position = position;
-            WriteByte(value);
+            return WriteByte(value);
         }
+        IPacket IPacket.WriteByte(byte value, int position) => WriteByte(value, position);
 
-        public void WriteBytes(ReadOnlySpan<byte> bytes)
+        public Packet WriteBytes(ReadOnlySpan<byte> bytes)
         {
             Grow(bytes.Length);
             bytes.CopyTo(_buffer.Span[Position..]);
             Position += bytes.Length;
+            return this;
         }
+        IPacket IPacket.WriteBytes(ReadOnlySpan<byte> bytes) => WriteBytes(bytes);
 
-        public void WriteBytes(ReadOnlySpan<byte> bytes, int position)
+        public Packet WriteBytes(ReadOnlySpan<byte> bytes, int position)
         {
             Position = position;
-            WriteBytes(bytes);
+            return WriteBytes(bytes);
         }
+        IPacket IPacket.WriteBytes(ReadOnlySpan<byte> bytes, int position) => WriteBytes(bytes, position);
 
-        public void WriteBool(bool value) => WriteByte((byte)(value ? 1 : 0));
+        public Packet WriteBool(bool value) => WriteByte((byte)(value ? 1 : 0));
+        IPacket IPacket.WriteBool(bool value) => WriteBool(value);
 
-        public void WriteBool(bool value, int position)
+        public Packet WriteBool(bool value, int position)
         {
             Position = position;
-            WriteBool(value);
+            return WriteBool(value);
         }
+        IPacket IPacket.WriteBool(bool value, int position) => WriteBool(value, position);
 
-        public void WriteShort(short value)
+        public Packet WriteShort(short value)
         {
             Grow(2);
             BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[Position..], value);
             Position += 2;
+            return this;
         }
+        IPacket IPacket.WriteShort(short value) => WriteShort(value);
 
-        public void WriteShort(short value, int position)
+        public Packet WriteShort(short value, int position)
         {
             Position = position;
-            WriteShort(value);
+            return WriteShort(value);
         }
+        IPacket IPacket.WriteShort(short value, int position) => WriteShort(value, position);
 
-        public void WriteInt(int value)
+        public Packet WriteInt(int value)
         {
             Grow(4);
             BinaryPrimitives.WriteInt32BigEndian(_buffer.Span[Position..], value);
             Position += 4;
+            return this;
         }
+        IPacket IPacket.WriteInt(int value) => WriteInt(value);
 
-        public void WriteInt(int value, int position)
+        public Packet WriteInt(int value, int position)
         {
             Position = position;
-            WriteInt(value);
+            return WriteInt(value);
         }
+        IPacket IPacket.WriteInt(int value, int position) => WriteInt(value, position);
 
-        public void WriteLong(long value)
+        public Packet WriteLong(long value)
         {
             Grow(8);
             BinaryPrimitives.WriteInt64BigEndian(_buffer.Span[Position..], value);
             Position += 8;
+            return this;
         }
+        IPacket IPacket.WriteLong(long value) => WriteLong(value);
 
-        public void WriteLong(long value, int position)
+        public Packet WriteLong(long value, int position)
         {
             Position = position;
-            WriteLong(value);
+            return WriteLong(value);
         }
+        IPacket IPacket.WriteLong(long value, int position) => WriteLong(value, position);
 
-        public void WriteFloat(float value)
+        public Packet WriteFloat(float value)
         {
             Grow(4);
             BinaryPrimitives.WriteSingleBigEndian(_buffer.Span[Position..], value);
             Position += 4;
+            return this;
         }
+        IPacket IPacket.WriteFloat(float value) => WriteFloat(value);
 
-        public void WriteFloat(float value, int position)
+        public Packet WriteFloat(float value, int position)
         {
             Position = position;
-            WriteFloat(value);
+            return WriteFloat(value);
         }
+        IPacket IPacket.WriteFloat(float value, int position) => WriteFloat(value, position);
 
-        public void WriteFloatAsString(float value)
+        public Packet WriteFloatAsString(float value)
         {
-            WriteString(value.ToString("0.0##############", CultureInfo.InvariantCulture));
+            return WriteString(value.ToString("0.0##############", CultureInfo.InvariantCulture));
         }
+        IPacket IPacket.WriteFloatAsString(float value) => WriteFloatAsString(value);
 
-        public void WriteFloatAsString(float value, int position)
+        public Packet WriteFloatAsString(float value, int position)
         {
             Position = position;
-            WriteFloatAsString(value);
+            return WriteFloatAsString(value);
         }
+        IPacket IPacket.WriteFloatAsString(float value, int position) => WriteFloatAsString(value, position);
 
-        public void WriteString(string value)
+        public Packet WriteString(string value)
         {
             int len = Encoding.UTF8.GetByteCount(value);
             WriteShort((short)len);
@@ -376,17 +412,18 @@ namespace Xabbo.Messages
             Grow(len);
             Encoding.UTF8.GetBytes(value, _buffer.Span[Position..]);
             Position += len;
+            return this;
         }
+        IPacket IPacket.WriteString(string value) => WriteString(value);
 
-        public void WriteString(string value, int position)
+        public Packet WriteString(string value, int position)
         {
             Position = position;
-            WriteString(value, position);
+            return WriteString(value, position);
         }
+        IPacket IPacket.WriteString(string value, int position) => WriteString(value, position);
 
-        public void WriteValues(params object[] values) => WriteValues(ClientType.Unknown, values);
-
-        public void WriteValues(ClientType clientType, params object[] values)
+        public Packet WriteValues(params object[] values)
         {
             foreach (object value in values)
             {
@@ -404,25 +441,36 @@ namespace Xabbo.Messages
                         break;
                     case string x: WriteString(x); break;
                     case float x: WriteFloat(x); break;
-                    case IComposable x: x.Compose(this, clientType); break;
+                    case IComposable x: x.Compose(this); break;
                     case ICollection x:
                         {
-                            WriteShort((short)x.Count);
+                            if (Protocol == ClientType.Flash)
+                            {
+                                WriteInt(x.Count);
+                            }
+                            else
+                            {
+                                WriteShort((short)x.Count);
+                            }
                             foreach (object o in x)
-                                WriteValues(clientType, o);
+                                WriteValues(o);
                         }
                         break;
                     case IEnumerable x:
                         {
                             int count = 0, startPosition = Position;
-                            WriteShort(-1);
+                            if (Protocol == ClientType.Flash) WriteInt(-1);
+                            else WriteShort(-1);
                             foreach (object o in x)
                             {
                                 WriteValues(o);
                                 count++;
                             }
                             int endPosition = Position;
-                            WriteShort((short)count, startPosition);
+                            if (Protocol == ClientType.Flash)
+                                WriteInt(count, startPosition);
+                            else
+                                WriteShort((short)count, startPosition);
                             Position = endPosition;
                         }
                         break;
@@ -433,12 +481,16 @@ namespace Xabbo.Messages
                             throw new Exception($"Invalid value type: {value.GetType().Name}");
                 }
             }
+
+            return this;
         }
+        IPacket IPacket.WriteValues(params object[] values) => WriteValues(values);
 
         #region - Replacement -
-        public void ReplaceString(string newValue) => ReplaceString(newValue, Position);
+        public Packet ReplaceString(string newValue) => ReplaceString(newValue, Position);
+        IPacket IPacket.ReplaceString(string newValue) => ReplaceString(newValue);
 
-        public void ReplaceString(string newValue, int position)
+        public Packet ReplaceString(string newValue, int position)
         {
             int previousLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
             if (Length < position + 2 + previousLen)
@@ -446,21 +498,19 @@ namespace Xabbo.Messages
 
             int newLen = Encoding.UTF8.GetByteCount(newValue);
 
-            int diff = newLen - previousLen;
-
-            if (diff == 0)
-            {
-                Encoding.UTF8.GetBytes(newValue, _buffer.Span[Position..]);
-                Position = position + 2 + newLen;
-                return;
-            }
-            else if (diff > 0)
+            if (newLen > previousLen)
             {
                 GrowToSize(Length + (newLen - previousLen));
             }
-            else if (diff < 0)
+            else if (newLen < previousLen)
             {
                 Length -= newLen - previousLen;
+            }
+            else
+            {
+                Encoding.UTF8.GetBytes(newValue, _buffer.Span[(position + 2)..]);
+                Position = position + 2 + newLen;
+                return this;
             }
 
             byte[] tail = _buffer.Span[(position + 2 + previousLen)..].ToArray();
@@ -470,9 +520,21 @@ namespace Xabbo.Messages
             tail.CopyTo(_buffer[(position + 2 + newLen)..]);
 
             Position = position + 2 + newLen;
+            return this;
         }
+        IPacket IPacket.ReplaceString(string newValue, int position) => ReplaceString(newValue, position);
 
-        public void ReplaceValues(params object[] newValues)
+        public Packet ReplaceString(Func<string, string> transform) => ReplaceString(transform, Position);
+        IPacket IPacket.ReplaceString(Func<string, string> transform) => ReplaceString(transform);
+
+        public Packet ReplaceString(Func<string, string> transform, int position)
+        {
+            string value = ReadString(position);
+            return ReplaceString(transform(value), position);
+        }
+        IPacket IPacket.ReplaceString(Func<string, string> transform, int position) => ReplaceString(transform, position);
+
+        public Packet ReplaceValues(params object[] newValues)
         {
             foreach (object value in newValues)
             {
@@ -500,13 +562,17 @@ namespace Xabbo.Messages
                     default: throw new Exception($"Value is of invalid type: {value.GetType().Name}");
                 }
             }
-        }
 
-        public void ReplaceValues(object[] newValues, int position)
+            return this;
+        }
+        IPacket IPacket.ReplaceValues(params object[] newValues) => ReplaceValues(newValues);
+
+        public Packet ReplaceValues(object[] newValues, int position)
         {
             Position = position;
-            ReplaceValues(newValues);
+            return ReplaceValues(newValues);
         }
+        IPacket IPacket.ReplaceValues(object[] newValues, int position) => ReplaceValues(newValues, position);
         #endregion
     }
 }
