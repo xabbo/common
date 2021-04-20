@@ -51,5 +51,7 @@ namespace Xabbo.Messages
 
         public static implicit operator short(Header header) => header.Value;
         public static implicit operator Header(short value) => new Header(Destination.Unknown, value, null);
+        public static bool operator ==(Header a, Header b) => a.Equals(b);
+        public static bool operator !=(Header a, Header b) => !(a == b);
     }
 }
