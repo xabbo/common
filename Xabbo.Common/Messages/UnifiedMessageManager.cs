@@ -23,7 +23,6 @@ namespace Xabbo.Messages
             NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
-        private readonly string _messageMapPath;
         private readonly MessageMap _messageMap;
 
         private readonly List<MessageInfo> _messageInfos = new();
@@ -41,18 +40,15 @@ namespace Xabbo.Messages
 
         public Header this[Identifier identifier] => GetHeaders(identifier.Destination)[identifier.Name];
 
-        public UnifiedMessageManager(IConfiguration config)
+        public UnifiedMessageManager(string filePath)
         {
             In = new Incoming();
             Out = new Outgoing();
 
-            _messageMapPath = config.GetValue("Messages:MapFilePath", "messages.json");
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException("Unable to find message map file.", filePath);
 
-            if (!File.Exists(_messageMapPath))
-                throw new FileNotFoundException("Unable to find message map file.", _messageMapPath);
-
-            _messageMap = JsonSerializer.Deserialize<MessageMap>(File.ReadAllText(_messageMapPath), _jsonSerializerOptions)
-                ?? throw new InvalidOperationException("Failed to load message map.");
+            _messageMap = MessageMap.Load(filePath);
         }
 
         /// <summary>
