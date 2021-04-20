@@ -47,5 +47,10 @@ namespace Xabbo.Interceptor.Dispatcher
         /// </summary>
         /// <returns>Whether the callback was removed or not.</returns>
         bool RemoveIntercept(Destination destination, Header targetHeader, Action<InterceptArgs> callback);
+
+        /// <summary>
+        /// Releases all bound intercept handlers and intercept callbacks.
+        /// </summary>
+        void ReleaseAll();
     }
 }

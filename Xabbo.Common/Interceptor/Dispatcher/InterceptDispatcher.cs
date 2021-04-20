@@ -166,6 +166,14 @@ namespace Xabbo.Interceptor.Dispatcher
             }
         }
 
+        public void ReleaseAll()
+        {
+            _bindings.Clear();
+            _receiveCallbacks.Clear();
+            _incomingInterceptCallbacks.Clear();
+            _outgoingInterceptCallbacks.Clear();
+        }
+
         #region - Handlers -
         public bool AddHandler(Header header, Action<object?, IReadOnlyPacket> handler)
         {
