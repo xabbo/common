@@ -31,7 +31,7 @@ namespace Xabbo.Interceptor.Dispatcher
                 
                 MethodInfo generator = generatorMethod.MakeGenericMethod(method.DeclaringType);
 
-                @delegate = (Delegate?)generatorMethod.Invoke(null, new object[] { method });
+                @delegate = (Delegate?)generator.Invoke(null, new object[] { method });
 
                 if (@delegate is null)
                 {
