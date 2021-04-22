@@ -15,7 +15,7 @@ namespace Xabbo.Interceptor.Dispatcher
         private static ReceiveCallback CreateCallback(short header, object target, MethodInfo method)
         {
             var callback = ReceiveDelegateFactory.GetOpenDelegate(method);
-            return new OpenReceiveCallback(header, target, callback);
+            return new OpenReceiveCallback(header, target, method, callback);
         }
 
         private static InterceptCallback CreateInterceptCallback(Destination destination, short header,
@@ -119,7 +119,7 @@ namespace Xabbo.Interceptor.Dispatcher
 
                     Debug.WriteLine(
                         $"Unhandled exception occurred in receiver method " +
-                        $"{callback.Delegate.Target?.GetType().FullName}.{callback.Delegate.Method.Name} " +
+                        $"{callback.Method.DeclaringType?.Name}.{callback.Method.Name} " +
                         $"for message {messageName}: {ex?.Message}\r\n{ex?.StackTrace}"
                     );
                 }
@@ -159,7 +159,7 @@ namespace Xabbo.Interceptor.Dispatcher
 
                     Debug.WriteLine(
                         $"Unhandled exception occurred in intercept method " +
-                        $"{callback.Target.GetType().FullName}.{callback.Method.Name} " +
+                        $"{callback.Method.DeclaringType?.Name}.{callback.Method.Name} " +
                         $"for message {messageName}: {ex.Message}\r\n{ex.StackTrace}"
                     );
                 }
@@ -196,7 +196,7 @@ namespace Xabbo.Interceptor.Dispatcher
                 else
                 {
                     List<ReceiveCallback> list = previousList.ToList();
-                    list.Add(new ClosedReceiveCallback(header, handler.Target, handler));
+                    list.Add(new ClosedReceiveCallback(header, handler.Target, handler.Method, handler));
                     newList = list;
 
                     result = true;

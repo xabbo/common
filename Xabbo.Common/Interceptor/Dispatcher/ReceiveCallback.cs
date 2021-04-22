@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 using Xabbo.Messages;
 
@@ -6,8 +7,8 @@ namespace Xabbo.Interceptor.Dispatcher
 {
     internal abstract class ReceiveCallback : BindingCallback
     {
-        protected ReceiveCallback(short header, object target, Delegate @delegate)
-            : base(header, target, @delegate.Method, @delegate)
+        protected ReceiveCallback(short header, object target, MethodInfo targetMethod, Delegate @delegate)
+            : base(header, target, targetMethod, @delegate)
         { }
 
         public void Invoke(object? sender, IReadOnlyPacket packet)
@@ -23,8 +24,8 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object, object?, IReadOnlyPacket> _callback;
 
-        public OpenReceiveCallback(short header, object target, Action<object, object?, IReadOnlyPacket> callback)
-            : base(header, target, callback)
+        public OpenReceiveCallback(short header, object target, MethodInfo targetMethod, Action<object, object?, IReadOnlyPacket> callback)
+            : base(header, target, targetMethod, callback)
         {
             _callback = callback;
         }
@@ -39,8 +40,8 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object?, IReadOnlyPacket> _callback;
 
-        public ClosedReceiveCallback(short header, object target, Delegate @delegate)
-            : base(header, target, @delegate)
+        public ClosedReceiveCallback(short header, object target, MethodInfo targetMethod, Delegate @delegate)
+            : base(header, target, targetMethod, @delegate)
         {
             if (@delegate is not Action<object?, IReadOnlyPacket> callback)
                 throw new Exception($"Invalid delegate type {@delegate.GetType().Name} for {GetType().Name}");
