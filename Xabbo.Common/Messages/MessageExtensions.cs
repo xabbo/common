@@ -1,8 +1,6 @@
 ﻿using System;
 
-using Xabbo.Messages;
-
-namespace Xabbo
+namespace Xabbo.Messages
 {
     public static class MessageExtensions
     {
