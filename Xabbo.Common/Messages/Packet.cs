@@ -444,14 +444,7 @@ namespace Xabbo.Messages
                     case IComposable x: x.Compose(this); break;
                     case ICollection x:
                         {
-                            if (Protocol == ClientType.Flash)
-                            {
-                                WriteInt(x.Count);
-                            }
-                            else
-                            {
-                                WriteShort((short)x.Count);
-                            }
+                            WriteLegacyShort((short)x.Count);
                             foreach (object o in x)
                                 WriteValues(o);
                         }
@@ -459,18 +452,14 @@ namespace Xabbo.Messages
                     case IEnumerable x:
                         {
                             int count = 0, startPosition = Position;
-                            if (Protocol == ClientType.Flash) WriteInt(-1);
-                            else WriteShort(-1);
+                            WriteLegacyShort(-1);
                             foreach (object o in x)
                             {
                                 WriteValues(o);
                                 count++;
                             }
                             int endPosition = Position;
-                            if (Protocol == ClientType.Flash)
-                                WriteInt(count, startPosition);
-                            else
-                                WriteShort((short)count, startPosition);
+                            WriteLegacyShort((short)count);
                             Position = endPosition;
                         }
                         break;
@@ -504,7 +493,7 @@ namespace Xabbo.Messages
             }
             else if (newLen < previousLen)
             {
-                Length -= newLen - previousLen;
+                Length -= previousLen - newLen;
             }
             else
             {
