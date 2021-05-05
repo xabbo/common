@@ -502,7 +502,7 @@ namespace Xabbo.Messages
                 return this;
             }
 
-            byte[] tail = _buffer.Span[(position + 2 + previousLen)..].ToArray();
+            byte[] tail = _buffer.Span[(position + 2 + previousLen)..Length].ToArray();
 
             BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[position..], (short)newLen);
             Encoding.UTF8.GetBytes(newValue, _buffer.Span[(position + 2)..]);
