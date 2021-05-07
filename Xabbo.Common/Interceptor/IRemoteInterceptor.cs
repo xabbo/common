@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Xabbo.Interceptor
 {
@@ -12,15 +13,15 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Gets whether a connection to the remote interceptor is established or not.
         /// </summary>
-        bool IsConnected { get; }
+        bool IsInterceptorConnected { get; }
 
         /// <summary>
-        /// Starts the remote interceptor service.
+        /// Runs the remote interceptor service.
         /// </summary>
-        void Start();
+        Task RunAsync();
 
         /// <summary>
-        /// Stops the remote interceptor service.
+        /// Requests to stop the remote interceptor service.
         /// </summary>
         void Stop();
 

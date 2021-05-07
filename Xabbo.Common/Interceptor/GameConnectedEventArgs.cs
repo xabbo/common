@@ -1,23 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Interceptor
 {
     public class GameConnectedEventArgs : EventArgs
     {
-        public string Host { get; }
-        public int Port { get; }
-        public string Version { get; }
-        public string MessagesPath { get; }
-        public string ClientType { get; }
+        public string Host { get; init; }
+        public int Port { get; init; }
+        public string? ClientVersion { get; init; }
+        public string? ClientIdentifier { get; init; }
+        public ClientType ClientType { get; init; }
+        public string? MessagesPath { get; init; }
+        public List<MessageInfo> Messages { get; init; } = new List<MessageInfo>();
 
-        public GameConnectedEventArgs(string host, int port,
-            string version, string messagesPath, string clientType)
+        public GameConnectedEventArgs()
         {
-            Host = host;
-            Port = port;
-            Version = version;
-            MessagesPath = messagesPath;
-            ClientType = clientType;
+            Host = string.Empty;
+            ClientType = ClientType.Unknown;
+            Messages = new List<MessageInfo>();
         }
     }
 }

@@ -21,7 +21,12 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Gets whether the game is currently connected or not.
         /// </summary>
-        bool IsGameConnected { get; }
+        bool IsConnected { get; }
+
+        /// <summary>
+        /// Gets the client identifier for the current connection.
+        /// </summary>
+        string ClientIdentifier { get; }
 
         /// <summary>
         /// Gets the client type for the current connection.
@@ -41,7 +46,7 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Invoked when the extension has been initialized by the interceptor.
         /// </summary>
-        event EventHandler? Initialized;
+        event EventHandler<InterceptorInitializedEventArgs>? Initialized;
 
         /// <summary>
         /// Invoked when the extension is selected in the interceptor UI.
