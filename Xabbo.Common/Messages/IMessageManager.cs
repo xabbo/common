@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Xabbo.Messages
@@ -7,9 +8,14 @@ namespace Xabbo.Messages
     {
         /// <summary>
         /// Loads the messages for the specified client type
-        /// using the messages file path if it is needed.
+        /// using the message API file path if it is needed.
         /// </summary>
-        void Load(ClientType clientType, string? messagesPath);
+        void LoadHarble(ClientType clientType, string? apiFilePath);
+
+        /// <summary>
+        /// Loads the messages for the specified client type.
+        /// </summary>
+        void LoadMessages(ClientType clientType, IEnumerable<MessageInfo> messages);
 
         /// <summary>
         /// Gets the incoming headers.
@@ -45,5 +51,15 @@ namespace Xabbo.Messages
         /// Attempts to get a header by its destination and name.
         /// </summary>
         bool TryGetHeaderByName(Destination destination, string name, [NotNullWhen(true)] out Header? header);
+
+        /// <summary>
+        /// Attempts to get a message's info by its direction and header.
+        /// </summary>
+        bool TryGetInfoByHeader(Direction direction, short header, [NotNullWhen(true)] out MessageInfo? info);
+
+        /// <summary>
+        /// Attempts to get a message's info by its direction and name.
+        /// </summary>
+        bool TryGetInfoByName(Direction direction, string name, [NotNullWhen(true)] out MessageInfo? info);
     }
 }

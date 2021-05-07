@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Xabbo.Messages
 {
     public interface IMessageInfo
     {
         /// <summary>
-        /// The destination of the message.
+        /// Gets the destination of the message.
         /// </summary>
         Destination Destination { get; }
+
+        /// <summary>
+        /// Gets the direction of the message.
+        /// </summary>
+        Direction Direction { get; }
 
         /// <summary>
         /// Gets if the message is an incoming message.
@@ -21,19 +25,23 @@ namespace Xabbo.Messages
         bool IsOutgoing { get; }
 
         /// <summary>
-        /// The name of the message as it appears in the Unity client,
-        /// or a relevant name if it does not exist in the Unity client.
+        /// Gets the name of the message for the current client, or a fallback name if it is unable to be resolved.
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// The name of the message in the Unity client, or <c>null</c> if it does not exist.
+        /// </summary>
+        string? UnityName { get; }
+
+        /// <summary>
+        /// The name of the message in the Flash client, or <c>null</c> if it does not exist.
+        /// </summary>
+        string? FlashName { get; }
 
         /// <summary>
         /// The header value of the message for the current client, or <c>-1</c> if it is unresolved.
         /// </summary>
         short Header { get; }
-
-        /// <summary>
-        /// The aliases of the message name.
-        /// </summary>
-        IReadOnlyCollection<string> Aliases { get; }
     }
 }
