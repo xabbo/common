@@ -18,7 +18,9 @@ namespace Xabbo.Interceptor.Tasks
         protected InterceptorTask(IInterceptor interceptor)
         {
             _interceptor = interceptor;
-            _completion = new TaskCompletionSource<TResult>();
+            _completion = new TaskCompletionSource<TResult>(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            );
         }
 
         public TResult Execute(int timeout, CancellationToken token) => ExecuteAsync(timeout, token).GetAwaiter().GetResult();
