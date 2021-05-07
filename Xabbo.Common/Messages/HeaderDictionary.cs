@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
 namespace Xabbo.Messages
@@ -8,7 +9,7 @@ namespace Xabbo.Messages
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        private readonly Type _type;
+        private readonly Type _selfType;
 
         private readonly Dictionary<short, Header> _valueMap = new Dictionary<short, Header>();
         private readonly Dictionary<string, Header> _nameMap = new Dictionary<string, Header>(StringComparer.OrdinalIgnoreCase);
@@ -19,7 +20,7 @@ namespace Xabbo.Messages
         {
             Destination = destination;
 
-            _type = GetType();
+            _selfType = GetType();
         }
 
         public HeaderDictionary(Destination destination, IReadOnlyDictionary<string, short> values)
@@ -31,17 +32,55 @@ namespace Xabbo.Messages
 
         private void ResetProperties()
         {
-            var props = _type.GetProperties();
-            foreach (var prop in props)
+            var props = _selfType.GetProperties();
+            foreach (PropertyInfo prop in props)
             {
                 if (prop.PropertyType.Equals(typeof(Header)) &&
                     prop.GetMethod?.GetParameters().Length == 0)
                 {
-                    var header = new Header(Destination, -1, prop.Name);
+                    Header header = new(Destination, -1, prop.Name);
                     _nameMap[prop.Name] = header;
                     prop.SetValue(this, header);
                 }
             }
+        }
+
+        public void Load(IEnumerable<MessageInfo> messages)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                _valueMap.Clear();
+                _nameMap.Clear();
+
+                ResetProperties();
+
+                foreach (MessageInfo info in messages)
+                {
+                    if (info.Header < 0 || !_valueMap.TryGetValue(info.Header, out Header? header))
+                    {
+                        header = new Header(info.Destination, info.Header, info.Name);
+                    }
+
+                    if (info.Header >= 0)
+                        _valueMap[info.Header] = header;
+
+                    _nameMap[info.Name] = header;
+
+                    if (!string.IsNullOrWhiteSpace(info.UnityName))
+                    {
+                        _nameMap[info.UnityName] = header;
+
+                        PropertyInfo? prop = _selfType.GetProperty(info.UnityName, typeof(Header));
+                        if (prop is not null)
+                            prop.SetValue(this, header);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(info.FlashName))
+                        _nameMap[info.FlashName] = header;
+                }
+            }
+            finally { _lock.ExitWriteLock(); }
         }
 
         public void Load(IReadOnlyDictionary<string, short> values)
@@ -62,7 +101,7 @@ namespace Xabbo.Messages
                     if (pair.Value >= 0)
                         _valueMap[pair.Value] = header;
 
-                    var prop = _type.GetProperty(pair.Key, typeof(Header));
+                    var prop = _selfType.GetProperty(pair.Key, typeof(Header));
                     if (prop != null)
                         prop.SetValue(this, new Header(Destination, pair.Value, prop.Name));
                 }
