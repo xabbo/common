@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
 
 using Xabbo.Messages;
 
@@ -74,27 +73,27 @@ namespace Xabbo.Serialization
             int equalIndex = line.IndexOf('=');
             if (equalIndex <= 0) return false;
 
-            string identifier = line[..equalIndex].Trim();
+            string unityName = line[..equalIndex].Trim();
             string value = line[(equalIndex + 1)..].Trim();
 
-            if (!_regexValidIdentifier.IsMatch(identifier))
+            if (!_regexValidIdentifier.IsMatch(unityName))
                 return false;
 ;
-            string[] aliases = Array.Empty<string>();
+            string? flashName = null;
 
             int semicolonIndex = value.IndexOf(';');
             if (semicolonIndex > 0)
             {
-                aliases = value[(semicolonIndex + 1)..]
-                    .Split(',')
-                    .Select(x => x.Trim())
-                    .ToArray();
+                flashName = value[(semicolonIndex + 1)..].Trim();
                 value = value[..semicolonIndex];
 
-                foreach (string alias in aliases)
+                if (flashName == "*")
                 {
-                    if (!_regexValidIdentifier.IsMatch(alias))
-                        return false;
+                    flashName = unityName;
+                }
+                else if (flashName == "!")
+                {
+                    flashName = null;
                 }
             }
 
@@ -103,9 +102,9 @@ namespace Xabbo.Serialization
 
             item = new MessageMapItem()
             {
-                Name = identifier,
+                UnityName = unityName,
                 Header = headerValue,
-                Aliases = aliases
+                FlashName = flashName
             };
 
             return true;
