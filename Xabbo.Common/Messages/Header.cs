@@ -39,13 +39,6 @@ namespace Xabbo.Messages
                 return false;
             }
 
-            if (Name is not null &&
-                other.Name is not null &&
-                !Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
             return true;
         }
 
