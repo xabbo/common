@@ -2,6 +2,9 @@
 
 namespace Xabbo.Messages
 {
+    /// <summary>
+    /// Represents a message name and direction.
+    /// </summary>
     public class Identifier
     {
         public Destination Destination { get; }
@@ -34,7 +37,7 @@ namespace Xabbo.Messages
         {
             return
                 Destination.Equals(other.Destination) &&
-                string.Equals(Name, other.Name);
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         public override string ToString() => Name;
