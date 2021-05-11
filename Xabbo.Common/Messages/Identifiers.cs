@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Xabbo.Messages
 {
+    /// <summary>
+    /// Represents a set of <see cref="Identifier"/>s.
+    /// </summary>
     public class Identifiers : HashSet<Identifier>
     {
         public IEnumerable<Identifier> Unknown => this.Where(id => id.Destination == Destination.Unknown);
