@@ -27,9 +27,11 @@ namespace Xabbo.Interceptor.Dispatcher
 
         /// <summary>
         /// Binds the specified target instance to this dispatcher.
-        /// The instance type must have at least one receive or intercept attribute on one of its methods.
+        /// Returns <c>true</c> if successfully bound, or <c>false</c> if the target
+        /// does not have a receive or intercept attribute on any of its methods.
+        /// Throws if any of the message identifiers are unable to be resolved.
         /// </summary>
-        void Bind(object target);
+        bool Bind(object target);
 
         /// <summary>
         /// Releases the binding to the specified target.

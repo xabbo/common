@@ -239,18 +239,12 @@ namespace Xabbo.Interceptor.Dispatcher
         #endregion
 
         #region - Binding -
-        /// <summary>
-        /// Checks if the target object is bound to the interceptor.
-        /// </summary>
         public bool IsBound(object target)
         {
             return _bindings.ContainsKey(target);
         }
 
-        /// <summary>
-        /// Attempts to bind to the specified target handler.
-        /// </summary>
-        public void Bind(object target)
+        public bool Bind(object target)
         {
             Type targetType = target.GetType();
             MethodInfo[] methodInfos = targetType.FindAllMethods().ToArray();
@@ -359,7 +353,9 @@ namespace Xabbo.Interceptor.Dispatcher
             }
 
             if (!callbackList.Any())
-                throw new Exception("No attributes found to bind to");
+            {
+                return false;
+            }
 
             InterceptorBinding binding = new(target, callbackList);
 
@@ -402,6 +398,8 @@ namespace Xabbo.Interceptor.Dispatcher
                 }
                 while (!map.TryUpdate(callbackGroup.Key.Header, updatedList, previousList));
             }
+
+            return true;
         }
 
         public bool Release(object target)
