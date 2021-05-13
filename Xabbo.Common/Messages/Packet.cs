@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
+using System.Buffers;
+using System.Buffers.Binary;
+using System.Collections;
 using System.Text;
 using System.Globalization;
-using System.Buffers.Binary;
 
 namespace Xabbo.Messages
 {
@@ -44,36 +45,71 @@ namespace Xabbo.Messages
 
         private Memory<byte> _buffer;
 
+        /// <summary>
+        /// Constructs a new packet.
+        /// </summary>
         public Packet()
-        {
-            _buffer = new byte[8];
-        }
+            : this(ClientType.Unknown, Header.Unknown)
+        { }
 
-        public Packet(ClientType protocol)
-        {
-            _buffer = new byte[8];
-
-            Protocol = protocol;
-        }
-
-        public Packet(ReadOnlySpan<byte> buffer)
-        {
-            Header = Header.Unknown;
-            _buffer = new Memory<byte>(buffer.ToArray());
-        }
-
+        /// <summary>
+        /// Constructs a new packet with the specified header.
+        /// </summary>
         public Packet(Header header)
+            : this(ClientType.Unknown, header)
+        { }
+
+        /// <summary>
+        /// Constructs a new packet with the specified protocol and header.
+        /// </summary>
+        public Packet(ClientType protocol, Header header)
         {
+            Protocol = protocol;
             Header = header;
-            _buffer = new byte[32];
+            _buffer = new byte[8];
         }
 
-        public Packet(Header header, ReadOnlySpan<byte> buffer)
-        {
-            Header = header;
-            _buffer = new Memory<byte>(buffer.ToArray());
+        /// <summary>
+        /// Constructs a new packet with the specified header,
+        /// copying the <see cref="ReadOnlySpan{T}"/> into its internal buffer.
+        /// </summary>
+        public Packet(Header header, ReadOnlySpan<byte> data)
+            : this(ClientType.Unknown, header, data.ToArray().AsMemory())
+        { }
 
-            Position = 0;
+        /// <summary>
+        /// Constructs a new packet with the specified header,
+        /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
+        /// </summary>
+        public Packet(Header header, ReadOnlySequence<byte> data)
+            : this(ClientType.Unknown, header, data)
+        { }
+
+        /// <summary>
+        /// Constructs a new packet with the specified protocol and header,
+        /// copying the <see cref="ReadOnlySpan{T}"/> into its internal buffer.
+        /// </summary>
+        public Packet(ClientType protocol, Header header, ReadOnlySpan<byte> data)
+            : this(protocol, header, data.ToArray().AsMemory())
+        { }
+
+        /// <summary>
+        /// Constructs a new packet with the specified protocol and header,
+        /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
+        /// </summary>
+        public Packet(ClientType protocol, Header header, ReadOnlySequence<byte> data)
+            : this(protocol, header, data.ToArray().AsMemory())
+        { }
+
+        /// <summary>
+        /// Constructs a new packet with the specified protocol and header,
+        /// using the <see cref="Memory{T}"/> as its internal buffer.
+        /// </summary>
+        public Packet(ClientType protocol, Header header, Memory<byte> buffer)
+        {
+            Protocol = protocol;
+            Header = header;
+            _buffer = buffer;
             Length = buffer.Length;
         }
 
