@@ -2,7 +2,7 @@
 
 namespace Xabbo.Messages
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public class RequiredOutAttribute : IdentifiersAttribute
     {
         public RequiredOutAttribute(params string[] identifiers)
