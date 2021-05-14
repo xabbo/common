@@ -517,34 +517,35 @@ namespace Xabbo.Messages
 
         public Packet ReplaceString(string newValue, int position)
         {
-            int previousLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
-            if (Length < position + 2 + previousLen)
+            int prevStrLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
+            if (Length < position + 2 + prevStrLen)
                 throw new InvalidOperationException($"Cannot replace string at position {position}");
 
-            int newLen = Encoding.UTF8.GetByteCount(newValue);
+            int newStrLen = Encoding.UTF8.GetByteCount(newValue);
 
-            if (newLen > previousLen)
-            {
-                GrowToSize(Length + (newLen - previousLen));
-            }
-            else if (newLen < previousLen)
-            {
-                Length -= previousLen - newLen;
-            }
-            else
+            if (newStrLen == prevStrLen)
             {
                 Encoding.UTF8.GetBytes(newValue, _buffer.Span[(position + 2)..]);
-                Position = position + 2 + newLen;
+                Position = position + 2 + newStrLen;
                 return this;
             }
 
-            byte[] tail = _buffer.Span[(position + 2 + previousLen)..Length].ToArray();
+            byte[] tail = _buffer.Span[(position + 2 + prevStrLen)..Length].ToArray();
 
-            BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[position..], (short)newLen);
+            if (newStrLen > prevStrLen)
+            {
+                GrowToSize(Length + (newStrLen - prevStrLen));
+            }
+            else if (newStrLen < prevStrLen)
+            {
+                Length -= prevStrLen - newStrLen;
+            }
+
+            BinaryPrimitives.WriteInt16BigEndian(_buffer.Span[position..], (short)newStrLen);
             Encoding.UTF8.GetBytes(newValue, _buffer.Span[(position + 2)..]);
-            tail.CopyTo(_buffer[(position + 2 + newLen)..]);
+            tail.CopyTo(_buffer.Span[(position + 2 + newStrLen)..]);
 
-            Position = position + 2 + newLen;
+            Position = position + 2 + newStrLen;
             return this;
         }
         IPacket IPacket.ReplaceString(string newValue, int position) => ReplaceString(newValue, position);
