@@ -13,7 +13,7 @@ namespace Xabbo.Messages
         public Destination Destination { get; }
         public ClientType Client { get; }
         public int Step { get; }
-        public IPacket Packet { get; }
+        public IPacket Packet { get; set; }
         public IReadOnlyPacket OriginalPacket { get; }
 
         public bool IsIncoming => Destination == Destination.Client;
