@@ -80,10 +80,7 @@ namespace Xabbo.Interceptor.Tasks
         protected bool SetCanceled() => _completion.TrySetCanceled();
         protected bool SetException(Exception ex) => _completion.TrySetException(ex);
 
-        protected Task SendAsync(short header, params object[] values) => _interceptor.SendToServerAsync(header, values);
-        protected Task SendAsync(IReadOnlyPacket packet) => _interceptor.SendToServerAsync(packet);
-
-        protected Task SendToClientAsync(short header, params object[] values) => _interceptor.SendToClientAsync(header, values);
-        protected Task SendToClientAsync(IReadOnlyPacket packet) => _interceptor.SendToClientAsync(packet);
+        protected void Send(short header, params object[] values) => _interceptor.Send(header, values);
+        protected void Send(IReadOnlyPacket packet) => _interceptor.Send(packet);
     }
 }
