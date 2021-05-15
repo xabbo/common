@@ -69,25 +69,5 @@ namespace Xabbo.Interceptor
         /// depending on the destination of the packet header.
         /// </summary>
         Task SendAsync(IReadOnlyPacket packet);
-
-        /// <summary>
-        /// Sends a packet with the specified header and values to the server.
-        /// </summary>
-        Task SendToServerAsync(Header header, params object[] values);
-
-        /// <summary>
-        /// Sends the specified packet to the server.
-        /// </summary>
-        Task SendToServerAsync(IReadOnlyPacket packet);
-
-        /// <summary>
-        /// Sends a packet with the specified header and values to the client.
-        /// </summary>
-        Task SendToClientAsync(Header header, params object[] values);
-
-        /// <summary>
-        /// Sends the specified packet to the client.
-        /// </summary>
-        Task SendToClientAsync(IReadOnlyPacket packet);
     }
 }
