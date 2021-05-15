@@ -82,5 +82,7 @@ namespace Xabbo.Interceptor.Tasks
 
         protected void Send(short header, params object[] values) => _interceptor.Send(header, values);
         protected void Send(IReadOnlyPacket packet) => _interceptor.Send(packet);
+        protected Task SendAsync(short header, params object[] values) => _interceptor.SendAsync(header, values);
+        protected Task SendAsync(IReadOnlyPacket packet) => _interceptor.SendAsync(packet);
     }
 }
