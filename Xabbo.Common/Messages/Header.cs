@@ -9,6 +9,7 @@ namespace Xabbo.Messages
         public Destination Destination { get; }
         public bool IsIncoming => Destination == Destination.Client;
         public bool IsOutgoing => Destination == Destination.Server;
+        public bool IsUnknown => !IsIncoming && !IsOutgoing;
         public short Value { get; }
         public string? Name { get; }
 
@@ -40,6 +41,21 @@ namespace Xabbo.Messages
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            if (IsUnknown && Value < 0 && string.IsNullOrWhiteSpace(Name))
+            {
+                return "unknown";
+            }
+            else
+            {
+                return
+                    (IsUnknown ? "unknown" : (IsIncoming ? "incoming" : "outgoing"))
+                    + ":" + (Name ?? string.Empty)
+                    + "[" + (Value < 0 ? "?" : Value.ToString()) + "]";
+            }
         }
 
         public static implicit operator short(Header header) => header.Value;
