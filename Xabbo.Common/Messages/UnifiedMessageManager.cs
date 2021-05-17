@@ -104,6 +104,7 @@ namespace Xabbo.Messages
         private void AddOrMergeMessage(MessageInfo info)
         {
             var nameMap = info.IsOutgoing ? _outgoingNameMap : _incomingNameMap;
+            var headerMap = info.IsOutgoing ? _outgoingHeaderMap : _incomingHeaderMap;
 
             if (nameMap.TryGetValue(info.Name, out MessageInfo? existingInfo))
             {
@@ -137,6 +138,9 @@ namespace Xabbo.Messages
 
             if (!string.IsNullOrWhiteSpace(info.FlashName))
                 nameMap.TryAdd(info.FlashName, info);
+
+            if (info.Header >= 0)
+                headerMap[info.Header] = info;
         }
 
         private void Initialize()
