@@ -7,12 +7,6 @@ namespace Xabbo.Messages
     public interface IMessageManager
     {
         /// <summary>
-        /// Loads the messages for the specified client type
-        /// using the message API file path if it is needed.
-        /// </summary>
-        void LoadHarble(ClientType clientType, string? apiFilePath);
-
-        /// <summary>
         /// Loads the messages for the specified client type.
         /// </summary>
         void LoadMessages(ClientType clientType, IEnumerable<MessageInfo> messages);

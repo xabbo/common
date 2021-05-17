@@ -54,6 +54,16 @@ namespace Xabbo.Messages
             _messageMap = MessageMap.Load(filePath);
         }
 
+        private HeaderDictionary GetHeaders(Destination destination)
+        {
+            return destination switch
+            {
+                Destination.Client => In,
+                Destination.Server => Out,
+                _ => throw new Exception("Invalid destination")
+            };
+        }
+
         private Dictionary<short, MessageInfo> GetHeaderMap(Direction direction)
         {
             return direction switch
@@ -72,6 +82,18 @@ namespace Xabbo.Messages
                 Direction.Outgoing => _outgoingNameMap,
                 _ => throw new Exception("Invalid direction")
             };
+        }
+
+        private void Initialize()
+        {
+            _messageInfos.Clear();
+            _incomingHeaderMap.Clear();
+            _outgoingHeaderMap.Clear();
+            _incomingNameMap.Clear();
+            _outgoingNameMap.Clear();
+
+            InitializeMessages(Direction.Incoming);
+            InitializeMessages(Direction.Outgoing);
         }
 
         /// <summary>
@@ -143,18 +165,6 @@ namespace Xabbo.Messages
                 headerMap[info.Header] = info;
         }
 
-        private void Initialize()
-        {
-            _messageInfos.Clear();
-            _incomingHeaderMap.Clear();
-            _outgoingHeaderMap.Clear();
-            _incomingNameMap.Clear();
-            _outgoingNameMap.Clear();
-
-            InitializeMessages(Direction.Incoming);
-            InitializeMessages(Direction.Outgoing);
-        }
-
         public void LoadMessages(ClientType clientType, IEnumerable<MessageInfo> messages)
         {
             Initialize();
@@ -176,135 +186,6 @@ namespace Xabbo.Messages
 
             In.Load(_messageInfos.Where(x => x.IsIncoming));
             Out.Load(_messageInfos.Where(x => x.IsOutgoing));
-            
-
-            /*In.Load(_messageInfos.Where(x => x.IsIncoming).ToDictionary(
-                k => k.Name,
-                v => v.Header
-            ));
-
-            Out.Load(_messageInfos.Where(x => x.IsOutgoing).ToDictionary(
-                k => k.Name,
-                v => v.Header
-            ));*/
-        }
-
-        public void LoadHarble(ClientType clientType, string? messagesPath)
-        {
-            Initialize();
-
-            if (clientType == ClientType.Unity)
-            {
-                foreach (MessageInfo messageInfo in _messageInfos)
-                {
-                    GetHeaderMap(messageInfo.Direction)[messageInfo.Header] = messageInfo;
-                }
-
-                In.Load(_messageInfos.Where(x => x.UnityName is not null && x.IsIncoming).ToDictionary(
-                    k => k.UnityName ?? throw new InvalidOperationException(),
-                    v => v.Header
-                ));
-
-                Out.Load(_messageInfos.Where(x => x.UnityName is not null && x.IsOutgoing).ToDictionary(
-                    k => k.UnityName ?? throw new InvalidOperationException(),
-                    v => v.Header
-                ));
-            }
-            else if (clientType == ClientType.Flash)
-            {
-                if (string.IsNullOrWhiteSpace(messagesPath))
-                {
-                    throw new Exception("Message cache file path not specified");
-                }
-
-                HarbleMessages harbleMessages = HarbleMessages.Load(messagesPath);
-
-                Dictionary<string, short>
-                    incomingMap = new(),
-                    outgoingMap = new();
-
-                foreach (HarbleMessage harbleMessage in Enumerable.Concat(harbleMessages.Incoming, harbleMessages.Outgoing))
-                {
-                    Direction direction = harbleMessage.IsOutgoing ? Direction.Outgoing : Direction.Incoming;
-
-                    Dictionary<string, MessageInfo> nameMap = GetNameMap(direction);
-                    Dictionary<short, MessageInfo> headerMap = GetHeaderMap(direction);
-
-                    if (!nameMap.TryGetValue(harbleMessage.Name, out MessageInfo? messageInfo))
-                    {
-                        messageInfo = new MessageInfo
-                        {
-                            Name = harbleMessage.Name,
-                            Direction = harbleMessage.IsOutgoing ? Direction.Outgoing : Direction.Incoming,
-                            Header = harbleMessage.Id
-                        };
-
-                        nameMap[messageInfo.Name] = messageInfo;
-                        _messageInfos.Add(messageInfo);
-                    }
-                    else
-                    {
-                        messageInfo.Name = harbleMessage.Name;
-                        messageInfo.Header = harbleMessage.Id;
-                    }
-
-                    /*// Attempt to convert to the Unity message name
-                    if (nameMap.TryGetValue(harbleMessage.Name, out MessageInfo? messageInfo) &&
-                        messageInfo.UnityName is not null)
-                    {
-                        headerMap[messageInfo.UnityName] = harbleMessage.Id;
-                        messageInfo.Name = harbleMessage.Name;
-                    }
-                    else
-                    {
-                        // Not found, use the harble message name
-                        headerMap[harbleMessage.Name] = harbleMessage.Id;
-
-                        messageInfo = new MessageInfo
-                        {
-                            Name = harbleMessage.Name,
-                            Direction = harbleMessage.IsOutgoing ? Direction.Outgoing : Direction.Incoming,
-                            UnityName = harbleMessage.Name,
-                            Header = harbleMessage.Id
-                        };
-
-                        _messageInfos.Add(messageInfo);
-                        nameMap[harbleMessage.Name] = messageInfo;
-                    }*/
-                }
-
-                foreach (MessageInfo messageInfo in _messageInfos)
-                {
-                    if (messageInfo.Header < 0)
-                    {
-                        Debug.WriteLine($"Unknown header '{messageInfo.Name}'");
-                        continue;
-                    }
-
-                    var nameHeaderMap = messageInfo.IsOutgoing ? outgoingMap : incomingMap;
-                    var headerMap = GetHeaderMap(messageInfo.Direction);
-
-                    nameHeaderMap[messageInfo.Name] = messageInfo.Header;
-                    headerMap[messageInfo.Header] = messageInfo;
-                }
-
-                In.Load(incomingMap);
-                Out.Load(outgoingMap);
-            }
-            else
-            {
-                throw new Exception("Unknown client type");
-            }
-        }
-
-        private HeaderDictionary GetHeaders(Destination destination)
-        {
-            return destination switch
-            {
-                Destination.Client => In,
-                Destination.Server => Out,
-                _ => throw new Exception("Invalid destination")
-            };
         }
 
         public bool IdentifierExists(Identifier identifier)
