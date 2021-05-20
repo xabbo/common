@@ -161,5 +161,10 @@ namespace Xabbo.Messages
         /// or throws if unknown.
         /// </summary>
         long ReadLegacyLong();
+
+        /// <summary>
+        /// Creates a copy of this packet.
+        /// </summary>
+        IPacket Clone();
     }
 }

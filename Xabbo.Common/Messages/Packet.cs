@@ -113,6 +113,19 @@ namespace Xabbo.Messages
             Length = buffer.Length;
         }
 
+        /// <summary>
+        /// Creates a copy of the specified original packet.
+        /// </summary>
+        public Packet Clone()
+        {
+            return new Packet(
+                Protocol,
+                Header,
+                GetBuffer().Span
+            );
+        }
+        IPacket IReadOnlyPacket.Clone() => Clone();
+
         private void Grow(int length) => GrowToSize(Position + length);
 
         private void GrowToSize(int minSize)
@@ -130,11 +143,6 @@ namespace Xabbo.Messages
 
             if (Length < minSize)
                 Length = minSize;
-        }
-
-        public IPacket Clone()
-        {
-            return new Packet(Header, GetBuffer().Span);
         }
 
         public static Packet Compose(Header header, params object[] values) => Compose(ClientType.Unknown, header, values);
