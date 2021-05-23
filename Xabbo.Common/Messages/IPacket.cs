@@ -142,11 +142,6 @@ namespace Xabbo.Messages
         IPacket ReplaceValues(object[] newValues, int position);
 
         /// <summary>
-        /// Creates a copy of the packet.
-        /// </summary>
-        IPacket Clone();
-
-        /// <summary>
         /// Writes a short if the packet's protocol is Unity,
         /// an int if it is Flash,
         /// or throws if unknown.
