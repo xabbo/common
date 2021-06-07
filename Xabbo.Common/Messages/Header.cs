@@ -52,7 +52,7 @@ namespace Xabbo.Messages
             else
             {
                 return
-                    (IsUnknown ? "unknown" : (IsIncoming ? "incoming" : "outgoing"))
+                    (IsUnknown ? "unknown" : (IsIncoming ? "in" : "out"))
                     + ":" + (Name ?? string.Empty)
                     + "[" + (Value < 0 ? "?" : Value.ToString()) + "]";
             }
