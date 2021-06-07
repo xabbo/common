@@ -61,11 +61,21 @@ namespace Xabbo.Interceptor.Tasks
         protected virtual void Bind()
         {
             _interceptor.Dispatcher.Bind(this);
+            _interceptor.Disconnected += OnDisconnected;
         }
 
         protected virtual void Release()
         {
             _interceptor.Dispatcher.Release(this);
+            _interceptor.Disconnected -= OnDisconnected;
+        }
+
+        /// <summary>
+        /// Called when the connection ends while the interceptor task is in progress.
+        /// </summary>
+        protected virtual void OnDisconnected(object? sender, EventArgs e)
+        {
+            _completion.TrySetCanceled();
         }
 
         protected abstract Task OnExecuteAsync();
