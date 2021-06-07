@@ -40,7 +40,7 @@ namespace Xabbo.Messages
         public Header this[Identifier identifier] => GetHeaders(identifier.Destination)[identifier.Name];
 
         public UnifiedMessageManager(IConfiguration config)
-            : this(config.GetValue("UnifiedMessageManager:MapFilePath", "messages.ini"))
+            : this(config.GetValue("Xabbo:Messages:MapFilePath", "messages.ini"))
         { }
 
         public UnifiedMessageManager(string filePath)
@@ -84,7 +84,7 @@ namespace Xabbo.Messages
             };
         }
 
-        private void Initialize()
+        private void Initialize(ClientType clientType)
         {
             _messageInfos.Clear();
             _incomingHeaderMap.Clear();
@@ -92,14 +92,14 @@ namespace Xabbo.Messages
             _incomingNameMap.Clear();
             _outgoingNameMap.Clear();
 
-            InitializeMessages(Direction.Incoming);
-            InitializeMessages(Direction.Outgoing);
+            InitializeMessages(clientType, Direction.Incoming);
+            InitializeMessages(clientType, Direction.Outgoing);
         }
 
         /// <summary>
         /// Initializes the messages from the message map
         /// </summary>
-        private void InitializeMessages(Direction direction)
+        private void InitializeMessages(ClientType clientType, Direction direction)
         {
             List<MessageMapItem>? list = direction switch
             {
@@ -115,7 +115,7 @@ namespace Xabbo.Messages
                 AddOrMergeMessage(new MessageInfo()
                 {
                     Direction = direction,
-                    Header = -1,
+                    Header = clientType == ClientType.Unity ? item.Header : -1,
                     Name = item.UnityName,
                     UnityName = item.UnityName,
                     FlashName = item.FlashName
@@ -165,9 +165,12 @@ namespace Xabbo.Messages
                 headerMap[info.Header] = info;
         }
 
-        public void LoadMessages(ClientType clientType, IEnumerable<MessageInfo> messages)
+        public void LoadMessages(ClientType clientType, IEnumerable<MessageInfo>? messages = null)
         {
-            Initialize();
+            Initialize(clientType);
+
+            if (messages is null)
+                messages = Enumerable.Empty<MessageInfo>();
 
             foreach (MessageInfo info in messages)
             {

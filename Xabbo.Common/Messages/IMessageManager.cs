@@ -9,7 +9,7 @@ namespace Xabbo.Messages
         /// <summary>
         /// Loads the messages for the specified client type.
         /// </summary>
-        void LoadMessages(ClientType clientType, IEnumerable<MessageInfo> messages);
+        void LoadMessages(ClientType clientType, IEnumerable<MessageInfo>? messages = null);
 
         /// <summary>
         /// Gets the incoming headers.
