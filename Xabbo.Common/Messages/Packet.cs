@@ -477,14 +477,17 @@ namespace Xabbo.Messages
                     case bool x: WriteBool(x); break;
                     case short x: WriteShort(x); break;
                     case ushort x: WriteShort((short)x); break;
+                    case LegacyShort x: WriteLegacyShort(x); break;
                     case int x: WriteInt(x); break;
                     case long x: WriteLong(x); break;
+                    case LegacyLong x: WriteLegacyLong(x); break;
                     case byte[] x:
                         WriteInt(x.Length);
                         WriteBytes(x);
                         break;
                     case string x: WriteString(x); break;
                     case float x: WriteFloat(x); break;
+                    case LegacyFloat x: WriteLegacyFloat(x); break;
                     case IComposable x: x.Compose(this); break;
                     case ICollection x:
                         {
