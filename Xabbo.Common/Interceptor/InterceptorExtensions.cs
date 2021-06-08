@@ -22,7 +22,7 @@ namespace Xabbo.Interceptor
             if (targetHeaders is null || targetHeaders.Length == 0)
                 throw new ArgumentException("At least one target header must be specified.");
 
-            if (targetHeaders.Any(header => header.Destination == Destination.Client))
+            if (targetHeaders.Any(header => header.Destination == Destination.Server))
                 throw new InvalidOperationException("Outgoing target header specified in ReceiveAsync.");
 
             return new CaptureMessageTask(interceptor, Destination.Client, false, targetHeaders)
