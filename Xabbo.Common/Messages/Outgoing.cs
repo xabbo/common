@@ -5,14 +5,10 @@ using System.Collections.Generic;
 
 namespace Xabbo.Messages
 {
-    public class Outgoing : HeaderDictionary
+    public class Outgoing : Headers
     {
         public Outgoing()
             : base(Destination.Server)
-        { }
-
-        public Outgoing(IReadOnlyDictionary<string, short> headers)
-            : base(Destination.Server, headers)
         { }
 
         public Header InfoRetrieve { get; private set; }

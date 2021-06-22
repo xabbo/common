@@ -54,7 +54,7 @@ namespace Xabbo.Interceptor
         event EventHandler? Clicked;
 
         /// <summary>
-        /// Invoked when a packet has been intercepted by the remote interceptor.
+        /// Invoked when a packet has been intercepted.
         /// </summary>
         event EventHandler<InterceptArgs>? Intercepted;
 

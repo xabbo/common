@@ -69,5 +69,13 @@ namespace Xabbo.Interceptor
         {
             return CaptureOutAsync(interceptor, timeout, CancellationToken.None, targetHeaders);
         }
+
+        public static void AddIntercept(this IInterceptor interceptor,
+            Action<InterceptArgs> action,
+            params Header[] headers)
+        {
+            foreach (Header header in headers)
+                interceptor.Dispatcher.AddIntercept(header, action, interceptor.ClientType);
+        }
     }
 }

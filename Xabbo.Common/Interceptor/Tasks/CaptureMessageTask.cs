@@ -23,13 +23,13 @@ namespace Xabbo.Interceptor.Tasks
         protected override void Bind()
         {
             foreach (Header header in _targetHeaders)
-                _interceptor.Dispatcher.AddIntercept(_destination, header, OnIntercept);
+                _interceptor.Dispatcher.AddIntercept(header, OnIntercept, _interceptor.ClientType);
         }
 
         protected override void Release()
         {
             foreach (Header header in _targetHeaders)
-                _interceptor.Dispatcher.RemoveIntercept(_destination, header, OnIntercept);
+                _interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
         }
 
         protected override Task OnExecuteAsync() => Task.CompletedTask;

@@ -5,14 +5,10 @@ using System.Collections.Generic;
 
 namespace Xabbo.Messages
 {
-    public class Incoming : HeaderDictionary
+    public class Incoming : Headers
     {
         public Incoming()
             : base(Destination.Client)
-        { }
-
-        public Incoming(IReadOnlyDictionary<string, short> headers)
-            : base(Destination.Client, headers)
         { }
 
         public Header LegacyBannerPublicKey { get; private set; }

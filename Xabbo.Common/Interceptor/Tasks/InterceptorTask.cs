@@ -60,7 +60,7 @@ namespace Xabbo.Interceptor.Tasks
 
         protected virtual void Bind()
         {
-            _interceptor.Dispatcher.Bind(this);
+            _interceptor.Dispatcher.Bind(this, _interceptor.ClientType);
             _interceptor.Disconnected += OnDisconnected;
         }
 
@@ -90,9 +90,9 @@ namespace Xabbo.Interceptor.Tasks
         protected bool SetCanceled() => _completion.TrySetCanceled();
         protected bool SetException(Exception ex) => _completion.TrySetException(ex);
 
-        protected void Send(short header, params object[] values) => _interceptor.Send(header, values);
+        protected void Send(Header header, params object[] values) => _interceptor.Send(header, values);
         protected void Send(IReadOnlyPacket packet) => _interceptor.Send(packet);
-        protected Task SendAsync(short header, params object[] values) => _interceptor.SendAsync(header, values);
+        protected Task SendAsync(Header header, params object[] values) => _interceptor.SendAsync(header, values);
         protected Task SendAsync(IReadOnlyPacket packet) => _interceptor.SendAsync(packet);
     }
 }

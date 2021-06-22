@@ -13,13 +13,12 @@ namespace Xabbo.Interceptor
         public string? ClientIdentifier { get; init; }
         public ClientType ClientType { get; init; }
         public string? MessagesPath { get; init; }
-        public List<MessageInfo> Messages { get; init; } = new List<MessageInfo>();
+        public List<IClientMessageInfo> Messages { get; init; } = new();
 
         public GameConnectedEventArgs()
         {
             Host = string.Empty;
             ClientType = ClientType.Unknown;
-            Messages = new List<MessageInfo>();
         }
     }
 }

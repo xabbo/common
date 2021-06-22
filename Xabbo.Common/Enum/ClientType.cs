@@ -2,10 +2,11 @@
 
 namespace Xabbo
 {
+    [Flags]
     public enum ClientType
     {
-        Unknown,
-        Flash,
-        Unity
+        Unknown = 0,
+        Flash = 1,
+        Unity = 2
     }
 }

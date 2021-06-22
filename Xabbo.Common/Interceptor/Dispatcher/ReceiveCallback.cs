@@ -7,7 +7,7 @@ namespace Xabbo.Interceptor.Dispatcher
 {
     internal abstract class ReceiveCallback : BindingCallback
     {
-        protected ReceiveCallback(short header, object target, MethodInfo targetMethod, Delegate @delegate)
+        protected ReceiveCallback(Header header, object target, MethodInfo targetMethod, Delegate @delegate)
             : base(header, target, targetMethod, @delegate)
         { }
 
@@ -24,7 +24,7 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object, object?, IReadOnlyPacket> _callback;
 
-        public OpenReceiveCallback(short header, object target, MethodInfo targetMethod, Action<object, object?, IReadOnlyPacket> callback)
+        public OpenReceiveCallback(Header header, object target, MethodInfo targetMethod, Action<object, object?, IReadOnlyPacket> callback)
             : base(header, target, targetMethod, callback)
         {
             _callback = callback;
@@ -40,7 +40,7 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object?, IReadOnlyPacket> _callback;
 
-        public ClosedReceiveCallback(short header, object target, MethodInfo targetMethod, Delegate @delegate)
+        public ClosedReceiveCallback(Header header, object target, MethodInfo targetMethod, Delegate @delegate)
             : base(header, target, targetMethod, @delegate)
         {
             if (@delegate is not Action<object?, IReadOnlyPacket> callback)

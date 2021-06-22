@@ -25,14 +25,14 @@ namespace Xabbo.Messages
         bool IsOutgoing { get; }
 
         /// <summary>
-        /// Gets the name of the message for the current client, or a fallback name if it is unable to be resolved.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
         /// The name of the message in the Unity client, or <c>null</c> if it does not exist.
         /// </summary>
         string? UnityName { get; }
+
+        /// <summary>
+        /// The header value of the message for the unity client.
+        /// </summary>
+        short UnityHeader { get; }
 
         /// <summary>
         /// The name of the message in the Flash client, or <c>null</c> if it does not exist.
@@ -40,8 +40,8 @@ namespace Xabbo.Messages
         string? FlashName { get; }
 
         /// <summary>
-        /// The header value of the message for the current client, or <c>-1</c> if it is unresolved.
+        /// The header value of the message for the flash client.
         /// </summary>
-        short Header { get; }
+        short FlashHeader { get; }
     }
 }

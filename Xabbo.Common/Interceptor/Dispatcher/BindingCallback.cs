@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Reflection;
 
+using Xabbo.Messages;
+
 namespace Xabbo.Interceptor.Dispatcher
 {
     public abstract class BindingCallback
     {
         protected volatile bool _isUnsubscribed = false;
 
-        public short Header { get; }
-        public object Target { get; }
+        public Header Header { get; }
+        public object? Target { get; }
         public MethodInfo Method { get; }
         public Delegate Delegate { get; }
         public bool IsUnsubscribed => _isUnsubscribed;
 
-        public BindingCallback(short header, object target, MethodInfo method, Delegate @delegate)
+        public BindingCallback(Header header, object? target, MethodInfo method, Delegate @delegate)
         {
             Header = header;
             Target = target;

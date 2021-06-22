@@ -11,11 +11,10 @@ namespace Xabbo.Interceptor.Dispatcher
         public bool IsOutgoing => Destination == Destination.Server;
         public bool IsIncoming => Destination == Destination.Client;
 
-        public InterceptCallback(Destination destination, short header,
-            object target, MethodInfo method, Delegate @delegate)
+        public InterceptCallback(Header header, object? target, MethodInfo method, Delegate @delegate)
             : base(header, target, method, @delegate)
         {
-            Destination = destination;
+            Destination = header.Destination;
         }
 
         public abstract void Invoke(InterceptArgs e);
@@ -25,9 +24,8 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object, InterceptArgs> _callback;
 
-        public OpenInterceptCallback(Destination destination, short header,
-            object target, MethodInfo method, Action<object, InterceptArgs> callback)
-            : base(destination, header, target, method, callback)
+        public OpenInterceptCallback(Header header, object? target, MethodInfo method, Action<object, InterceptArgs> callback)
+            : base(header, target, method, callback)
         {
             _callback = callback;
         }
@@ -42,9 +40,8 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<InterceptArgs> _callback;
 
-        public ClosedInterceptCallback(Destination destination, short header,
-            object target, MethodInfo method, Action<InterceptArgs> callback)
-            : base(destination, header, target, method, callback)
+        public ClosedInterceptCallback(Header header, object? target, MethodInfo method, Action<InterceptArgs> callback)
+            : base(header, target, method, callback)
         {
             _callback = callback;
         }

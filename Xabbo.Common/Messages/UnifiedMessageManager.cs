@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -7,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
+using Microsoft.Extensions.Configuration;
 
 using Xabbo.Serialization;
 
@@ -26,7 +27,7 @@ namespace Xabbo.Messages
 
         private readonly List<MessageInfo> _messageInfos = new();
 
-        private readonly Dictionary<short, MessageInfo>
+        private readonly Dictionary<(ClientType, short), MessageInfo>
             _incomingHeaderMap = new(),
             _outgoingHeaderMap = new();
 
@@ -52,9 +53,11 @@ namespace Xabbo.Messages
                 throw new FileNotFoundException("Unable to find message map file.", filePath);
 
             _messageMap = MessageMap.Load(filePath);
+
+            Initialize();
         }
 
-        private HeaderDictionary GetHeaders(Destination destination)
+        private Headers GetHeaders(Destination destination)
         {
             return destination switch
             {
@@ -64,7 +67,7 @@ namespace Xabbo.Messages
             };
         }
 
-        private Dictionary<short, MessageInfo> GetHeaderMap(Direction direction)
+        private Dictionary<(ClientType, short), MessageInfo> GetHeaderMap(Direction direction)
         {
             return direction switch
             {
@@ -84,7 +87,7 @@ namespace Xabbo.Messages
             };
         }
 
-        private void Initialize(ClientType clientType)
+        private void Initialize()
         {
             _messageInfos.Clear();
             _incomingHeaderMap.Clear();
@@ -92,14 +95,14 @@ namespace Xabbo.Messages
             _incomingNameMap.Clear();
             _outgoingNameMap.Clear();
 
-            InitializeMessages(clientType, Direction.Incoming);
-            InitializeMessages(clientType, Direction.Outgoing);
+            InitializeMessages(Direction.Incoming);
+            InitializeMessages(Direction.Outgoing);
         }
 
         /// <summary>
         /// Initializes the messages from the message map
         /// </summary>
-        private void InitializeMessages(ClientType clientType, Direction direction)
+        private void InitializeMessages(Direction direction)
         {
             List<MessageMapItem>? list = direction switch
             {
@@ -112,15 +115,50 @@ namespace Xabbo.Messages
 
             foreach (MessageMapItem item in list)
             {
-                AddOrMergeMessage(new MessageInfo()
+                MessageInfo messageInfo = new MessageInfo
                 {
                     Direction = direction,
-                    Header = clientType == ClientType.Unity ? item.Header : -1,
-                    Name = item.UnityName,
+                    UnityHeader = item.Header,
                     UnityName = item.UnityName,
                     FlashName = item.FlashName
-                });
+                };
+
+                GetHeaderMap(direction).Add((ClientType.Unity, item.Header), messageInfo);
+                GetNameMap(direction).Add(item.UnityName, messageInfo);
+                if (!string.IsNullOrWhiteSpace(item.FlashName) &&
+                    item.FlashName != item.UnityName)
+                {
+                    GetNameMap(direction).Add(item.FlashName, messageInfo);
+                }
+
+                _messageInfos.Add(messageInfo);
             }
+        }
+
+        private void Merge(IClientMessageInfo info)
+        {
+            var nameMap = info.Direction == Direction.Outgoing ? _outgoingNameMap : _incomingNameMap;
+            var headerMap = info.Direction == Direction.Outgoing ? _outgoingHeaderMap : _incomingHeaderMap;
+
+            if (!nameMap.TryGetValue(info.Name, out MessageInfo? messageInfo))
+            {
+                messageInfo = new MessageInfo { Direction = info.Direction };
+                nameMap[info.Name] = messageInfo;
+                _messageInfos.Add(messageInfo);
+            }
+
+            if (info.Client == ClientType.Flash)
+            {
+                messageInfo.FlashHeader = info.Header;
+                messageInfo.FlashName = info.Name;
+            }
+            else if (info.Client == ClientType.Unity)
+            {
+                messageInfo.UnityHeader = info.Header;
+                messageInfo.UnityName = info.Name;
+            }
+
+            headerMap[(info.Client, info.Header)] = messageInfo;
         }
 
         private void AddOrMergeMessage(MessageInfo info)
@@ -128,20 +166,23 @@ namespace Xabbo.Messages
             var nameMap = info.IsOutgoing ? _outgoingNameMap : _incomingNameMap;
             var headerMap = info.IsOutgoing ? _outgoingHeaderMap : _incomingHeaderMap;
 
-            if (nameMap.TryGetValue(info.Name, out MessageInfo? existingInfo))
+            if ((info.FlashName is not null &&
+                nameMap.TryGetValue(info.FlashName, out MessageInfo? existingInfo)) ||
+                (info.UnityName is not null &&
+                nameMap.TryGetValue(info.UnityName, out existingInfo)))
             {
-                if (existingInfo.Header != -1 &&
-                   existingInfo.Header != info.Header)
+                if (existingInfo.UnityHeader != -1 &&
+                   existingInfo.UnityHeader != info.UnityHeader)
                 {
                     Debug.WriteLine(
                         $"Conflicting duplicate {info.Direction.ToString().ToLower()}"
-                        + $" message name '{info.Name}' (overwriting header value"
-                        + $" {existingInfo.Header} -> {info.Header})"
+                        + $" message name '{info.UnityName}' (overwriting header value"
+                        + $" {existingInfo.UnityHeader} -> {info.UnityHeader})"
                     );
                 }
 
-                existingInfo.Name = info.Name;
-                existingInfo.Header = info.Header;
+                if (info.UnityHeader >= 0) existingInfo.UnityHeader = info.UnityHeader;
+                if (info.FlashHeader >= 0) existingInfo.FlashHeader = info.FlashHeader;
                 existingInfo.UnityName ??= info.UnityName;
                 existingInfo.FlashName ??= info.FlashName;
 
@@ -149,42 +190,24 @@ namespace Xabbo.Messages
             }
             else
             {
-                nameMap.Add(info.Name, info);
                 _messageInfos.Add(info);
             }
 
-            nameMap.TryAdd(info.Name, info);
-
-            if (!string.IsNullOrWhiteSpace(info.UnityName))
-                nameMap.TryAdd(info.UnityName, info);
-
-            if (!string.IsNullOrWhiteSpace(info.FlashName))
-                nameMap.TryAdd(info.FlashName, info);
-
-            if (info.Header >= 0)
-                headerMap[info.Header] = info;
+            if (!string.IsNullOrWhiteSpace(info.UnityName)) nameMap.TryAdd(info.UnityName, info);
+            if (!string.IsNullOrWhiteSpace(info.FlashName)) nameMap.TryAdd(info.FlashName, info);
+            if (info.UnityHeader >= 0)
+                headerMap[(ClientType.Unity, info.UnityHeader)] = info;
+            if (info.FlashHeader >= 0)
+                headerMap[(ClientType.Flash, info.FlashHeader)] = info;
         }
 
-        public void LoadMessages(ClientType clientType, IEnumerable<MessageInfo>? messages = null)
+        public void LoadMessages(IEnumerable<IClientMessageInfo> messages)
         {
-            Initialize(clientType);
+            Initialize();
 
-            if (messages is null)
-                messages = Enumerable.Empty<MessageInfo>();
-
-            foreach (MessageInfo info in messages)
+            foreach (IClientMessageInfo message in messages)
             {
-                AddOrMergeMessage(info);
-            }
-
-            Dictionary<string, short>
-                inDict = new(),
-                outDict = new();
-
-            foreach (MessageInfo info in messages)
-            {
-                var dict = info.IsOutgoing ? outDict : inDict;
-                dict[info.Name] = info.Header;
+                Merge(message);
             }
 
             In.Load(_messageInfos.Where(x => x.IsIncoming));
@@ -201,9 +224,9 @@ namespace Xabbo.Messages
             return TryGetHeaderByName(identifier.Destination, identifier.Name, out header);
         }
 
-        public bool TryGetHeaderByValue(Destination destination, short value, [NotNullWhen(true)] out Header? header)
+        public bool TryGetHeaderByValue(Destination destination, ClientType clientType, short value, [NotNullWhen(true)] out Header? header)
         {
-            return GetHeaders(destination).TryGetHeader(value, out header);
+            return GetHeaders(destination).TryGetHeader(clientType, value, out header);
         }
 
         public bool TryGetHeaderByName(Destination destination, string name, [NotNullWhen(true)] out Header? header)
@@ -211,9 +234,9 @@ namespace Xabbo.Messages
             return GetHeaders(destination).TryGetHeader(name, out header);
         }
 
-        public bool TryGetInfoByHeader(Direction direction, short header, [NotNullWhen(true)] out MessageInfo? info)
+        public bool TryGetInfoByHeader(Direction direction, ClientType clientType, short header, [NotNullWhen(true)] out MessageInfo? info)
         {
-            return GetHeaderMap(direction).TryGetValue(header, out info);
+            return GetHeaderMap(direction).TryGetValue((clientType, header), out info);
         }
 
         public bool TryGetInfoByName(Direction direction, string name, [NotNullWhen(true)] out MessageInfo? info)
