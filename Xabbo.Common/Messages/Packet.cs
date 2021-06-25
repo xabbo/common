@@ -506,6 +506,7 @@ namespace Xabbo.Messages
                                 count++;
                             }
                             int endPosition = Position;
+                            Position = startPosition;
                             WriteLegacyShort((short)count);
                             Position = endPosition;
                         }
