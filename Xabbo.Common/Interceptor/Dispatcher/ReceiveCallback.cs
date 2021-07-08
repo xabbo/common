@@ -32,6 +32,9 @@ namespace Xabbo.Interceptor.Dispatcher
 
         protected override void OnInvoked(object? sender, IReadOnlyPacket packet)
         {
+            if (Target is null)
+                throw new NullReferenceException("Open receive callback target is null.");
+
             _callback(Target, sender, packet);
         }
     }

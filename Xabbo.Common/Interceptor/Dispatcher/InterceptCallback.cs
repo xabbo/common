@@ -24,7 +24,7 @@ namespace Xabbo.Interceptor.Dispatcher
     {
         private readonly Action<object, InterceptArgs> _callback;
 
-        public OpenInterceptCallback(Header header, object? target, MethodInfo method, Action<object, InterceptArgs> callback)
+        public OpenInterceptCallback(Header header, object target, MethodInfo method, Action<object, InterceptArgs> callback)
             : base(header, target, method, callback)
         {
             _callback = callback;
@@ -32,6 +32,9 @@ namespace Xabbo.Interceptor.Dispatcher
 
         public override void Invoke(InterceptArgs e)
         {
+            if (Target is null)
+                throw new NullReferenceException("Open intercept callback target is null.");
+
             _callback(Target, e);
         }
     }
