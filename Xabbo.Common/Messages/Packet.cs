@@ -524,10 +524,47 @@ namespace Xabbo.Messages
         IPacket IPacket.WriteValues(params object[] values) => WriteValues(values);
 
         #region - Replacement -
-        public Packet ReplaceString(string newValue) => ReplaceString(newValue, Position);
-        IPacket IPacket.ReplaceString(string newValue) => ReplaceString(newValue);
+        public Packet Replace(params object[] values)
+        {
+            foreach (object value in values)
+            {
+                switch (value)
+                {
+                    case byte x: WriteByte(x); break;
+                    case bool x: WriteBool(x); break;
+                    case short x: WriteShort(x); break;
+                    case ushort x: WriteShort((short)x); break;
+                    case int x: WriteInt(x); break;
+                    case long x: WriteLong(x); break;
+                    case byte[] x: WriteBytes(x); break;
+                    case string x: ReplaceString(x, Position); break;
+                    case Type t:
+                        {
+                            if (t == Byte) ReadByte();
+                            else if (t == Bool) ReadBool();
+                            else if (t == Short) ReadShort();
+                            else if (t == Int) ReadInt();
+                            else if (t == ByteArray) throw new NotSupportedException();
+                            else if (t == String) ReadString();
+                            else throw new Exception($"Invalid type specified: {t.FullName}");
+                        }
+                        break;
+                    default: throw new Exception($"Value is of invalid type: {value.GetType().Name}");
+                }
+            }
 
-        public Packet ReplaceString(string newValue, int position)
+            return this;
+        }
+        IPacket IPacket.Replace(params object[] values) => Replace(values);
+
+        Packet ReplaceAt(int position, params object[] values)
+        {
+            Position = position;
+            return Replace(values);
+        }
+        IPacket IPacket.ReplaceAt(int position, params object[] values) => ReplaceAt(position, values);
+
+        private Packet ReplaceString(string newValue, int position)
         {
             int prevStrLen = BinaryPrimitives.ReadInt16BigEndian(_buffer.Span[position..]);
             if (Length < position + 2 + prevStrLen)
@@ -560,57 +597,16 @@ namespace Xabbo.Messages
             Position = position + 2 + newStrLen;
             return this;
         }
-        IPacket IPacket.ReplaceString(string newValue, int position) => ReplaceString(newValue, position);
 
-        public Packet ReplaceString(Func<string, string> transform) => ReplaceString(transform, Position);
-        IPacket IPacket.ReplaceString(Func<string, string> transform) => ReplaceString(transform);
+        public Packet Replace(Func<string, string> transform) => ReplaceAt(Position, transform);
+        IPacket IPacket.Replace(Func<string, string> transform) => Replace(transform);
 
-        public Packet ReplaceString(Func<string, string> transform, int position)
+        public Packet ReplaceAt(int position, Func<string, string> transform)
         {
             string value = ReadString(position);
             return ReplaceString(transform(value), position);
         }
-        IPacket IPacket.ReplaceString(Func<string, string> transform, int position) => ReplaceString(transform, position);
-
-        public Packet ReplaceValues(params object[] newValues)
-        {
-            foreach (object value in newValues)
-            {
-                switch (value)
-                {
-                    case byte x: WriteByte(x); break;
-                    case bool x: WriteBool(x); break;
-                    case short x: WriteShort(x); break;
-                    case ushort x: WriteShort((short)x); break;
-                    case int x: WriteInt(x); break;
-                    case long x: WriteLong(x); break;
-                    case byte[] x: WriteBytes(x); break;
-                    case string x: ReplaceString(x); break;
-                    case Type t:
-                        {
-                            if (t == Byte) ReadByte();
-                            else if (t == Bool) ReadBool();
-                            else if (t == Short) ReadShort();
-                            else if (t == Int) ReadInt();
-                            else if (t == ByteArray) throw new NotSupportedException();
-                            else if (t == String) ReadString();
-                            else throw new Exception($"Invalid type specified: {t.FullName}");
-                        }
-                        break;
-                    default: throw new Exception($"Value is of invalid type: {value.GetType().Name}");
-                }
-            }
-
-            return this;
-        }
-        IPacket IPacket.ReplaceValues(params object[] newValues) => ReplaceValues(newValues);
-
-        public Packet ReplaceValues(object[] newValues, int position)
-        {
-            Position = position;
-            return ReplaceValues(newValues);
-        }
-        IPacket IPacket.ReplaceValues(object[] newValues, int position) => ReplaceValues(newValues, position);
+        IPacket IPacket.ReplaceAt(int position, Func<string, string> transform) => ReplaceAt(position, transform);
         #endregion
 
         #region - Legacy -

@@ -110,36 +110,26 @@ namespace Xabbo.Messages
         IPacket WriteValues(params object[] values);
 
         /// <summary>
-        /// Replaces a string at the current position in the packet.
+        /// Replaces values from the current position in the packet.
         /// </summary>
-        IPacket ReplaceString(string newValue);
-
-        /// <summary>
-        /// Replaces a string at the specified position in the packet.
-        /// </summary>
-        IPacket ReplaceString(string newValue, int position);
+        IPacket Replace(params object[] values);
 
         /// <summary>
         /// Reads a string from the current position in the packet
         /// and replaces it with the result provided by a transform function.
         /// </summary>
-        IPacket ReplaceString(Func<string, string> transform);
+        IPacket Replace(Func<string, string> transform);
+
+        /// <summary>
+        /// Replaces values from the specified position in the packet.
+        /// </summary>
+        IPacket ReplaceAt(int position, params object[] values);
 
         /// <summary>
         /// Reads a string from the specified position in the packet
         /// and replaces it with the result provided by a transform function.
         /// </summary>
-        IPacket ReplaceString(Func<string, string> transform, int position);
-
-        /// <summary>
-        /// Replaces the specified values at the current position in the packet.
-        /// </summary>
-        IPacket ReplaceValues(params object[] newValues);
-
-        /// <summary>
-        /// Replaces the specified values at the specified position in the packet.
-        /// </summary>
-        IPacket ReplaceValues(object[] newValues, int position);
+        IPacket ReplaceAt(int position, Func<string, string> transform);
 
         /// <summary>
         /// Writes a short if the packet's protocol is Unity,
