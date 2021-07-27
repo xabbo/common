@@ -7,6 +7,7 @@
     <Authors>b7</Authors>
     <FileVersion>0.0.1</FileVersion>
     <AssemblyVersion>0.0.1</AssemblyVersion>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <PropertyGroup>
