@@ -18,7 +18,10 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Runs the remote interceptor service.
         /// </summary>
-        Task RunAsync();
+        Task RunAsync(
+            ConnectMode connectMode = ConnectMode.Continuous,
+            ExceptionHandling exceptionHandling = ExceptionHandling.Throw
+        );
 
         /// <summary>
         /// Requests to stop the remote interceptor service.
