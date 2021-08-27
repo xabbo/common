@@ -23,7 +23,7 @@ namespace Xabbo.Interceptor.Tasks
         protected override void Bind()
         {
             foreach (Header header in _targetHeaders)
-                _interceptor.Dispatcher.AddIntercept(header, OnIntercept, _interceptor.ClientType);
+                _interceptor.Dispatcher.AddIntercept(header, OnIntercept, _interceptor.Client);
         }
 
         protected override void Release()

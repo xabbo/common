@@ -31,7 +31,7 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Gets the client type for the current connection.
         /// </summary>
-        ClientType ClientType { get; }
+        ClientType Client { get; }
 
         /// <summary>
         /// Invoked when a connection to the game is established.

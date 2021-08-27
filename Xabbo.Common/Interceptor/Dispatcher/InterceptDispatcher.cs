@@ -10,6 +10,11 @@ using Xabbo.Utility;
 
 namespace Xabbo.Interceptor.Dispatcher
 {
+    /// <summary>
+    /// Dispatches intercepted messages based on their header and destination.
+    /// Objects that have methods decorated with intercept attributes can be bound to the dispatcher,
+    /// and while bound, each method will be invoked when a packet with a matching header is intercepted.
+    /// </summary>
     public class InterceptDispatcher : IInterceptDispatcher
     {
         private static ReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
@@ -34,8 +39,15 @@ namespace Xabbo.Interceptor.Dispatcher
         private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<ReceiveCallback>> _receiveCallbacks = new();
         private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<InterceptCallback>> _interceptCallbacks = new();
 
+        /// <summary>
+        /// Gets the message manager used by this dispatcher.
+        /// </summary>
         public IMessageManager Messages { get; }
 
+        /// <summary>
+        /// Creates a new <see cref="InterceptDispatcher"/> using the specified <see cref="IMessageManager"/>.
+        /// </summary>
+        /// <param name="messages"></param>
         public InterceptDispatcher(IMessageManager messages)
         {
             Messages = messages;
@@ -78,6 +90,9 @@ namespace Xabbo.Interceptor.Dispatcher
                 parameters.All(param => IsValidParameter(param));
         }
 
+        /// <summary>
+        /// Dispatches the specified message to all bound receive callbacks.
+        /// </summary>
         public void DispatchMessage(object? sender, IReadOnlyPacket packet)
         {
             ClientHeader? clientHeader = packet.Header.GetClientHeader(packet.Protocol);
@@ -119,6 +134,9 @@ namespace Xabbo.Interceptor.Dispatcher
             }
         }
 
+        /// <summary>
+        /// Dispatches the specified intercept arguments to all bound intercept callbacks.
+        /// </summary>
         public void DispatchIntercept(InterceptArgs e)
         {
             ClientHeader? key = e.Packet.Header.GetClientHeader(e.Client);
@@ -166,6 +184,9 @@ namespace Xabbo.Interceptor.Dispatcher
             }
         }
 
+        /// <summary>
+        /// Releases all bindings, intercepts and receive callbacks.
+        /// </summary>
         public void ReleaseAll()
         {
             _bindings.Clear();

@@ -60,7 +60,7 @@ namespace Xabbo.Interceptor.Tasks
 
         protected virtual void Bind()
         {
-            _interceptor.Dispatcher.Bind(this, _interceptor.ClientType);
+            _interceptor.Dispatcher.Bind(this, _interceptor.Client);
             _interceptor.Disconnected += OnDisconnected;
         }
 

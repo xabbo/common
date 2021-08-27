@@ -75,7 +75,7 @@ namespace Xabbo.Interceptor
             params Header[] headers)
         {
             foreach (Header header in headers)
-                interceptor.Dispatcher.AddIntercept(header, action, interceptor.ClientType);
+                interceptor.Dispatcher.AddIntercept(header, action, interceptor.Client);
         }
     }
 }
