@@ -43,6 +43,6 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Invoked when the connection to the remote interceptor ends.
         /// </summary>
-        event EventHandler? InterceptorDisconnected;
+        event EventHandler<DisconnectedEventArgs>? InterceptorDisconnected;
     }
 }
