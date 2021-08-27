@@ -16,17 +16,24 @@ namespace Xabbo.Interceptor
         bool IsInterceptorConnected { get; }
 
         /// <summary>
-        /// Runs the remote interceptor service.
+        /// Gets the port that the remote interceptor is currently connected on.
         /// </summary>
-        Task RunAsync(
-            ConnectMode connectMode = ConnectMode.Continuous,
-            ExceptionHandling exceptionHandling = ExceptionHandling.Throw
-        );
+        int Port { get; }
+
+        /// <summary>
+        /// Connects to the remote interceptor and processes incoming packets.
+        /// </summary>
+        Task RunAsync();
 
         /// <summary>
         /// Requests to stop the remote interceptor service.
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Invoked when connection to the remote interceptor fails.
+        /// </summary>
+        event EventHandler<ConnectionFailedEventArgs>? InterceptorConnectionFailed;
 
         /// <summary>
         /// Invoked when a connection to the remote interceptor is established.
