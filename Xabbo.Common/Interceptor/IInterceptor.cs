@@ -81,5 +81,21 @@ namespace Xabbo.Interceptor
         /// depending on the destination of the packet header.
         /// </summary>
         Task SendAsync(IReadOnlyPacket packet);
+
+        /// <summary>
+        /// Binds the specified target object to the dispatcher.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if successfully bound, or <c>false</c> if the target
+        /// does not have a receive or intercept attribute on any of its methods.
+        /// Throws if any of the message identifiers are unable to be resolved.
+        /// </returns>
+        bool Bind(object target) => Dispatcher.Bind(target, Client);
+
+        /// <summary>
+        /// Releases the specified target object from the dispatcher.
+        /// </summary>
+        /// <returns>Whether the binding was released or not.</returns>
+        bool Release(object target) => Dispatcher.Release(target);
     }
 }
