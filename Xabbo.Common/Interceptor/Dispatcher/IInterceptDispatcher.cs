@@ -26,22 +26,29 @@ namespace Xabbo.Interceptor.Dispatcher
         bool IsBound(object target);
 
         /// <summary>
-        /// Binds the specified target instance to this dispatcher.
-        /// Returns <c>true</c> if successfully bound, or <c>false</c> if the target
+        /// Binds the specified target object to this dispatcher.
+        /// </summary>
+        /// <param name="target">The target object to bind.</param>
+        /// <param name="requiredClientHeaders">Specifies which client headers must be resolved for the binding to be successful.</param>
+        /// <returns>
+        /// <c>true</c> if successfully bound, or <c>false</c> if the target
         /// does not have a receive or intercept attribute on any of its methods.
         /// Throws if any of the message identifiers are unable to be resolved.
-        /// </summary>
+        /// </returns>
         bool Bind(object target, ClientType requiredClientHeaders);
 
         /// <summary>
         /// Releases the binding to the specified target.
         /// </summary>
-        /// <returns>Whether the target instance was released or not.</returns>
+        /// <returns>Whether the binding was released or not.</returns>
         bool Release(object target);
 
         /// <summary>
         /// Adds an intercept callback that is invoked when a message with the target header is sent to the specified destination.
         /// </summary>
+        /// <param name="header">Specifies the target header to intercept.</param>
+        /// <param name="callback">The action to invoke when a message is intercepted.</param>
+        /// <param name="requiredClientHeaders">Specifies which client headers must be resolved for the binding to be successful.</param>
         void AddIntercept(Header header, Action<InterceptArgs> callback, ClientType requiredClientHeaders);
 
         /// <summary>
