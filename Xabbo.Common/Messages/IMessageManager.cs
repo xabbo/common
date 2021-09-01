@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Xabbo.Messages
 {
     public interface IMessageManager
     {
+        /// <summary>
+        /// Initializes the message manager.
+        /// </summary>
+        Task InitializeAsync(CancellationToken cancellationToken);
+
         /// <summary>
         /// Loads the specified client message information.
         /// </summary>

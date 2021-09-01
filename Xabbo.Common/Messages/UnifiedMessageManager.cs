@@ -4,8 +4,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 
@@ -23,8 +26,7 @@ namespace Xabbo.Messages
             NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
-        private readonly MessageMap _messageMap;
-
+        private readonly string _mapFilePath;
         private readonly List<MessageInfo> _messageInfos = new();
 
         private readonly Dictionary<(ClientType, short), MessageInfo>
@@ -34,6 +36,9 @@ namespace Xabbo.Messages
         private readonly Dictionary<string, MessageInfo>
             _incomingNameMap = new(StringComparer.OrdinalIgnoreCase),
             _outgoingNameMap = new(StringComparer.OrdinalIgnoreCase);
+
+        private bool _initialized;
+        private MessageMap? _messageMap;
 
         public Incoming In { get; private set; }
         public Outgoing Out { get; private set; }
@@ -46,15 +51,29 @@ namespace Xabbo.Messages
 
         public UnifiedMessageManager(string filePath)
         {
+            _mapFilePath = filePath;
+
             In = new Incoming();
             Out = new Outgoing();
 
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException("Unable to find message map file.", filePath);
-
-            _messageMap = MessageMap.Load(filePath);
-
             Initialize();
+        }
+
+        public async Task InitializeAsync(CancellationToken cancellationToken)
+        {
+            if (_initialized) return;
+
+            if (!File.Exists(_mapFilePath))
+            {
+                using HttpClient http = new();
+                using Stream ins = await http.GetStreamAsync("https://raw.githubusercontent.com/b7c/Xabbo.Messages/master/messages.ini", cancellationToken);
+                using Stream outs = File.OpenWrite(_mapFilePath);
+                await ins.CopyToAsync(outs, cancellationToken);
+            }
+
+            _messageMap = MessageMap.Load(_mapFilePath);
+
+            _initialized = true;
         }
 
         private Headers GetHeaders(Destination destination)
@@ -104,6 +123,11 @@ namespace Xabbo.Messages
         /// </summary>
         private void InitializeMessages(Direction direction)
         {
+            if (_messageMap is null)
+            {
+                throw new InvalidOperationException("Message map has not been initialized.");
+            }
+
             List<MessageMapItem>? list = direction switch
             {
                 Direction.Incoming => _messageMap.Incoming,
