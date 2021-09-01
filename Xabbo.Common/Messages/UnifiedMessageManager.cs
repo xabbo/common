@@ -183,45 +183,6 @@ namespace Xabbo.Messages
             headerMap[(info.Client, info.Header)] = messageInfo;
         }
 
-        private void AddOrMergeMessage(MessageInfo info)
-        {
-            var nameMap = info.IsOutgoing ? _outgoingNameMap : _incomingNameMap;
-            var headerMap = info.IsOutgoing ? _outgoingHeaderMap : _incomingHeaderMap;
-
-            if ((info.FlashName is not null &&
-                nameMap.TryGetValue(info.FlashName, out MessageInfo? existingInfo)) ||
-                (info.UnityName is not null &&
-                nameMap.TryGetValue(info.UnityName, out existingInfo)))
-            {
-                if (existingInfo.UnityHeader != -1 &&
-                   existingInfo.UnityHeader != info.UnityHeader)
-                {
-                    Debug.WriteLine(
-                        $"Conflicting duplicate {info.Direction.ToString().ToLower()}"
-                        + $" message name '{info.UnityName}' (overwriting header value"
-                        + $" {existingInfo.UnityHeader} -> {info.UnityHeader})"
-                    );
-                }
-
-                if (info.UnityHeader >= 0) existingInfo.UnityHeader = info.UnityHeader;
-                if (info.FlashHeader >= 0) existingInfo.FlashHeader = info.FlashHeader;
-                existingInfo.UnityName ??= info.UnityName;
-                existingInfo.FlashName ??= info.FlashName;
-
-                info = existingInfo;
-            }
-            else
-            {
-                _messageInfos.Add(info);
-            }
-
-            if (!string.IsNullOrWhiteSpace(info.UnityName)) nameMap.TryAdd(info.UnityName, info);
-            if (!string.IsNullOrWhiteSpace(info.FlashName)) nameMap.TryAdd(info.FlashName, info);
-            if (info.UnityHeader >= 0)
-                headerMap[(ClientType.Unity, info.UnityHeader)] = info;
-            if (info.FlashHeader >= 0)
-                headerMap[(ClientType.Flash, info.FlashHeader)] = info;
-        }
 
         public void LoadMessages(IEnumerable<IClientMessageInfo> messages)
         {
