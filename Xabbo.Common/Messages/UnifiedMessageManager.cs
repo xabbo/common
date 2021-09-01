@@ -21,11 +21,6 @@ namespace Xabbo.Messages
     /// </summary>
     public class UnifiedMessageManager : IMessageManager
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions()
-        {
-            NumberHandling = JsonNumberHandling.AllowReadingFromString
-        };
-
         private readonly string _mapFilePath;
         private readonly List<MessageInfo> _messageInfos = new();
 
