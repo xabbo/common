@@ -55,8 +55,6 @@ namespace Xabbo.Messages
 
             In = new Incoming();
             Out = new Outgoing();
-
-            Initialize();
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -106,7 +104,7 @@ namespace Xabbo.Messages
             };
         }
 
-        private void Initialize()
+        private void Reset()
         {
             _messageInfos.Clear();
             _incomingHeaderMap.Clear();
@@ -227,7 +225,7 @@ namespace Xabbo.Messages
 
         public void LoadMessages(IEnumerable<IClientMessageInfo> messages)
         {
-            Initialize();
+            Reset();
 
             foreach (IClientMessageInfo message in messages)
             {
