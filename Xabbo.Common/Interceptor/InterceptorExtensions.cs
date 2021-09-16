@@ -5,77 +5,37 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor.Tasks;
+using System.Collections.Generic;
 
 namespace Xabbo.Interceptor
 {
     public static class InterceptorExtensions
     {
         /// <summary>
-        /// Asynchronously captures the first incoming packet with one of the specified target headers.
+        /// Asynchronously captures the first packet with one of the specified target headers.
         /// Throws an <see cref="OperationCanceledException"/> if no matching packets are received
         /// after the specified <paramref name="timeout"/> in milliseconds, or the specified 
         /// <see cref="CancellationToken"/> is cancelled.
         /// </summary>
         public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor,
-            int timeout, CancellationToken cancellationToken, params Header[] targetHeaders)
+            IEnumerable<Header> headers, int timeout, bool blockPacket = false, CancellationToken cancellationToken = default)
         {
-            if (targetHeaders is null || targetHeaders.Length == 0)
+            if (headers is null || !headers.Any())
                 throw new ArgumentException("At least one target header must be specified.");
 
-            if (targetHeaders.Any(header => header.Destination == Destination.Server))
-                throw new InvalidOperationException("Outgoing target header specified in ReceiveAsync.");
-
-            return new CaptureMessageTask(interceptor, Destination.Client, false, targetHeaders)
+            return new CaptureMessageTask(interceptor, headers, blockPacket)
                 .ExecuteAsync(timeout, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously captures the first incoming packet with one of the specified target headers.
+        /// Asynchronously captures the first packet with one of the specified target headers.
         /// Throws an <see cref="OperationCanceledException"/> if no matching packets are received
         /// after the specified <paramref name="timeout"/> in milliseconds.
         /// </summary>
         public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor,
-            int timeout, params Header[] targetHeaders)
+            Header header, int timeout, bool blockPacket = false, CancellationToken cancellationToken = default)
         {
-            return ReceiveAsync(interceptor, timeout, CancellationToken.None, targetHeaders);
-        }
-
-        /// <summary>
-        /// Asynchronously captures the first outgoing packet with one of the specified target headers.
-        /// Throws an <see cref="OperationCanceledException"/> if no matching packets are sent
-        /// after the specified <paramref name="timeout"/> in milliseconds, or the specified 
-        /// <see cref="CancellationToken"/> is cancelled.
-        /// </summary>
-        public static Task<IPacket> CaptureOutAsync(this IInterceptor interceptor,
-            int timeout, CancellationToken cancellationToken, params Header[] targetHeaders)
-        {
-            if (targetHeaders is null || targetHeaders.Length == 0)
-                throw new ArgumentException("At least one target header must be specified.");
-
-            if (targetHeaders.Any(header => header.Destination == Destination.Client))
-                throw new InvalidOperationException("Incoming target header specified in CaptureOutAsync.");
-
-            return new CaptureMessageTask(interceptor, Destination.Server, false, targetHeaders)
-                .ExecuteAsync(timeout, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously captures the first outgoing packet with one of the specified target headers.
-        /// Throws an <see cref="OperationCanceledException"/> if no matching packets are sent
-        /// after the specified <paramref name="timeout"/> in milliseconds.
-        /// </summary>
-        public static Task<IPacket> CaptureOutAsync(this IInterceptor interceptor,
-            int timeout, params Header[] targetHeaders)
-        {
-            return CaptureOutAsync(interceptor, timeout, CancellationToken.None, targetHeaders);
-        }
-
-        public static void AddIntercept(this IInterceptor interceptor,
-            Action<InterceptArgs> action,
-            params Header[] headers)
-        {
-            foreach (Header header in headers)
-                interceptor.Dispatcher.AddIntercept(header, action, interceptor.Client);
+            return ReceiveAsync(interceptor, new[] { header }, timeout, blockPacket, cancellationToken);
         }
     }
 }

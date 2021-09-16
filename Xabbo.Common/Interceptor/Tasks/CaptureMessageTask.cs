@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
@@ -7,15 +8,16 @@ namespace Xabbo.Interceptor.Tasks
 {
     public class CaptureMessageTask : InterceptorTask<IPacket>
     {
-        private readonly Destination _destination;
         private readonly bool _blockPacket;
-        private readonly Header[] _targetHeaders;
+        private readonly IEnumerable<Header> _targetHeaders;
 
+        /// <summary>
+        /// Asynchronously captures the first message with a matching target header.
+        /// </summary>
         public CaptureMessageTask(IInterceptor interceptor,
-            Destination destination, bool blockPacket, params Header[] targetHeaders)
+            IEnumerable<Header> targetHeaders, bool blockPacket = false)
             : base(interceptor)
         {
-            _destination = destination;
             _blockPacket = blockPacket;
             _targetHeaders = targetHeaders;
         }
