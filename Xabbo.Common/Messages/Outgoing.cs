@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 #nullable disable
+#pragma warning disable CS1591
 
 namespace Xabbo.Messages
 {
