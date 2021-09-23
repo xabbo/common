@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
@@ -9,7 +10,7 @@ namespace Xabbo.Interceptor.Tasks
     public class CaptureMessageTask : InterceptorTask<IPacket>
     {
         private readonly bool _blockPacket;
-        private readonly IEnumerable<Header> _targetHeaders;
+        private readonly Header[] _targetHeaders;
 
         /// <summary>
         /// Asynchronously captures the first message with a matching target header.
@@ -19,7 +20,15 @@ namespace Xabbo.Interceptor.Tasks
             : base(interceptor)
         {
             _blockPacket = blockPacket;
-            _targetHeaders = targetHeaders;
+
+            if (targetHeaders is Header[] array)
+            {
+                _targetHeaders = array;
+            }
+            else
+            {
+                _targetHeaders = targetHeaders.ToArray();
+            }
         }
 
         protected override void Bind()

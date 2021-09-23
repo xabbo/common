@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor.Dispatcher;
+using System.Threading;
+using System.Runtime.CompilerServices;
+using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Interceptor
 {
@@ -81,6 +84,24 @@ namespace Xabbo.Interceptor
         /// depending on the destination of the packet header.
         /// </summary>
         Task SendAsync(IReadOnlyPacket packet);
+
+        /// <summary>
+        /// Asynchronously receives a packet with any of the specified headers.
+        /// </summary>
+        public Task<IPacket> ReceiveAsync(HeaderSet headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
+            => new CaptureMessageTask(this, headers, block).ExecuteAsync(timeout, cancellationToken);
+
+        /// <summary>
+        /// Asynchronously captures a packet with any of the specified headers.
+        /// </summary>
+        Task<IPacket> ReceiveAsync(ITuple headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
+            => ReceiveAsync(HeaderSet.FromTuple(headers), timeout, block, cancellationToken);
+
+        /// <summary>
+        /// Asynchronously receives a packet with the specified header.
+        /// </summary>
+        public Task<IPacket> ReceiveAsync(Header header, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
+            => ReceiveAsync(new HeaderSet() { header }, timeout, block, cancellationToken);
 
         /// <summary>
         /// Binds the specified target object to the dispatcher.
