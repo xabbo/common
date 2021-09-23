@@ -33,11 +33,7 @@ namespace Xabbo.Messages
                 if (prop.PropertyType.Equals(typeof(Header)) &&
                     prop.GetMethod?.GetParameters().Length == 0)
                 {
-                    Header header = new()
-                    {
-                        Destination = Destination.Client,
-                        Name = prop.Name
-                    };
+                    Header header = new(Destination, name: prop.Name); 
                     _nameMap[prop.Name] = header;
                     prop.SetValue(this, header);
                 }
@@ -83,13 +79,13 @@ namespace Xabbo.Messages
                         };
                     }
 
-                    header = new Header
-                    {
+                    header = new Header(info.Destination, unityHeader, flashHeader);
+                    /*{
                         Destination = info.Destination,
                         Name = info.UnityName ?? info.FlashName ?? "unknown",
                         Flash = flashHeader,
                         Unity = unityHeader
-                    };
+                    };*/
 
                     if (flashHeader is not null)
                     {
@@ -165,11 +161,7 @@ namespace Xabbo.Messages
                     }
                     else
                     {
-                        return new Header()
-                        {
-                            Destination = Destination,
-                            Name = name
-                        };
+                        throw new Exception($"Unknown header: \"{name}\".");
                     }
                 }
                 finally { _lock.ExitReadLock(); }

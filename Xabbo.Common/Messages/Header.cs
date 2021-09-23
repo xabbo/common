@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Xabbo.Messages
 {
@@ -19,52 +19,63 @@ namespace Xabbo.Messages
         /// Gets the destination of this header.
         /// </summary>
         public Destination Destination { get; init; }
+
         /// <summary>
         /// Gets if this is an incoming header.
         /// </summary>
         public bool IsIncoming => Destination == Destination.Client;
+
         /// <summary>
         /// Gets if this is an outgoing header.
         /// </summary>
         public bool IsOutgoing => Destination == Destination.Server;
+
         /// <summary>
         /// Gets the header information for the Flash client.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ClientHeader? Flash { get; init; }
+
         /// <summary>
         /// Gets the header information for the Unity client.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ClientHeader? Unity { get; init; }
+
         /// <summary>
         /// Gets the explicit name of this header.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public string? Name { get; init; }
+
         /// <summary>
-        /// Get the explicit value of this header.
+        /// Gets the explicit value of this header.
         /// If this value set, it overrides client header information.
         /// It should only be used when a dynamic header from the message manager is unavailable.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public short? Value { get; init; }
 
-        /// <summary>
-        /// Creates a new header.
-        /// </summary>
-        public Header()
+        private Header() { Destination = Destination.Unknown; }
+
+        public Header(Destination destination, ClientHeader? unityHeader, ClientHeader? flashHeader)
         {
-            Destination = Destination.Unknown;
+            Destination = destination;
+            Unity = unityHeader;
+            Flash = flashHeader;
+
+            Name = Unity?.Name ?? Flash?.Name;
         }
 
         /// <summary>
         /// Creates a new header with the specified destination and explicit value.
         /// </summary>
-        public Header(Destination destination, short value)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Header(Destination destination, short value = -1, string? name = null)
         {
             Destination = destination;
             Value = value;
+            Name = name;
         }
 
         /// <summary>
@@ -82,7 +93,6 @@ namespace Xabbo.Messages
 
         /// <summary>
         /// Gets the header value for the specified client type.
-        /// If an explicit value is set, that value will be returned regardless of the client type.
         /// </summary>
         public short GetValue(ClientType clientType)
         {
@@ -94,8 +104,8 @@ namespace Xabbo.Messages
             {
                 return clientType switch
                 {
-                    ClientType.Flash => Flash?.Value ?? throw new Exception("Unknown Flash header."),
-                    ClientType.Unity => Unity?.Value ?? throw new Exception("Unknown Unity header."),
+                    ClientType.Flash => Flash?.Value ?? -1,
+                    ClientType.Unity => Unity?.Value ?? -1,
                     _ => throw new Exception("Invalid client type specified.")
                 };
             }
@@ -103,7 +113,6 @@ namespace Xabbo.Messages
 
         /// <summary>
         /// Gets the name of the header for the specified client type.
-        /// If an explicit name is set, that name will be returned regardless of the client type.
         /// </summary>
         public string? GetName(ClientType clientType) => GetClientHeader(clientType)?.Name;
 
@@ -138,7 +147,43 @@ namespace Xabbo.Messages
             return true;
         }
 
-        public override string ToString() => Unity?.Name ?? Flash?.Name ?? Value?.ToString() ?? "unknown";
+        public string ToString(ClientType client)
+        {
+            ClientHeader? header = GetClientHeader(client);
+            if (header is null) return ToString();
+
+            StringBuilder sb = new();
+
+            sb
+                .Append(Destination switch {
+                    Destination.Client => "in:",
+                    Destination.Server => "out:",
+                    _ => string.Empty
+                })
+                .Append(header.Name);
+
+            if (header.Value >= 0)
+            {
+                sb
+                    .Append('[')
+                    .Append(header.Value)
+                    .Append(']');
+            }
+
+            return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            return new StringBuilder()
+                .Append(Destination switch {
+                    Destination.Client => "in:",
+                    Destination.Server => "out:",
+                    _ => string.Empty
+                })
+                .Append(Name ?? Value?.ToString() ?? "unknown")
+                .ToString();
+        }
 
         public static implicit operator Header(short value) => new Header() { Value = value };
         public static bool operator ==(Header a, Header b) => a.Equals(b);
@@ -161,5 +206,20 @@ namespace Xabbo.Messages
             Destination = Destination.Server,
             Value = value
         };
+
+        /// <summary>
+        /// Converts the specified tuple into an array of headers.
+        /// </summary>
+        public static Header[] FromTuple(ITuple tuple)
+        {
+            Header[] headers = new Header[tuple.Length];
+            for (int i = 0; i < tuple.Length; i++)
+            {
+                if (tuple[i] is not Header header)
+                    throw new Exception($"Tuple values must be of type {typeof(Header).FullName}.");
+                headers[i] = header;
+            }
+            return headers;
+        }
     }
 }
