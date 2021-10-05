@@ -630,6 +630,7 @@ namespace Xabbo.Interceptor.Dispatcher
         {
             bool modified = false;
             modified |= header.Flash is not null && RemoveIntercept(header.Flash, callback);
+            modified |= header.Unity is not null && RemoveIntercept(header.Unity, callback);
             return modified;
         }
         #endregion
