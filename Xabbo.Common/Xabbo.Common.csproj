@@ -11,6 +11,10 @@
     <Configurations>Debug;Release;Develop</Configurations>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
   <!-- Configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -21,10 +25,13 @@
 
   <!-- Package -->
   <PropertyGroup>
+    <LocalPackageCache>%USERPROFILE%\.nuget\packages</LocalPackageCache>
     <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
     <PackageId>Xabbo.Common</PackageId>
-    <Version Condition="'$(Configuration)'=='Develop'">1.0.0-dev</Version>
-    <Version Condition="'$(Configuration)'!='Develop'">1.0.0-alpha</Version>
+    <Description>Common library for interacting with Habbo packet interceptors.</Description>
+    <Version Condition="'$(Configuration)'=='Develop'">0.0.0-dev</Version>
+    <Version Condition="'$(Configuration)'!='Develop'">1.0.0-beta</Version>
+    <InformationalVersion>$(Version)</InformationalVersion>
     <Authors>b7</Authors>
   </PropertyGroup>
 
@@ -47,6 +54,7 @@
 
   <!-- Update package in local source after pack -->
   <Target Name="NugetDeletePackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Develop'">
+    <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageCache) -NonInteractive" ContinueOnError="true" />
     <Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
   </Target>
   <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'!='Debug'">
