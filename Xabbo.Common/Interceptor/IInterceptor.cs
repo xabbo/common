@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor.Dispatcher;
-using System.Threading;
-using System.Runtime.CompilerServices;
 using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Interceptor
 {
+    /// <summary>
+    /// Represents a Habbo packet interceptor that can read, modify and send packets.
+    /// </summary>
     public interface IInterceptor
     {
         /// <summary>

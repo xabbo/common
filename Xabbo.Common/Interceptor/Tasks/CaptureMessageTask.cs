@@ -7,39 +7,45 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Tasks
 {
+    /// <summary>
+    /// Captures the first message with a matching target header.
+    /// </summary>
     public class CaptureMessageTask : InterceptorTask<IPacket>
     {
-        private readonly bool _blockPacket;
-        private readonly Header[] _targetHeaders;
+        private readonly bool _block;
+        private readonly Header[] _headers;
 
         /// <summary>
-        /// Asynchronously captures the first message with a matching target header.
+        /// Creates a new <see cref="CaptureMessageTask"/> targeting the specified headers.
         /// </summary>
+        /// <param name="interceptor">The interceptor to bind to.</param>
+        /// <param name="headers">The headers to listen for.</param>
+        /// <param name="block">Whether to block the captured packet.</param>
         public CaptureMessageTask(IInterceptor interceptor,
-            IEnumerable<Header> targetHeaders, bool blockPacket = false)
+            IEnumerable<Header> headers, bool block = false)
             : base(interceptor)
         {
-            _blockPacket = blockPacket;
+            _block = block;
 
-            if (targetHeaders is Header[] array)
+            if (headers is Header[] array)
             {
-                _targetHeaders = array;
+                _headers = array;
             }
             else
             {
-                _targetHeaders = targetHeaders.ToArray();
+                _headers = headers.ToArray();
             }
         }
 
         protected override void Bind()
         {
-            foreach (Header header in _targetHeaders)
+            foreach (Header header in _headers)
                 _interceptor.Dispatcher.AddIntercept(header, OnIntercept, _interceptor.Client);
         }
 
         protected override void Release()
         {
-            foreach (Header header in _targetHeaders)
+            foreach (Header header in _headers)
                 _interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
         }
 
@@ -51,7 +57,7 @@ namespace Xabbo.Interceptor.Tasks
             {
                 if (SetResult(e.Packet.Clone()))
                 {
-                    if (_blockPacket)
+                    if (_block)
                         e.Block();
                 }
             }

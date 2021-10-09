@@ -5,8 +5,7 @@ using Xabbo.Messages;
 namespace Xabbo.Interceptor.Dispatcher
 {
     /// <summary>
-    /// A service that creates bindings for routing messages
-    /// to methods decorated with receive or intercept attributes.
+    /// Represents a service that routes messages to methods decorated with receive or intercept attributes.
     /// </summary>
     public interface IInterceptDispatcher
     {
