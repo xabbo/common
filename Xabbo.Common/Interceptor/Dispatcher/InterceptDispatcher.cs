@@ -543,6 +543,8 @@ namespace Xabbo.Interceptor.Dispatcher
 
         private static bool CheckClientHeader(ClientType requiredClientHeaders, Header header)
         {
+            if (header.Value.HasValue) return true;
+
             if (requiredClientHeaders.HasFlag(ClientType.Flash) &&
                 !(header.Flash?.Value >= 0))
             {
