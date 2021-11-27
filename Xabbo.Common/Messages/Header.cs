@@ -76,6 +76,22 @@ namespace Xabbo.Messages
             Destination = destination;
             Value = value;
             Name = name;
+
+            Unity = new ClientHeader
+            {
+                Client = ClientType.Unity,
+                Destination = destination,
+                Name = name ?? value.ToString(),
+                Value = value
+            };
+
+            Flash = new ClientHeader
+            {
+                Client = ClientType.Flash,
+                Destination = destination,
+                Name = name ?? value.ToString(),
+                Value = value
+            };
         }
 
         /// <summary>
@@ -185,27 +201,18 @@ namespace Xabbo.Messages
                 .ToString();
         }
 
-        public static implicit operator Header(short value) => new Header() { Value = value };
         public static bool operator ==(Header a, Header b) => a.Equals(b);
         public static bool operator !=(Header a, Header b) => !(a == b);
 
         /// <summary>
         /// Creates an outgoing header with the specified explicit value.
         /// </summary>
-        public static Header In(short value) => new Header
-        {
-            Destination = Destination.Client,
-            Value = value
-        };
+        public static Header In(short value) => new Header(Destination.Client, value);
 
         /// <summary>
         /// Creates an incoming header with the specified explicit value.
         /// </summary>
-        public static Header Out(short value) => new Header
-        {
-            Destination = Destination.Server,
-            Value = value
-        };
+        public static Header Out(short value) => new Header(Destination.Server, value);
 
         /// <summary>
         /// Converts the specified tuple into an array of headers.
