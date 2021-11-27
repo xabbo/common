@@ -479,7 +479,7 @@ namespace Xabbo.Messages
                     case ushort x: WriteShort((short)x); break;
                     case LegacyShort x: WriteLegacyShort(x); break;
                     case int x: WriteInt(x); break;
-                    case long x: WriteLong(x); break;
+                    case long x: WriteLegacyLong(x); break;
                     case LegacyLong x: WriteLegacyLong(x); break;
                     case byte[] x:
                         WriteInt(x.Length);
@@ -662,6 +662,10 @@ namespace Xabbo.Messages
         }
         IPacket IPacket.WriteLegacyFloat(float value) => WriteLegacyFloat(value);
 
+        /// <summary>
+        /// Writes a long to the packet if the <see cref="Protocol"/>
+        /// is set to <see cref="ClientType.Unity"/>, or an int if it is <see cref="ClientType.Flash"/>.
+        /// </summary>
         public Packet WriteLegacyLong(long value)
         {
             return Protocol switch
