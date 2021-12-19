@@ -23,13 +23,13 @@
     <InformationalVersion>$(Version)</InformationalVersion>
     <PackageProjectUrl>https://github.com/b7c/Xabbo.Common</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>images\xabbo.png</PackageIcon>
+    <PackageIcon>img\package-icon.png</PackageIcon>
     <Authors>b7</Authors>
   </PropertyGroup>
 
   <!-- Include package icon -->
   <ItemGroup>
-    <None Include="res\img\xabbo.png" Pack="true" PackagePath="images\xabbo.png" />
+    <None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
   </ItemGroup>
 
   <!-- Rename paths -->
@@ -51,7 +51,7 @@
 
   <!-- Add package to local source after pack -->
   <Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
-    <Exec Command="nuget add bin\$(ConfigurationName)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
+    <Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
   </Target>
 
 </Project>
