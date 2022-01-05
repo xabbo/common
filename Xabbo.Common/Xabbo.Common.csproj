@@ -19,7 +19,7 @@
     <LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
     <PackageId>Xabbo.Common</PackageId>
     <Description>Common library for interfacing with Habbo packet interceptors.</Description>
-    <Version>1.0.0-beta.1</Version>
+    <Version>1.0.0-beta.2</Version>
     <InformationalVersion>$(Version)</InformationalVersion>
     <RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
