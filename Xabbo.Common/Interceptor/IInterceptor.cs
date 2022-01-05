@@ -65,6 +65,11 @@ namespace Xabbo.Interceptor
         event EventHandler<InterceptArgs>? Intercepted;
 
         /// <summary>
+        /// Gets a cancellation token that is triggered when the connection to the game ends.
+        /// </summary>
+        CancellationToken DisconnectToken { get; }
+
+        /// <summary>
         /// Sends a packet with the specified header and values
         /// to either the client or server, depending on the destination of the header.
         /// </summary>
