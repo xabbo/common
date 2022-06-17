@@ -5,12 +5,12 @@ namespace Xabbo.Interceptor.Dispatcher
 {
     internal class InterceptorBinding
     {
-        public object Target { get; }
+        public IInterceptHandler Handler { get; }
         public IReadOnlyCollection<BindingCallback> Callbacks { get; }
 
-        public InterceptorBinding(object target, IEnumerable<BindingCallback> callbacks)
+        public InterceptorBinding(IInterceptHandler handler, IEnumerable<BindingCallback> callbacks)
         {
-            Target = target;
+            Handler = handler;
             Callbacks = new List<BindingCallback>(callbacks).AsReadOnly();
         }
     }

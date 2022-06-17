@@ -5,16 +5,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
+using Xabbo.Common;
 using Xabbo.Messages;
+using Xabbo.Messages.Attributes;
 using Xabbo.Utility;
 
 namespace Xabbo.Interceptor.Dispatcher
 {
-    /// <summary>
-    /// Dispatches intercepted messages based on their header and destination.
-    /// Objects that have methods decorated with intercept attributes can be bound to the dispatcher,
-    /// and while bound, each method will be invoked when a packet with a matching header is intercepted.
-    /// </summary>
+    /// <inheritdoc cref="IInterceptDispatcher" />
     public class InterceptDispatcher : IInterceptDispatcher
     {
         private static ReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
@@ -35,7 +33,7 @@ namespace Xabbo.Interceptor.Dispatcher
         private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(ClientHeader key)
             => new List<InterceptCallback>();
 
-        private readonly ConcurrentDictionary<object, InterceptorBinding> _bindings = new();
+        private readonly ConcurrentDictionary<IInterceptHandler, InterceptorBinding> _bindings = new();
         private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<ReceiveCallback>> _receiveCallbacks = new();
         private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<InterceptCallback>> _interceptCallbacks = new();
 
@@ -58,7 +56,7 @@ namespace Xabbo.Interceptor.Dispatcher
             return !param.IsOut && !param.IsIn && !param.IsOptional && !param.HasDefaultValue;
         }
 
-        private static bool VerifyReceiveMethodSignature(MethodInfo methodInfo)
+        private static bool ValidateReceiveMethodSignature(MethodInfo methodInfo)
         {
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
@@ -78,7 +76,7 @@ namespace Xabbo.Interceptor.Dispatcher
             };
         }
 
-        private static bool VerifyInterceptorMethodSignature(MethodInfo methodInfo)
+        private static bool ValidateInterceptorMethodSignature(MethodInfo methodInfo)
         {
             if (!methodInfo.ReturnType.Equals(typeof(void)))
                 return false;
@@ -139,7 +137,7 @@ namespace Xabbo.Interceptor.Dispatcher
         /// </summary>
         public void DispatchIntercept(InterceptArgs e)
         {
-            ClientHeader? key = e.Packet.Header.GetClientHeader(e.Client);
+            ClientHeader? key = e.Packet.Header.GetClientHeader(e.Packet.Protocol);
             if (key is null) return;
 
             if (_interceptCallbacks.TryGetValue(key, out IReadOnlyList<InterceptCallback>? list))
@@ -150,7 +148,7 @@ namespace Xabbo.Interceptor.Dispatcher
 
         private void InvokeInterceptCallbacks(IEnumerable<InterceptCallback> callbacks, InterceptArgs e)
         {
-            ClientHeader? header = e.Packet.Header.GetClientHeader(e.Client);
+            ClientHeader? header = e.Packet.Header.GetClientHeader(e.Packet.Protocol);
             if (header is null) return;
 
             foreach (InterceptCallback callback in callbacks)
@@ -170,7 +168,7 @@ namespace Xabbo.Interceptor.Dispatcher
 
                     string messageName = header.Value.ToString();
                     if (Messages.TryGetInfoByHeader(e.Destination.ToDirection(),
-                        e.Client, header.Value, out MessageInfo? messageInfo))
+                        e.Packet.Protocol, header.Value, out MessageInfo? messageInfo))
                     {
                         messageName = messageInfo.UnityName ?? messageInfo.FlashName ?? messageName;
                     }
@@ -314,15 +312,15 @@ namespace Xabbo.Interceptor.Dispatcher
             if (header.Unity is not null) AddInterceptCallbacks(header.Unity, callbacks);
         }
 
-        public bool IsBound(object target)
+        public bool IsBound(IInterceptHandler handler)
         {
-            return _bindings.ContainsKey(target);
+            return _bindings.ContainsKey(handler);
         }
 
-        public bool Bind(object target, ClientType requiredClientHeaders = ClientType.Flash | ClientType.Unity)
+        public bool Bind(IInterceptHandler handler, ClientType requiredClientHeaders = ClientType.Flash | ClientType.Unity)
         {
-            Type targetType = target.GetType();
-            MethodInfo[] methodInfos = targetType.FindAllMethods().ToArray();
+            Type handlerType = handler.GetType();
+            MethodInfo[] methods = handlerType.FindAllMethods().ToArray();
 
             Identifiers
                 unknownIdentifiers = new(),
@@ -332,7 +330,7 @@ namespace Xabbo.Interceptor.Dispatcher
                 Detect unknown, invalid identifiers
             */
             {
-                foreach (IdentifiersAttribute attribute in targetType.GetCustomAttributes<IdentifiersAttribute>())
+                foreach (IdentifiersAttribute attribute in handlerType.GetCustomAttributes<IdentifiersAttribute>())
                 {
                     if (!attribute.Required) continue;
                     if ((attribute.RequiredClient & requiredClientHeaders) == 0) continue;
@@ -356,7 +354,7 @@ namespace Xabbo.Interceptor.Dispatcher
                 }
             }
 
-            foreach (MethodInfo methodInfo in methodInfos)
+            foreach (MethodInfo methodInfo in methods)
             {
                 foreach (IdentifiersAttribute attribute in methodInfo.GetCustomAttributes<IdentifiersAttribute>())
                 {
@@ -384,7 +382,7 @@ namespace Xabbo.Interceptor.Dispatcher
 
             if (unknownIdentifiers.Any() || unresolvedIdentifiers.Any())
             {
-                throw new InterceptorBindingFailedException(target, unknownIdentifiers, unresolvedIdentifiers);
+                throw new InterceptorBindingFailedException(handler, unknownIdentifiers, unresolvedIdentifiers);
             }
 
             List<BindingCallback> callbackList = new();
@@ -392,16 +390,16 @@ namespace Xabbo.Interceptor.Dispatcher
             /*
                 Generate receive/intercept callbacks
             */
-            foreach (MethodInfo methodInfo in methodInfos)
+            foreach (MethodInfo methodInfo in methods)
             {
                 // Receive
                 ReceiveAttribute? receiveAttribute = methodInfo.GetCustomAttribute<ReceiveAttribute>();
                 if (receiveAttribute != null)
                 {
-                    if (!VerifyReceiveMethodSignature(methodInfo))
+                    if (!ValidateReceiveMethodSignature(methodInfo))
                     {
                         throw new Exception(
-                            $"{targetType.Name}.{methodInfo.Name} has a " +
+                            $"{handlerType.Name}.{methodInfo.Name} has a " +
                             $"method signature incompatible with {receiveAttribute.GetType().Name}"
                         );
                     }
@@ -412,22 +410,22 @@ namespace Xabbo.Interceptor.Dispatcher
                         Header header = Messages[identifier];
                         if (!uniqueHeaders.Add(header)) continue;
 
-                        callbackList.Add(CreateCallback(header, target, methodInfo));
+                        callbackList.Add(CreateCallback(header, handler, methodInfo));
                     }
                 }
 
                 // Intercept
                 IEnumerable<InterceptAttribute> interceptAttributes = methodInfo.GetCustomAttributes<InterceptAttribute>();
                 if (interceptAttributes.Count() > 1)
-                    throw new Exception($"Multiple intercept attributes defined for method {targetType.Name}.{methodInfo.Name}");
+                    throw new Exception($"Multiple intercept attributes defined for method {handlerType.Name}.{methodInfo.Name}");
 
                 InterceptAttribute? interceptAttribute = interceptAttributes.FirstOrDefault();
                 if (interceptAttribute != null)
                 {
-                    if (!VerifyInterceptorMethodSignature(methodInfo))
+                    if (!ValidateInterceptorMethodSignature(methodInfo))
                     {
                         throw new Exception(
-                            $"{targetType.Name}.{methodInfo.Name} has a " +
+                            $"{handlerType.Name}.{methodInfo.Name} has a " +
                             $"method signature incompatible with {interceptAttribute.GetType().Name}"
                         );
                     }
@@ -438,7 +436,7 @@ namespace Xabbo.Interceptor.Dispatcher
                         Header header = Messages[identifier];
                         if (!uniqueHeaders.Add(header)) continue;
 
-                        callbackList.Add(CreateInterceptCallback(header, target, methodInfo));
+                        callbackList.Add(CreateInterceptCallback(header, handler, methodInfo));
                     }
                 }
             }
@@ -448,10 +446,10 @@ namespace Xabbo.Interceptor.Dispatcher
                 return false;
             }
 
-            InterceptorBinding binding = new(target, callbackList);
+            InterceptorBinding binding = new(handler, callbackList);
 
-            if (!_bindings.TryAdd(target, binding))
-                throw new InvalidOperationException($"The target '{targetType.FullName}' is already bound.");
+            if (!_bindings.TryAdd(handler, binding))
+                throw new InvalidOperationException($"The target '{handlerType.FullName}' is already bound.");
 
             // Add receive callbacks
             foreach (var callbacks in callbackList.OfType<ReceiveCallback>().GroupBy(x => x.Header))
@@ -515,9 +513,9 @@ namespace Xabbo.Interceptor.Dispatcher
             if (header.Unity is not null) RemoveInterceptCallbacks(header.Unity, callbacks);
         }
 
-        public bool Release(object target)
+        public bool Release(IInterceptHandler handler)
         {
-            if (!_bindings.TryRemove(target, out InterceptorBinding? binding))
+            if (!_bindings.TryRemove(handler, out InterceptorBinding? binding))
                 return false;
 
             foreach (BindingCallback callback in binding.Callbacks)
@@ -583,16 +581,22 @@ namespace Xabbo.Interceptor.Dispatcher
             while (!_interceptCallbacks.TryUpdate(key, newList, previousList));
         }
 
-        public void AddIntercept(Header header, Action<InterceptArgs> callback, ClientType requiredClientHeaders)
+        public void AddIntercept(HeaderSet headers, Action<InterceptArgs> callback, ClientType requiredClientHeaders)
         {
-            if (!CheckClientHeader(requiredClientHeaders, header))
-                throw new InvalidOperationException("Invalid header specified for intercept.");
+            foreach (Header header in headers)
+            {
+                if (!CheckClientHeader(requiredClientHeaders, header))
+                    throw new InvalidOperationException("Invalid header specified for intercept.");
+            }
 
             if (callback.Target is null)
                 throw new InvalidOperationException("The target of the specified callback cannot be null.");
 
-            if (header.Flash is not null) AddIntercept(header, header.Flash, callback);
-            if (header.Unity is not null) AddIntercept(header, header.Unity, callback);
+            foreach (Header header in headers)
+            {
+                if (header.Flash is not null) AddIntercept(header, header.Flash, callback);
+                if (header.Unity is not null) AddIntercept(header, header.Unity, callback);
+            }
         }
 
         public bool RemoveInterceptIn(Header header, Action<InterceptArgs> action)

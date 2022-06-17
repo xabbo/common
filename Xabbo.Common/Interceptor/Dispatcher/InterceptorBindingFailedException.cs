@@ -7,27 +7,27 @@ namespace Xabbo.Interceptor.Dispatcher
 {
     public class InterceptorBindingFailedException : Exception
     {
-        public object Target { get; }
+        public IInterceptHandler Handler { get; }
         public Identifiers UnknownIdentifiers { get; }
         public Identifiers UnresolvedIdentifiers { get; }
 
         public InterceptorBindingFailedException(
-            object target,
+            IInterceptHandler handler,
             Identifiers unknownIdentifiers,
             Identifiers unresolvedIdentifiers)
-            : base(BuildMessage(target, unknownIdentifiers, unresolvedIdentifiers))
+            : base(BuildMessage(handler, unknownIdentifiers, unresolvedIdentifiers))
         {
-            Target = target;
+            Handler = handler;
             UnknownIdentifiers = unknownIdentifiers;
             UnresolvedIdentifiers = unresolvedIdentifiers;
         }
 
-        private static string BuildMessage(object target,
+        private static string BuildMessage(IInterceptHandler handler,
             Identifiers unknownIdentifiers,
             Identifiers unresolvedIdentifiers)
         {
             var sb = new StringBuilder();
-            sb.Append($"Failed to bind to target '{target.GetType().FullName}'.");
+            sb.Append($"Failed to bind to target '{handler.GetType().FullName}'.");
 
             if (unknownIdentifiers.Count > 0)
             {
