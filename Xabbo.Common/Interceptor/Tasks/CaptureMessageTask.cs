@@ -55,7 +55,7 @@ namespace Xabbo.Interceptor.Tasks
         {
             try
             {
-                if (SetResult(e.Packet.Clone()))
+                if (SetResult(e.Packet.Copy()))
                 {
                     if (_block)
                         e.Block();
