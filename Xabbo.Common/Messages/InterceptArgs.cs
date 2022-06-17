@@ -1,65 +1,100 @@
 ﻿using System;
-using System.Buffers;
 
-namespace Xabbo.Messages
+using Xabbo.Common;
+
+namespace Xabbo.Messages;
+
+/// <summary>
+/// Contains event arguments of an intercepted packet.
+/// </summary>
+public class InterceptArgs : EventArgs, IDisposable
 {
-    public class InterceptArgs : EventArgs, IDisposable
+    private bool _disposed;
+
+    /// <summary>
+    /// Gets the time that the packet was intercepted.
+    /// </summary>
+    public DateTime Timestamp { get; }
+
+    /// <summary>
+    /// Gets the destination of the packet.
+    /// </summary>
+    public Destination Destination { get; }
+
+    /// <summary>
+    /// Gets the sequence number of the intercepted packet.
+    /// </summary>
+    public int Step { get; init; }
+
+    /// <summary>
+    /// Gets or replaces the intercepted packet.
+    /// </summary>
+    public IPacket Packet { get; set; }
+
+    /// <summary>
+    /// Gets the original, unmodified packet that was intercepted.
+    /// </summary>
+    public IReadOnlyPacket OriginalPacket { get; }
+
+    /// <summary>
+    /// Gets if the packet's destination is to the client.
+    /// </summary>
+    public bool IsIncoming => Destination == Destination.Client;
+
+    /// <summary>
+    /// Gets if the packet's destination is to the server.
+    /// </summary>
+    public bool IsOutgoing => Destination == Destination.Server;
+
+    /// <summary>
+    /// Gets if the packet is to be blocked by the interceptor.
+    /// </summary>
+    public bool IsBlocked { get; private set; }
+
+    /// <summary>
+    /// Gets if the packet has been modified from its original state.
+    /// </summary>
+    public bool IsModified =>
+        Packet.Header != OriginalPacket.Header ||
+        Packet.Length != OriginalPacket.Length ||
+        !Packet.Buffer.Span.SequenceEqual(OriginalPacket.Buffer.Span);
+
+    /// <summary>
+    /// Constructs a new InterceptArgs instance with the specified destination and packet.
+    /// </summary>
+    public InterceptArgs(Destination destination, IPacket packet)
     {
-        private bool _disposed;
+        Timestamp = DateTime.Now;
+        Destination = destination;
+        Packet = packet;
 
-        private readonly IMemoryOwner<byte> _originalDataOwner;
+        OriginalPacket = new Packet(packet.Protocol, packet.Header, packet.Buffer.Span);
+    }
 
-        public DateTime Timestamp { get; }
-        public Destination Destination { get; }
-        public ClientType Client { get; }
-        public int Step { get; }
-        public IPacket Packet { get; set; }
-        public IReadOnlyPacket OriginalPacket { get; }
+    /// <summary>
+    /// Flags the packet to be blocked from its destination by the interceptor.
+    /// </summary>
+    public void Block() => IsBlocked = true;
 
-        public bool IsIncoming => Destination == Destination.Client;
-        public bool IsOutgoing => Destination == Destination.Server;
+    /// <inheritdoc cref="Dispose()" />
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+        _disposed = true;
 
-        public bool IsBlocked { get; private set; }
-        public bool IsModified =>
-            Packet.Header != OriginalPacket.Header ||
-            Packet.Length != OriginalPacket.Length ||
-            !Packet.GetBuffer().Span.SequenceEqual(OriginalPacket.GetBuffer().Span);
-
-        public InterceptArgs(Destination destination, ClientType client, int step, IPacket packet)
+        if (disposing)
         {
-            Timestamp = DateTime.Now;
-            Destination = destination;
-            Client = client;
-            Step = step;
-            Packet = packet;
-
-            _originalDataOwner = MemoryPool<byte>.Shared.Rent(packet.Length);
-            packet.CopyTo(_originalDataOwner.Memory.Span);
-
-            OriginalPacket = new Packet(
-                client,
-                packet.Header,
-                _originalDataOwner.Memory[0..packet.Length]
-            );
+            Packet.Dispose();
+            OriginalPacket.Dispose();
         }
+    }
 
-        public void Block() => IsBlocked = true;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            _disposed = true;
-
-            if (disposing)
-            {
-                _originalDataOwner.Dispose();
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+    /// <summary>
+    /// Disposes this InterceptArgs instance.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

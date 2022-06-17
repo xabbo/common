@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
+using Xabbo.Common;
 using Xabbo.Messages;
 using Xabbo.Interceptor.Dispatcher;
 using Xabbo.Interceptor.Tasks;
@@ -70,28 +71,10 @@ namespace Xabbo.Interceptor
         CancellationToken DisconnectToken { get; }
 
         /// <summary>
-        /// Sends a packet with the specified header and values
-        /// to either the client or server, depending on the destination of the header.
-        /// </summary>
-        void Send(Header header, params object[] values);
-
-        /// <summary>
         /// Sends the specified packet to either the client or server,
         /// depending on the destination of the packet header.
         /// </summary>
-        void Send(IReadOnlyPacket packet);
-
-        /// <summary>
-        /// Sends a packet with the specified header and values
-        /// to either the client or server, depending on the destination of the header.
-        /// </summary>
-        Task SendAsync(Header header, params object[] values);
-
-        /// <summary>
-        /// Sends the specified packet to either the client or server,
-        /// depending on the destination of the packet header.
-        /// </summary>
-        Task SendAsync(IReadOnlyPacket packet);
+        ValueTask SendAsync(IReadOnlyPacket packet);
 
         /// <summary>
         /// Asynchronously receives a packet with any of the specified headers.
@@ -102,7 +85,7 @@ namespace Xabbo.Interceptor
         /// <summary>
         /// Asynchronously captures a packet with any of the specified headers.
         /// </summary>
-        Task<IPacket> ReceiveAsync(ITuple headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
+        public Task<IPacket> ReceiveAsync(ITuple headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
             => ReceiveAsync(HeaderSet.FromTuple(headers), timeout, block, cancellationToken);
 
         /// <summary>
@@ -112,19 +95,26 @@ namespace Xabbo.Interceptor
             => ReceiveAsync(new HeaderSet() { header }, timeout, block, cancellationToken);
 
         /// <summary>
+        /// Registers a callback that is invoked when a packet with a matching header is intercepted.
+        /// </summary>
+        /// <param name="headers">Specifies which headers to intercept.</param>
+        /// <param name="callback">The callback to invoke when a message is intercepted.</param>
+        public void OnIntercept(HeaderSet headers, Action<InterceptArgs> callback) => Dispatcher.AddIntercept(headers, callback, Client);
+
+        /// <summary>
         /// Binds the specified target object to the dispatcher.
         /// </summary>
         /// <returns>
         /// <c>true</c> if successfully bound, or <c>false</c> if the target
         /// does not have a receive or intercept attribute on any of its methods.
-        /// Throws if any of the message identifiers are unable to be resolved.
+        /// Throws if any of the required message identifiers are unable to be resolved.
         /// </returns>
-        bool Bind(object target) => Dispatcher.Bind(target, Client);
+        public bool Bind(IInterceptHandler handler) => Dispatcher.Bind(handler, Client);
 
         /// <summary>
         /// Releases the specified target object from the dispatcher.
         /// </summary>
         /// <returns>Whether the binding was released or not.</returns>
-        bool Release(object target) => Dispatcher.Release(target);
+        public bool Release(IInterceptHandler handler) => Dispatcher.Release(handler);
     }
 }
