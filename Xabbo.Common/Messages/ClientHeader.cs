@@ -1,9 +1,11 @@
 ﻿using System;
 
+using Xabbo.Common;
+
 namespace Xabbo.Messages
 {
     /// <summary>
-    /// Specifies header information for a specific client type.
+    /// Specifies message header information for a specific client type.
     /// </summary>
     public class ClientHeader
     {
@@ -11,14 +13,17 @@ namespace Xabbo.Messages
         /// The client type of this header.
         /// </summary>
         public ClientType Client { get; init; }
+
         /// <summary>
         /// The destination of this header.
         /// </summary>
         public Destination Destination { get; init; }
+
         /// <summary>
         /// The value of this header.
         /// </summary>
         public short Value { get; init; }
+
         /// <summary>
         /// The name of this header.
         /// </summary>

@@ -4,6 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Xabbo.Common;
+
 namespace Xabbo.Messages
 {
     public interface IMessageManager

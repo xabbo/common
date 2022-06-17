@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Xabbo.Messages
+using Xabbo.Common;
+
+namespace Xabbo.Messages.Attributes
 {
     public abstract class IdentifiersAttribute : Attribute
     {
