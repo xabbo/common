@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo
+namespace Xabbo.Common
 {
     /// <summary>
     /// Represents a type of game client.
@@ -19,6 +19,10 @@ namespace Xabbo
         /// <summary>
         /// Represents the Unity client.
         /// </summary>
-        Unity = 1 << 2
+        Unity = 1 << 1,
+        /// <summary>
+        /// Represents all client types.
+        /// </summary>
+        All = Flash | Unity
     }
 }
