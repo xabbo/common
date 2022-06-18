@@ -137,8 +137,6 @@ public partial class Packet : IPacket
         : this(ClientType.Unknown, header, data)
     { }
 
-    public void CopyTo(Span<byte> destination) => _buffer.Span.CopyTo(destination);
-
     /// <inheritdoc cref="IReadOnlyPacket.Copy" />
     public Packet Copy()
     {
