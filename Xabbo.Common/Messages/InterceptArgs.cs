@@ -57,7 +57,7 @@ public class InterceptArgs : EventArgs, IDisposable
     public bool IsModified =>
         Packet.Header != OriginalPacket.Header ||
         Packet.Length != OriginalPacket.Length ||
-        !Packet.Buffer.Span.SequenceEqual(OriginalPacket.Buffer.Span);
+        !Packet.Buffer.SequenceEqual(OriginalPacket.Buffer);
 
     /// <summary>
     /// Constructs a new InterceptArgs instance with the specified destination and packet.
@@ -68,7 +68,7 @@ public class InterceptArgs : EventArgs, IDisposable
         Destination = destination;
         Packet = packet;
 
-        OriginalPacket = new Packet(packet.Protocol, packet.Header, packet.Buffer.Span);
+        OriginalPacket = new Packet(packet.Protocol, packet.Header, packet.Buffer);
     }
 
     /// <summary>
