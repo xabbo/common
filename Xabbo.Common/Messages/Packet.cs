@@ -230,6 +230,15 @@ public partial class Packet : IPacket
         return success;
     }
 
+    /// <inheritdoc cref="IPacket.Skip(int)" />
+    public Packet Skip(int bytes)
+    {
+        Position += bytes;
+        return this;
+    }
+    IPacket IPacket.Skip(int bytes) => Skip(bytes);
+    IReadOnlyPacket IReadOnlyPacket.Skip(int bytes) => Skip(bytes);
+
     /// <inheritdoc />
     public byte ReadByte()
     {

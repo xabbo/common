@@ -56,6 +56,11 @@ public interface IReadOnlyPacket : IDisposable
     bool CanReadString();
 
     /// <summary>
+    /// Advances the packet's position by the specified number of bytes.
+    /// </summary>
+    IReadOnlyPacket Skip(int bytes);
+
+    /// <summary>
     /// Reads a boolean from the current position in the packet.
     /// </summary>
     bool ReadBool();
