@@ -31,6 +31,7 @@ namespace Xabbo.Common.SourceGeneration
             for (int n = 1; n <= MaxParams; n++)
             {
                 if (n > 1) sb.AppendLine();
+                sb.AppendLine("\t/// <summary>Sends a packet with the specified header and values to either the client or server, depending on the header destination.</summary>");
                 sb.Append("\tpublic static async ValueTask SendAsync<");
                 for (int i = 1; i <= n; i++)
                 {
