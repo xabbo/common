@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Xabbo.Common;
+using Xabbo.Interceptor;
 
 namespace Xabbo.Messages;
 
@@ -10,6 +11,11 @@ namespace Xabbo.Messages;
 public class InterceptArgs : EventArgs, IDisposable
 {
     private bool _disposed;
+
+    /// <summary>
+    /// Gets the interceptor that intercepted this packet.
+    /// </summary>
+    public IInterceptor Interceptor { get; }
 
     /// <summary>
     /// Gets the time that the packet was intercepted.
@@ -62,8 +68,9 @@ public class InterceptArgs : EventArgs, IDisposable
     /// <summary>
     /// Constructs a new InterceptArgs instance with the specified destination and packet.
     /// </summary>
-    public InterceptArgs(Destination destination, IPacket packet)
+    public InterceptArgs(IInterceptor interceptor, Destination destination, IPacket packet)
     {
+        Interceptor = interceptor;
         Timestamp = DateTime.Now;
         Destination = destination;
         Packet = packet;
