@@ -1,27 +1,14 @@
 using System.Text;
-using Xabbo.Messages;
+
 using Xunit;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Common.Tests;
 
 public class PacketTests
 {
-    private IPacket packet;
-
-    public PacketTests()
-    {
-        packet = new Packet();
-        packet
-            .WriteBool(true)
-            .WriteBool(false)
-            .WriteByte(244)
-            .WriteShort(31337)
-            .WriteInt(-123456789)
-            .WriteFloat(3.14f)
-            .WriteLong(9876543210)
-            .WriteString("hello, world");
-        packet.Position = 0;
-    }
+    public PacketTests() { }
 
     [Fact]
     public void Read_Write()
