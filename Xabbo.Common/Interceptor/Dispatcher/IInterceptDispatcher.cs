@@ -29,13 +29,13 @@ public interface IInterceptDispatcher
 
     /// <summary>
     /// Binds the specified intercept handler to this dispatcher.
+    /// Throws an exception if any of the message identifiers are unable to be resolved.
     /// </summary>
     /// <param name="handler">The intercept handler to bind.</param>
     /// <param name="requiredClientHeaders">Specifies which client headers must be resolved for the binding to be successful.</param>
     /// <returns>
-    /// <c>true</c> if successfully bound, or <c>false</c> if the target
-    /// does not have a receive or intercept attribute on any of its methods.
-    /// Throws if any of the message identifiers are unable to be resolved.
+    /// <c>true</c> if successfully bound, or <c>false</c> if the intercept handler
+    /// does not have any receive or intercept attributes on any of its methods.
     /// </returns>
     bool Bind(IInterceptHandler handler, ClientType requiredClientHeaders);
 
