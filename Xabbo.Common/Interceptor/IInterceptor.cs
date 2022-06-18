@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 using Xabbo.Common;
 using Xabbo.Messages;
 using Xabbo.Interceptor.Dispatcher;
-using Xabbo.Interceptor.Tasks;
 
 namespace Xabbo.Interceptor
 {
@@ -75,46 +73,5 @@ namespace Xabbo.Interceptor
         /// depending on the destination of the packet header.
         /// </summary>
         ValueTask SendAsync(IReadOnlyPacket packet);
-
-        /// <summary>
-        /// Asynchronously receives a packet with any of the specified headers.
-        /// </summary>
-        public Task<IPacket> ReceiveAsync(HeaderSet headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
-            => new CaptureMessageTask(this, headers, block).ExecuteAsync(timeout, cancellationToken);
-
-        /// <summary>
-        /// Asynchronously captures a packet with any of the specified headers.
-        /// </summary>
-        public Task<IPacket> ReceiveAsync(ITuple headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
-            => ReceiveAsync(HeaderSet.FromTuple(headers), timeout, block, cancellationToken);
-
-        /// <summary>
-        /// Asynchronously receives a packet with the specified header.
-        /// </summary>
-        public Task<IPacket> ReceiveAsync(Header header, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
-            => ReceiveAsync(new HeaderSet() { header }, timeout, block, cancellationToken);
-
-        /// <summary>
-        /// Registers a callback that is invoked when a packet with a matching header is intercepted.
-        /// </summary>
-        /// <param name="headers">Specifies which headers to intercept.</param>
-        /// <param name="callback">The callback to invoke when a message is intercepted.</param>
-        public void OnIntercept(HeaderSet headers, Action<InterceptArgs> callback) => Dispatcher.AddIntercept(headers, callback, Client);
-
-        /// <summary>
-        /// Binds the specified target object to the dispatcher.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if successfully bound, or <c>false</c> if the target
-        /// does not have a receive or intercept attribute on any of its methods.
-        /// Throws if any of the required message identifiers are unable to be resolved.
-        /// </returns>
-        public bool Bind(IInterceptHandler handler) => Dispatcher.Bind(handler, Client);
-
-        /// <summary>
-        /// Releases the specified target object from the dispatcher.
-        /// </summary>
-        /// <returns>Whether the binding was released or not.</returns>
-        public bool Release(IInterceptHandler handler) => Dispatcher.Release(handler);
     }
 }

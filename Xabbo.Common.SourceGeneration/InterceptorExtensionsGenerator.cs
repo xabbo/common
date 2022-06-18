@@ -16,7 +16,6 @@ namespace Xabbo.Common.SourceGeneration
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("using System.ComponentModel;");
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine();
 
@@ -26,8 +25,7 @@ namespace Xabbo.Common.SourceGeneration
             sb.AppendLine("namespace Xabbo.Interceptor;");
             sb.AppendLine();
 
-            sb.AppendLine("[EditorBrowsable(EditorBrowsableState.Never)]");
-            sb.AppendLine("public static class InterceptorExtensions");
+            sb.AppendLine("public static partial class InterceptorExtensions");
             sb.AppendLine("{"); // Open class
 
             for (int n = 1; n <= MaxParams; n++)
