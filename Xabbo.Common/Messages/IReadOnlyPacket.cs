@@ -35,9 +35,14 @@ public interface IReadOnlyPacket : IDisposable
     int Available { get;  }
 
     /// <summary>
-    /// Gets the underlying memory of the packet's data.
+    /// Gets the underlying buffer of the packet's data as a <see cref="ReadOnlySpan{T}"/>.
     /// </summary>
-    ReadOnlyMemory<byte> Buffer { get; }
+    ReadOnlySpan<byte> Buffer { get; }
+
+    /// <summary>
+    /// Gets the underlying buffer of the packet's data as <see cref="ReadOnlyMemory{T}"/>.
+    /// </summary>
+    ReadOnlyMemory<byte> GetMemory();
 
     /// <summary>
     /// Returns whether a boolean can be read from the current position in the packet.

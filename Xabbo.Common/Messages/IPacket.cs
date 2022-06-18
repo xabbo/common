@@ -13,9 +13,14 @@ public interface IPacket : IReadOnlyPacket
     new Header Header { get; set; }
 
     /// <summary>
-    /// Gets the underlying memory of the packet's data.
+    /// Gets the underlying buffer of the packet's data as a <see cref="Span{T}"/>.
     /// </summary>
-    new Memory<byte> Buffer { get; }
+    new Span<byte> Buffer { get; }
+
+    /// <summary>
+    /// Gets the underlying buffer of the packet's data as <see cref="Memory{T}"/>.
+    /// </summary>
+    new Memory<byte> GetMemory();
 
     /// <summary>
     /// <para>

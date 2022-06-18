@@ -35,16 +35,20 @@ public partial class Packet : IPacket
     public Header Header { get; set; } = Header.Unknown;
 
     /// <inheritdoc />
-    public Memory<byte> Buffer
+    public Span<byte> Buffer
     {
         get
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(Packet));
-            return _buffer;
+            return _buffer.Span;
         }
     }
-    ReadOnlyMemory<byte> IReadOnlyPacket.Buffer => Buffer;
+    ReadOnlySpan<byte> IReadOnlyPacket.Buffer => Buffer;
+
+    /// <inheritdoc />
+    public Memory<byte> GetMemory() => _buffer;
+    ReadOnlyMemory<byte> IReadOnlyPacket.GetMemory() => GetMemory();
 
     /// <inheritdoc />
     public int Position
@@ -141,7 +145,7 @@ public partial class Packet : IPacket
         return new Packet(
             Protocol,
             Header,
-            Buffer.Span
+            Buffer
         );
     }
     IPacket IReadOnlyPacket.Copy() => Copy();
@@ -231,7 +235,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public byte ReadByte()
     {
-        byte value = Buffer.Span[Position];
+        byte value = Buffer[Position];
         Position++;
         return value;
     }
@@ -246,7 +250,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public void Read(Span<byte> buffer)
     {
-        Buffer.Span[Position..(Position + buffer.Length)].CopyTo(buffer);
+        Buffer[Position..(Position + buffer.Length)].CopyTo(buffer);
         Position += buffer.Length;
     }
 
@@ -260,7 +264,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public bool ReadBool()
     {
-        byte value = Buffer.Span[Position];
+        byte value = Buffer[Position];
         if (value != 0 && value != 1)
             throw new InvalidDataException($"Value {value} is outside the range of a boolean.");
 
@@ -278,7 +282,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public short ReadShort()
     {
-        short value = BinaryPrimitives.ReadInt16BigEndian(Buffer.Span[Position..]);
+        short value = BinaryPrimitives.ReadInt16BigEndian(Buffer[Position..]);
         Position += 2;
         return value;
     }
@@ -293,7 +297,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public int ReadInt()
     {
-        int value = BinaryPrimitives.ReadInt32BigEndian(Buffer.Span[Position..]);
+        int value = BinaryPrimitives.ReadInt32BigEndian(Buffer[Position..]);
         Position += 4;
         return value;
     }
@@ -308,7 +312,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public float ReadFloat()
     {
-        float value = BinaryPrimitives.ReadSingleBigEndian(Buffer.Span[Position..]);
+        float value = BinaryPrimitives.ReadSingleBigEndian(Buffer[Position..]);
         Position += 4;
         return value;
     }
@@ -323,7 +327,7 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public long ReadLong()
     {
-        long value = BinaryPrimitives.ReadInt64BigEndian(Buffer.Span[Position..]);
+        long value = BinaryPrimitives.ReadInt64BigEndian(Buffer[Position..]);
         Position += 8;
         return value;
     }
@@ -338,8 +342,9 @@ public partial class Packet : IPacket
     /// <inheritdoc />
     public string ReadString()
     {
-        int length = BinaryPrimitives.ReadUInt16BigEndian(Buffer.Span[Position..]);
-        string value = Encoding.UTF8.GetString(Buffer.Span[(Position+2)..(Position+2+length)]);
+        Span<byte> buffer = Buffer;
+        int length = BinaryPrimitives.ReadUInt16BigEndian(buffer[Position..]);
+        string value = Encoding.UTF8.GetString(buffer[(Position+2)..(Position+2+length)]);
         Position += (2 + length);
         return value;
     }
@@ -365,7 +370,7 @@ public partial class Packet : IPacket
     public Span<byte> GetSpan(int length)
     {
         Grow(length);
-        Span<byte> span = Buffer.Span[Position..(Position + length)];
+        Span<byte> span = Buffer[Position..(Position + length)];
         Position += length;
         return span;
     }
