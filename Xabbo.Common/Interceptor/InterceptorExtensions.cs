@@ -13,6 +13,15 @@ namespace Xabbo.Interceptor;
 public static partial class InterceptorExtensions
 {
     /// <summary>
+    /// Sends a packet with the specified header to either the client or server, depending on the header destination.
+    /// </summary>
+    public static async ValueTask SendAsync(this IInterceptor interceptor, Header header)
+    {
+        using Packet p = new(interceptor.Client, header);
+        await interceptor.SendAsync(p);
+    }
+
+    /// <summary>
     /// Asynchronously receives a packet with any of the specified headers.
     /// </summary>
     public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor, HeaderSet headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
