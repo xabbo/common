@@ -18,6 +18,19 @@ public interface IPacket : IReadOnlyPacket
     new Memory<byte> Buffer { get; }
 
     /// <summary>
+    /// <para>
+    /// Returns a span of bytes of the specified length from the current position in the packet that maps to the packet's internal buffer.
+    /// If the length of the packet is insufficient, it will be increased and its internal buffer may be grown.
+    /// Any bytes that already exist after the current position in the packet will be included from the start of the resulting span.
+    /// Advances the packet's position by the specified length.
+    /// </para>
+    /// <para>
+    /// Should be used with methods that write directly to a span without needing to allocate a new byte array, such as <see cref="System.Text.Encoding.GetBytes(ReadOnlySpan{char}, Span{byte})"/>.
+    /// </para>
+    /// </summary>
+    Span<byte> GetSpan(int length);
+
+    /// <summary>
     /// Writes a composable object to the packet.
     /// </summary>
     IPacket Write(IComposable composable);

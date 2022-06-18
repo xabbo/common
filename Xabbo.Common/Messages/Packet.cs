@@ -361,6 +361,15 @@ public partial class Packet : IPacket
         return ReadFloatAsString();
     }
 
+    /// <inheritdoc />
+    public Span<byte> GetSpan(int length)
+    {
+        Grow(length);
+        Span<byte> span = Buffer.Span[Position..(Position + length)];
+        Position += length;
+        return span;
+    }
+
     public Packet Write(IComposable composable)
     {
         composable.Compose(this);
