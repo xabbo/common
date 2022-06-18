@@ -117,7 +117,7 @@ public partial class Packet : IPacket
     /// Constructs a new packet with the specified protocol and header,
     /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
     /// </summary>
-    public Packet(ClientType protocol, Header header, ReadOnlySequence<byte> data)
+    public Packet(ClientType protocol, Header header, in ReadOnlySequence<byte> data)
         : this(protocol, header, (int)data.Length)
     {
         Length = (int)data.Length;
@@ -129,7 +129,7 @@ public partial class Packet : IPacket
     /// Constructs a new packet with the specified header,
     /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
     /// </summary>
-    public Packet(Header header, ReadOnlySequence<byte> data)
+    public Packet(Header header, in ReadOnlySequence<byte> data)
         : this(ClientType.Unknown, header, data)
     { }
 
