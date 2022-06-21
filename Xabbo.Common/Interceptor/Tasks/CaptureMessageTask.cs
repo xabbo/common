@@ -40,16 +40,16 @@ namespace Xabbo.Interceptor.Tasks
         protected override void Bind()
         {
             foreach (Header header in _headers)
-                _interceptor.Dispatcher.AddIntercept(header, OnIntercept, _interceptor.Client);
+                Interceptor.Dispatcher.AddIntercept(header, OnIntercept, Interceptor.Client);
         }
 
         protected override void Release()
         {
             foreach (Header header in _headers)
-                _interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
+                Interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
         }
 
-        protected override Task OnExecuteAsync() => Task.CompletedTask;
+        protected override ValueTask OnExecuteAsync() => ValueTask.CompletedTask;
 
         private void OnIntercept(InterceptArgs e)
         {

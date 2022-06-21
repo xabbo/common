@@ -18,17 +18,17 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// <summary>
     /// The interceptor that this task is bound to.
     /// </summary>
-    protected readonly IInterceptor _interceptor;
+    protected IInterceptor Interceptor { get; }
 
     /// <summary>
     /// The incoming messages provided by the interceptor's message manager.
     /// </summary>
-    protected Incoming In => _interceptor.Messages.In;
+    protected Incoming In => Interceptor.Messages.In;
 
     /// <summary>
     /// The outgoing messages provided by the interceptor's message manager.
     /// </summary>
-    protected Outgoing Out => _interceptor.Messages.Out;
+    protected Outgoing Out => Interceptor.Messages.Out;
 
     /// <summary>
     /// Creates a new interceptor task bound to the specified interceptor.
@@ -36,7 +36,7 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// <param name="interceptor">The interceptor to bind to.</param>
     protected InterceptorTask(IInterceptor interceptor)
     {
-        _interceptor = interceptor;
+        Interceptor = interceptor;
         _completion = new TaskCompletionSource<TResult>(
             TaskCreationOptions.RunContinuationsAsynchronously
         );
@@ -93,8 +93,8 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// </summary>
     protected virtual void Bind()
     {
-        _interceptor.Dispatcher.Bind(this, _interceptor.Client);
-        _interceptor.Disconnected += OnDisconnected;
+        Interceptor.Bind(this);
+        Interceptor.Disconnected += OnDisconnected;
     }
 
     /// <summary>
@@ -102,8 +102,8 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// </summary>
     protected virtual void Release()
     {
-        _interceptor.Dispatcher.Release(this);
-        _interceptor.Disconnected -= OnDisconnected;
+        Interceptor.Release(this);
+        Interceptor.Disconnected -= OnDisconnected;
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// <summary>
     /// Invoked when the task is executed.
     /// </summary>
-    protected abstract Task OnExecuteAsync();
+    protected abstract ValueTask OnExecuteAsync();
 
     /// <summary>
     /// Attempts to set the result of this task to the specified value.
@@ -135,9 +135,4 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
     /// Attempts to set the result of this task to the specified exception.
     /// </summary>
     protected bool SetException(Exception ex) => _completion.TrySetException(ex);
-
-    /// <summary>
-    /// Sends the specified packet.
-    /// </summary>
-    protected ValueTask SendAsync(IReadOnlyPacket packet) => _interceptor.SendAsync(packet);
 }
