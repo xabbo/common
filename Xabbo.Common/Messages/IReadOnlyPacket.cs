@@ -113,7 +113,6 @@ public interface IReadOnlyPacket : IDisposable
     /// <summary>
     /// Reads a long from the current position in the packet.
     /// </summary>
-    /// <returns></returns>
     long ReadLong();
 
     /// <summary>
