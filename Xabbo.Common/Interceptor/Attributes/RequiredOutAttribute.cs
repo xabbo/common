@@ -1,6 +1,8 @@
 ﻿using System;
 
-namespace Xabbo.Messages.Attributes
+using Xabbo.Messages;
+
+namespace Xabbo.Interceptor.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public class RequiredOutAttribute : IdentifiersAttribute

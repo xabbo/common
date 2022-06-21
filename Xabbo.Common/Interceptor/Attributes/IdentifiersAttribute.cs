@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xabbo.Common;
+using Xabbo.Messages;
 
-namespace Xabbo.Messages.Attributes
+namespace Xabbo.Interceptor.Attributes
 {
     public abstract class IdentifiersAttribute : Attribute
     {
