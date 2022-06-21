@@ -5,169 +5,168 @@ using System.Threading;
 
 using Xabbo.Common;
 
-namespace Xabbo.Messages
+namespace Xabbo.Messages;
+
+public abstract class Headers
 {
-    public abstract class Headers
+    private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+    private readonly Type _selfType;
+
+    private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
+    private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
+
+    public Destination Destination { get; }
+
+    public Headers(Destination destination)
     {
-        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        _selfType = GetType();
 
-        private readonly Type _selfType;
+        Destination = destination;
 
-        private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
-        private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
+        ResetProperties();
+    }
 
-        public Destination Destination { get; }
-
-        public Headers(Destination destination)
+    private void ResetProperties()
+    {
+        var props = _selfType.GetProperties();
+        foreach (PropertyInfo prop in props)
         {
-            _selfType = GetType();
+            if (prop.PropertyType.Equals(typeof(Header)) &&
+                prop.GetMethod?.GetParameters().Length == 0)
+            {
+                Header header = new(Destination, name: prop.Name); 
+                _nameMap[prop.Name] = header;
+                prop.SetValue(this, header);
+            }
+        }
+    }
 
-            Destination = destination;
+    public void Load(IEnumerable<IMessageInfo> messages)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _headerMap.Clear();
+            _nameMap.Clear();
 
             ResetProperties();
-        }
 
-        private void ResetProperties()
-        {
-            var props = _selfType.GetProperties();
-            foreach (PropertyInfo prop in props)
+            foreach (IMessageInfo info in messages)
             {
-                if (prop.PropertyType.Equals(typeof(Header)) &&
-                    prop.GetMethod?.GetParameters().Length == 0)
+                Header? header;
+                ClientHeader?
+                    flashHeader = null,
+                    unityHeader = null;
+
+                if (info.FlashHeader >= 0)
                 {
-                    Header header = new(Destination, name: prop.Name); 
-                    _nameMap[prop.Name] = header;
-                    prop.SetValue(this, header);
-                }
-            }
-        }
-
-        public void Load(IEnumerable<IMessageInfo> messages)
-        {
-            _lock.EnterWriteLock();
-            try
-            {
-                _headerMap.Clear();
-                _nameMap.Clear();
-
-                ResetProperties();
-
-                foreach (IMessageInfo info in messages)
-                {
-                    Header? header;
-                    ClientHeader?
-                        flashHeader = null,
-                        unityHeader = null;
-
-                    if (info.FlashHeader >= 0)
+                    flashHeader = new ClientHeader
                     {
-                        flashHeader = new ClientHeader
-                        {
-                            Client = ClientType.Flash,
-                            Destination = info.Destination,
-                            Value = info.FlashHeader,
-                            Name = info.FlashName ?? string.Empty
-                        };
-                    }
-
-                    if (info.UnityHeader >= 0)
-                    {
-                        unityHeader = new ClientHeader
-                        {
-                            Client = ClientType.Unity,
-                            Destination = info.Destination,
-                            Value = info.UnityHeader,
-                            Name = info.UnityName ?? string.Empty
-                        };
-                    }
-
-                    header = new Header(info.Destination, unityHeader, flashHeader);
-                    /*{
+                        Client = ClientType.Flash,
                         Destination = info.Destination,
-                        Name = info.UnityName ?? info.FlashName ?? "unknown",
-                        Flash = flashHeader,
-                        Unity = unityHeader
-                    };*/
+                        Value = info.FlashHeader,
+                        Name = info.FlashName ?? string.Empty
+                    };
+                }
 
-                    if (flashHeader is not null)
+                if (info.UnityHeader >= 0)
+                {
+                    unityHeader = new ClientHeader
                     {
-                        _headerMap[(flashHeader.Client, flashHeader.Value)] = header;
-                        _nameMap[flashHeader.Name] = header;
-                    }
+                        Client = ClientType.Unity,
+                        Destination = info.Destination,
+                        Value = info.UnityHeader,
+                        Name = info.UnityName ?? string.Empty
+                    };
+                }
 
-                    if (unityHeader is not null)
-                    {
-                        _headerMap[(unityHeader.Client, unityHeader.Value)] = header;
-                        _nameMap[unityHeader.Name] = header;
+                header = new Header(info.Destination, unityHeader, flashHeader);
+                /*{
+                    Destination = info.Destination,
+                    Name = info.UnityName ?? info.FlashName ?? "unknown",
+                    Flash = flashHeader,
+                    Unity = unityHeader
+                };*/
 
-                        PropertyInfo? prop = _selfType.GetProperty(unityHeader.Name, typeof(Header));
-                        if (prop is not null)
-                            prop.SetValue(this, header);
-                    }
+                if (flashHeader is not null)
+                {
+                    _headerMap[(flashHeader.Client, flashHeader.Value)] = header;
+                    _nameMap[flashHeader.Name] = header;
+                }
+
+                if (unityHeader is not null)
+                {
+                    _headerMap[(unityHeader.Client, unityHeader.Value)] = header;
+                    _nameMap[unityHeader.Name] = header;
+
+                    PropertyInfo? prop = _selfType.GetProperty(unityHeader.Name, typeof(Header));
+                    if (prop is not null)
+                        prop.SetValue(this, header);
                 }
             }
-            finally { _lock.ExitWriteLock(); }
         }
+        finally { _lock.ExitWriteLock(); }
+    }
 
-        public bool MessageExists(string name)
+    public bool MessageExists(string name)
+    {
+        _lock.EnterReadLock();
+        try { return _nameMap.ContainsKey(name); }
+        finally { _lock.ExitReadLock(); }
+    }
+
+    public bool TryGetName(ClientType clientType, short value, out string? name)
+    {
+        _lock.EnterReadLock();
+        try
         {
-            _lock.EnterReadLock();
-            try { return _nameMap.ContainsKey(name); }
-            finally { _lock.ExitReadLock(); }
-        }
+            name = null;
+            if (!_headerMap.TryGetValue((clientType, value), out Header? header))
+                return false;
 
-        public bool TryGetName(ClientType clientType, short value, out string? name)
+            name = clientType switch
+            {
+                ClientType.Flash => header.Flash?.Name ?? header.Unity?.Name ?? string.Empty,
+                ClientType.Unity => header.Unity?.Name ?? header.Flash?.Name ?? string.Empty,
+                _ => string.Empty
+            };
+            return true;
+        }
+        finally { _lock.ExitReadLock(); }
+    }
+
+    public bool TryGetHeader(ClientType clientType, short value, out Header? header)
+    {
+        _lock.EnterReadLock();
+        try { return _headerMap.TryGetValue((clientType, value), out header); }
+        finally { _lock.ExitReadLock(); }
+    }
+
+    public bool TryGetHeader(string name, out Header? header)
+    {
+        _lock.EnterReadLock();
+        try { return _nameMap.TryGetValue(name, out header); }
+        finally { _lock.ExitReadLock(); }
+    }
+
+    public Header this[string name]
+    {
+        get
         {
             _lock.EnterReadLock();
             try
             {
-                name = null;
-                if (!_headerMap.TryGetValue((clientType, value), out Header? header))
-                    return false;
-
-                name = clientType switch
+                if (_nameMap.TryGetValue(name, out Header? header))
                 {
-                    ClientType.Flash => header.Flash?.Name ?? header.Unity?.Name ?? string.Empty,
-                    ClientType.Unity => header.Unity?.Name ?? header.Flash?.Name ?? string.Empty,
-                    _ => string.Empty
-                };
-                return true;
-            }
-            finally { _lock.ExitReadLock(); }
-        }
-
-        public bool TryGetHeader(ClientType clientType, short value, out Header? header)
-        {
-            _lock.EnterReadLock();
-            try { return _headerMap.TryGetValue((clientType, value), out header); }
-            finally { _lock.ExitReadLock(); }
-        }
-
-        public bool TryGetHeader(string name, out Header? header)
-        {
-            _lock.EnterReadLock();
-            try { return _nameMap.TryGetValue(name, out header); }
-            finally { _lock.ExitReadLock(); }
-        }
-
-        public Header this[string name]
-        {
-            get
-            {
-                _lock.EnterReadLock();
-                try
-                {
-                    if (_nameMap.TryGetValue(name, out Header? header))
-                    {
-                        return header;
-                    }
-                    else
-                    {
-                        throw new Exception($"Unknown header: \"{name}\".");
-                    }
+                    return header;
                 }
-                finally { _lock.ExitReadLock(); }
+                else
+                {
+                    throw new Exception($"Unknown header: \"{name}\".");
+                }
             }
+            finally { _lock.ExitReadLock(); }
         }
     }
 }

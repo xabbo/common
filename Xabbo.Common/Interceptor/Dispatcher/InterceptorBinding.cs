@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Interceptor.Dispatcher
-{
-    internal class InterceptorBinding
-    {
-        public IInterceptHandler Handler { get; }
-        public IReadOnlyCollection<BindingCallback> Callbacks { get; }
+namespace Xabbo.Interceptor.Dispatcher;
 
-        public InterceptorBinding(IInterceptHandler handler, IEnumerable<BindingCallback> callbacks)
-        {
-            Handler = handler;
-            Callbacks = new List<BindingCallback>(callbacks).AsReadOnly();
-        }
+internal class InterceptorBinding
+{
+    public IInterceptHandler Handler { get; }
+    public IReadOnlyCollection<BindingCallback> Callbacks { get; }
+
+    public InterceptorBinding(IInterceptHandler handler, IEnumerable<BindingCallback> callbacks)
+    {
+        Handler = handler;
+        Callbacks = new List<BindingCallback>(callbacks).AsReadOnly();
     }
 }

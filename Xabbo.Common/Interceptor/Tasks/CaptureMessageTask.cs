@@ -5,63 +5,62 @@ using System.Threading.Tasks;
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Tasks
+namespace Xabbo.Interceptor.Tasks;
+
+/// <summary>
+/// Captures the first message with a matching target header.
+/// </summary>
+public class CaptureMessageTask : InterceptorTask<IPacket>
 {
+    private readonly bool _block;
+    private readonly Header[] _headers;
+
     /// <summary>
-    /// Captures the first message with a matching target header.
+    /// Creates a new <see cref="CaptureMessageTask"/> targeting the specified headers.
     /// </summary>
-    public class CaptureMessageTask : InterceptorTask<IPacket>
+    /// <param name="interceptor">The interceptor to bind to.</param>
+    /// <param name="headers">The headers to listen for.</param>
+    /// <param name="block">Whether to block the captured packet.</param>
+    public CaptureMessageTask(IInterceptor interceptor,
+        IEnumerable<Header> headers, bool block = false)
+        : base(interceptor)
     {
-        private readonly bool _block;
-        private readonly Header[] _headers;
+        _block = block;
 
-        /// <summary>
-        /// Creates a new <see cref="CaptureMessageTask"/> targeting the specified headers.
-        /// </summary>
-        /// <param name="interceptor">The interceptor to bind to.</param>
-        /// <param name="headers">The headers to listen for.</param>
-        /// <param name="block">Whether to block the captured packet.</param>
-        public CaptureMessageTask(IInterceptor interceptor,
-            IEnumerable<Header> headers, bool block = false)
-            : base(interceptor)
+        if (headers is Header[] array)
         {
-            _block = block;
+            _headers = array;
+        }
+        else
+        {
+            _headers = headers.ToArray();
+        }
+    }
 
-            if (headers is Header[] array)
+    protected override void Bind()
+    {
+        foreach (Header header in _headers)
+            Interceptor.Dispatcher.AddIntercept(header, OnIntercept, Interceptor.Client);
+    }
+
+    protected override void Release()
+    {
+        foreach (Header header in _headers)
+            Interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
+    }
+
+    protected override ValueTask OnExecuteAsync() => ValueTask.CompletedTask;
+
+    private void OnIntercept(InterceptArgs e)
+    {
+        try
+        {
+            if (SetResult(e.Packet.Copy()))
             {
-                _headers = array;
-            }
-            else
-            {
-                _headers = headers.ToArray();
+                if (_block)
+                    e.Block();
             }
         }
-
-        protected override void Bind()
-        {
-            foreach (Header header in _headers)
-                Interceptor.Dispatcher.AddIntercept(header, OnIntercept, Interceptor.Client);
-        }
-
-        protected override void Release()
-        {
-            foreach (Header header in _headers)
-                Interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);
-        }
-
-        protected override ValueTask OnExecuteAsync() => ValueTask.CompletedTask;
-
-        private void OnIntercept(InterceptArgs e)
-        {
-            try
-            {
-                if (SetResult(e.Packet.Copy()))
-                {
-                    if (_block)
-                        e.Block();
-                }
-            }
-            catch (Exception ex) { SetException(ex); }
-        }
+        catch (Exception ex) { SetException(ex); }
     }
 }

@@ -1,17 +1,16 @@
 ﻿using System;
 
-namespace Xabbo.Messages
+namespace Xabbo.Messages;
+
+public struct LegacyFloat
 {
-    public struct LegacyFloat
+    public float Value { get; }
+
+    public LegacyFloat(float value)
     {
-        public float Value { get; }
-
-        public LegacyFloat(float value)
-        {
-            Value = value;
-        }
-
-        public static implicit operator LegacyFloat(float value) => new LegacyFloat(value);
-        public static implicit operator float(LegacyFloat legacyFloat) => legacyFloat.Value;
+        Value = value;
     }
+
+    public static implicit operator LegacyFloat(float value) => new LegacyFloat(value);
+    public static implicit operator float(LegacyFloat legacyFloat) => legacyFloat.Value;
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Xabbo.Messages
+namespace Xabbo.Messages;
+
+public enum Destination
 {
-    public enum Destination
-    {
-        Unknown,
-        Client,
-        Server
-    }
+    Unknown,
+    Client,
+    Server
 }

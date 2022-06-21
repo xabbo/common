@@ -1,11 +1,10 @@
 ﻿using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Attributes
+namespace Xabbo.Interceptor.Attributes;
+
+public sealed class InterceptOutAttribute : InterceptAttribute
 {
-    public sealed class InterceptOutAttribute : InterceptAttribute
-    {
-        public InterceptOutAttribute(params string[] identifiers)
-            : base(Destination.Server, identifiers)
-        { }
-    }
+    public InterceptOutAttribute(params string[] identifiers)
+        : base(Destination.Server, identifiers)
+    { }
 }

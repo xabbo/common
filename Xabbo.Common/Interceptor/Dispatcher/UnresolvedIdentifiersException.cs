@@ -4,41 +4,40 @@ using System.Text;
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Dispatcher
+namespace Xabbo.Interceptor.Dispatcher;
+
+public class UnresolvedIdentifiersException : Exception
 {
-    public class UnresolvedIdentifiersException : Exception
+    public Identifiers Identifiers { get; }
+
+    public UnresolvedIdentifiersException(Identifiers identifiers, string message)
+        : base(ConstructMessage(identifiers, message))
     {
-        public Identifiers Identifiers { get; }
+        Identifiers = identifiers;
+    }
 
-        public UnresolvedIdentifiersException(Identifiers identifiers, string message)
-            : base(ConstructMessage(identifiers, message))
+    private static string ConstructMessage(Identifiers identifiers, string message)
+    {
+        var sb = new StringBuilder();
+        sb.Append(message);
+        sb.Append(": Unresolved identifiers (");
+
+        if (identifiers.Incoming.Any())
         {
-            Identifiers = identifiers;
+            sb.Append("Incoming: ");
+            sb.Append(string.Join(", ", identifiers.Incoming));
         }
 
-        private static string ConstructMessage(Identifiers identifiers, string message)
+        if (identifiers.Outgoing.Any())
         {
-            var sb = new StringBuilder();
-            sb.Append(message);
-            sb.Append(": Unresolved identifiers (");
-
             if (identifiers.Incoming.Any())
-            {
-                sb.Append("Incoming: ");
-                sb.Append(string.Join(", ", identifiers.Incoming));
-            }
-
-            if (identifiers.Outgoing.Any())
-            {
-                if (identifiers.Incoming.Any())
-                    sb.Append("; ");
-                sb.Append("Outgoing: ");
-                sb.Append(string.Join(", ", identifiers.Outgoing));
-            }
-
-            sb.Append(")");
-
-            return sb.ToString();
+                sb.Append("; ");
+            sb.Append("Outgoing: ");
+            sb.Append(string.Join(", ", identifiers.Outgoing));
         }
+
+        sb.Append(")");
+
+        return sb.ToString();
     }
 }

@@ -2,13 +2,12 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Attributes
+namespace Xabbo.Interceptor.Attributes;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+public class RequiredOutAttribute : IdentifiersAttribute
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-    public class RequiredOutAttribute : IdentifiersAttribute
-    {
-        public RequiredOutAttribute(params string[] identifiers)
-          : base(Destination.Server, identifiers)
-        { }
-    }
+    public RequiredOutAttribute(params string[] identifiers)
+      : base(Destination.Server, identifiers)
+    { }
 }
