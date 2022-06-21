@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Xabbo.Messages
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class MessageExtensions
     {
         public static Direction ToDirection(this Destination destination) => destination switch
