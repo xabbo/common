@@ -1,4 +1,6 @@
-﻿using Xabbo.Messages;
+﻿using System;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Attributes
 {
