@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Xabbo.Messages;
 
@@ -20,24 +21,22 @@ public static partial class PacketExtensions
     /// <exception cref="ArgumentException">The specified type <typeparamref name="T"/> cannot be read from the packet.</exception>
     public static T Read<T>(this IReadOnlyPacket p)
     {
-        Type t = typeof(T);
-        switch (Type.GetTypeCode(t))
-        {
-            case TypeCode.Boolean: return (T)Convert.ChangeType(p.ReadBool(), t);
-            case TypeCode.Byte: return (T)Convert.ChangeType(p.ReadByte(), t);
-            case TypeCode.Int16: return (T)Convert.ChangeType(p.ReadShort(), t);
-            case TypeCode.Int32: return (T)Convert.ChangeType(p.ReadInt(), t);
-            case TypeCode.Int64: return (T)Convert.ChangeType(p.ReadLong(), t);
-            case TypeCode.String: return (T)Convert.ChangeType(p.ReadString(), t);
-            case TypeCode.Single: return (T)Convert.ChangeType(p.ReadFloat(), t);
-            default:
-                if (t == typeof(LegacyLong)) return (T)Convert.ChangeType(p.ReadLegacyLong(), t);
-                if (t == typeof(LegacyShort)) return (T)Convert.ChangeType(p.ReadLegacyShort(), t);
-                if (t == typeof(LegacyFloat)) return (T)Convert.ChangeType(p.ReadLegacyFloat(), t);
-                break;
-        };
+        static TOut Convert<TIn, TOut>(TIn value) => Unsafe.As<TIn, TOut>(ref value);
 
-        throw new ArgumentException($"The specified type is not supported for packet deserialization: {typeof(T).Name}.");
+        return Type.GetTypeCode(typeof(T)) switch
+        {
+            TypeCode.Boolean => Convert<bool, T>(p.ReadBool()),
+            TypeCode.Byte or TypeCode.SByte => Convert<byte, T>(p.ReadByte()),
+            TypeCode.Int16 or TypeCode.UInt16 => Convert<short, T>(p.ReadShort()),
+            TypeCode.Int32 or TypeCode.UInt32 => Convert<int, T>(p.ReadInt()),
+            TypeCode.Int64 or TypeCode.UInt64 => Convert<long, T>(p.ReadLong()),
+            TypeCode.String => Convert<string, T>(p.ReadString()),
+            TypeCode.Single => Convert<float, T>(p.ReadFloat()),
+            _ when typeof(T) == typeof(LegacyShort) => Convert<LegacyShort, T>(p.ReadLegacyShort()),
+            _ when typeof(T) == typeof(LegacyFloat) => Convert<LegacyFloat, T>(p.ReadLegacyFloat()),
+            _ when typeof(T) == typeof(LegacyLong) => Convert<LegacyLong, T>(p.ReadLegacyLong()),
+            _ => throw new ArgumentException($"The specified type is not supported for packet deserialization: {typeof(T).Name}.")
+        };
     }
     #endregion
 
