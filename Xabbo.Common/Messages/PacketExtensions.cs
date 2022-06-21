@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -38,6 +39,19 @@ public static partial class PacketExtensions
             _ => throw new ArgumentException($"The specified type is not supported for packet deserialization: {typeof(T).Name}.")
         };
     }
+
+    /// <summary>
+    /// Reads a collection of values of the specified type into a list.
+    /// The size of the list is read as an int on Flash sessions, or a short on Unity sessions.
+    /// </summary>
+    public static List<T> ReadList<T>(this IReadOnlyPacket p)
+    {
+        List<T> list = new();
+        int n = p.ReadLegacyShort();
+        for (int i = 0; i < n; i++)
+            list.Add(p.Read<T>());
+        return list;
+    }
     #endregion
 
     /// <summary>
@@ -68,16 +82,17 @@ public static partial class PacketExtensions
             LegacyLong x => p.WriteLegacyLong(x),
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
-            ICollection x => WriteCollection(p, x),
+            ICollection x => WriteObjectCollection(p, x),
             _ => throw new ArgumentException($"The specified type is not supported for packet serialization: {value.GetType().Name}.", nameof(value))
         });
     }
 
     /// <summary>
     /// Writes the specified collection of objects to the packet.
+    /// The size of the collection is written as an int on Flash sessions, or a short on Unity sessions.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static TPacket WriteCollection<TPacket>(this TPacket p, ICollection collection)
+    public static TPacket WriteObjectCollection<TPacket>(this TPacket p, ICollection collection)
         where TPacket : IPacket
     {
         p.WriteLegacyShort((short)collection.Count);
@@ -115,9 +130,22 @@ public static partial class PacketExtensions
             LegacyLong x => p.WriteLegacyLong(x),
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
-            ICollection x => WriteCollection(p, x),
+            ICollection x => WriteObjectCollection(p, x),
             _ => throw new ArgumentException($"The specified type is not supported for packet serialization: {typeof(T).Name}.", nameof(value))
         });
+    }
+
+    /// <summary>
+    /// Writes the specified generically typed collection to the packet.
+    /// The size of the collection is written as an int on Flash sessions, or a short on Unity sessions.
+    /// </summary>
+    public static TPacket WriteCollection<TPacket, T>(this TPacket p, ICollection<T> collection)
+        where TPacket : IPacket
+    {
+        p.WriteLegacyShort((short)collection.Count);
+        foreach (T value in collection)
+            Write(p, value);
+        return p;
     }
     #endregion
 }
