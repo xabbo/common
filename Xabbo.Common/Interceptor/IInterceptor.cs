@@ -72,5 +72,11 @@ public interface IInterceptor
     /// Sends the specified packet to either the client or server,
     /// depending on the destination of the packet header.
     /// </summary>
+    void Send(IReadOnlyPacket packet);
+
+    /// <summary>
+    /// Sends the specified packet asynchronously to either the client or server,
+    /// depending on the destination of the packet header.
+    /// </summary>
     ValueTask SendAsync(IReadOnlyPacket packet);
 }

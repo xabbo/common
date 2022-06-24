@@ -28,6 +28,7 @@ namespace Xabbo.Common.SourceGeneration
             sb.AppendLine("public static partial class InterceptorExtensions");
             sb.AppendLine("{"); // Open class
 
+            // Asynchronous
             for (int n = 1; n <= MaxParams; n++)
             {
                 if (n > 1) sb.AppendLine();
@@ -55,6 +56,37 @@ namespace Xabbo.Common.SourceGeneration
                     sb.AppendLine();
                 }
                 sb.AppendLine("\t\tawait interceptor.SendAsync(packet);");
+                sb.AppendLine("\t}"); // Close method
+            }
+
+            // Synchronous
+            for (int n = 1; n <= MaxParams; n++)
+            {
+                sb.AppendLine();
+                sb.AppendLine("\t/// <summary>Sends a packet with the specified header and values to either the client or server, depending on the header destination.</summary>");
+                sb.Append("\tpublic static void Send<");
+                for (int i = 1; i <= n; i++)
+                {
+                    if (i > 1) sb.Append(", ");
+                    sb.Append($"T{i}");
+                }
+                sb.Append(">(this IInterceptor interceptor, Header header, ");
+                for (int i = 1; i <= n; i++)
+                {
+                    if (i > 1) sb.Append(", ");
+                    sb.Append($"T{i} value{i}");
+                }
+                sb.AppendLine(")");
+                sb.AppendLine("\t{"); // Open method
+                sb.AppendLine("\t\tusing Packet packet = new Packet(interceptor.Client, header);");
+                sb.AppendLine("\t\tpacket");
+                for (int i = 1; i <= n; i++)
+                {
+                    sb.Append($"\t\t\t.Write(value{i})");
+                    if (i == n) sb.Append(";");
+                    sb.AppendLine();
+                }
+                sb.AppendLine("\t\tinterceptor.Send(packet);");
                 sb.AppendLine("\t}"); // Close method
             }
 
