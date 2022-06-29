@@ -13,7 +13,7 @@
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
-
+	
 	<!-- Source generation -->
 	<ItemGroup>
 		<ProjectReference Include="..\Xabbo.Common.SourceGeneration\Xabbo.Common.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
@@ -58,7 +58,8 @@
 	</ItemGroup>
 
 	<!-- Add package to local source after pack -->
-	<Target Name="NugetAddPackage" AfterTargets="Pack" Condition="'$(Configuration)'=='Release'">
+	<Target Name="NugetAddPackage" AfterTargets="Pack">
+		<Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
 		<Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
 	</Target>
 
