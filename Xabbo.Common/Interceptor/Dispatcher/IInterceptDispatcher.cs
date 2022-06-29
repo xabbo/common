@@ -13,17 +13,17 @@ namespace Xabbo.Interceptor.Dispatcher;
 public interface IInterceptDispatcher
 {
     /// <summary>
-    /// Routes the specified message to all targets bound to this dispatcher.
+    /// Routes the specified message to all intercept handlers bound to this dispatcher.
     /// </summary>
     void DispatchMessage(object? sender, IReadOnlyPacket packet);
 
     /// <summary>
-    /// Routes the specified <see cref="InterceptArgs"/> to all targets bound to this dispatcher.
+    /// Routes the specified <see cref="InterceptArgs"/> to all intercept handlers bound to this dispatcher.
     /// </summary>
     void DispatchIntercept(InterceptArgs intercept);
 
     /// <summary>
-    /// Gets whether the specified target instance is bound to this dispatcher or not.
+    /// Gets whether the specified intercept handler is bound to this dispatcher or not.
     /// </summary>
     bool IsBound(IInterceptHandler handler);
 
