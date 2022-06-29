@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Xabbo.Common;
 
 namespace Xabbo.Messages;
 
@@ -30,7 +31,7 @@ public static partial class PacketExtensions
             TypeCode.Byte or TypeCode.SByte => Convert<byte, T>(p.ReadByte()),
             TypeCode.Int16 or TypeCode.UInt16 => Convert<short, T>(p.ReadShort()),
             TypeCode.Int32 or TypeCode.UInt32 => Convert<int, T>(p.ReadInt()),
-            TypeCode.Int64 or TypeCode.UInt64 => Convert<long, T>(p.ReadLong()),
+            TypeCode.Int64 or TypeCode.UInt64 => Convert<long, T>(p.ReadLegacyLong()),
             TypeCode.String => Convert<string, T>(p.ReadString()),
             TypeCode.Single => Convert<float, T>(p.ReadFloat()),
             _ when typeof(T) == typeof(LegacyShort) => Convert<LegacyShort, T>(p.ReadLegacyShort()),
@@ -77,8 +78,8 @@ public static partial class PacketExtensions
             uint x => p.WriteInt((int)x),
             float x => p.WriteFloat(x),
             LegacyFloat x => p.WriteLegacyFloat(x),
-            long x => p.WriteLong(x),
-            ulong x => p.WriteLong((long)x),
+            long x => p.WriteLegacyLong(x),
+            ulong x => p.WriteLegacyLong((long)x),
             LegacyLong x => p.WriteLegacyLong(x),
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
@@ -125,8 +126,8 @@ public static partial class PacketExtensions
             uint x => p.WriteInt((int)x),
             float x => p.WriteFloat(x),
             LegacyFloat x => p.WriteLegacyFloat(x),
-            long x => p.WriteLong(x),
-            ulong x => p.WriteLong((long)x),
+            long x => p.WriteLegacyLong(x),
+            ulong x => p.WriteLegacyLong((long)x),
             LegacyLong x => p.WriteLegacyLong(x),
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
