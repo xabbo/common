@@ -527,7 +527,7 @@ public partial class Packet : IPacket
     public Packet WriteString(string value, int position)
     {
         Position = position;
-        return WriteString(value, position);
+        return WriteString(value);
     }
     IPacket IPacket.WriteString(string value, int position) => WriteString(value, position);
 
