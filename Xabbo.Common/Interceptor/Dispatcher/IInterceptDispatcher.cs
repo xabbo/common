@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 
 using Xabbo.Common;
 using Xabbo.Messages;
-using Xabbo.Interceptor.Attributes;
 
 namespace Xabbo.Interceptor.Dispatcher;
 

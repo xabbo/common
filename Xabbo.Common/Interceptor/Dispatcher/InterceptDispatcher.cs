@@ -7,7 +7,6 @@ using System.Reflection;
 
 using Xabbo.Common;
 using Xabbo.Messages;
-using Xabbo.Interceptor.Attributes;
 using Xabbo.Utility;
 
 namespace Xabbo.Interceptor.Dispatcher;

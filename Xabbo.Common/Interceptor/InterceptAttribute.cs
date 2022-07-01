@@ -2,7 +2,7 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Attributes;
+namespace Xabbo.Interceptor;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class InterceptAttribute : IdentifiersAttribute

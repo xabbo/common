@@ -5,7 +5,7 @@ using System.Linq;
 using Xabbo.Common;
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Attributes;
+namespace Xabbo.Interceptor;
 
 public abstract class IdentifiersAttribute : Attribute
 {

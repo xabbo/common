@@ -1,5 +1,4 @@
 ﻿using Xabbo.Messages;
-using Xabbo.Interceptor.Attributes;
 using Xabbo.Interceptor.Dispatcher;
 
 namespace Xabbo.Interceptor;
