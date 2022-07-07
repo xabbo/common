@@ -75,10 +75,7 @@ public abstract class InterceptorTask<TResult> : IInterceptHandler
         catch (OperationCanceledException ex)
         when (!cancellationToken.IsCancellationRequested)
         {
-            throw new OperationCanceledException(
-                $"The interceptor task '{GetType().FullName}' timed out.",
-                ex.CancellationToken
-            );
+            throw new TimeoutException($"The interceptor task '{GetType().FullName}' timed out.", ex);
         }
         finally
         {
