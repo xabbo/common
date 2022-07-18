@@ -84,6 +84,7 @@ public static partial class PacketExtensions
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
             ICollection x => WriteObjectCollection(p, x),
+            IEnumerable x => WriteObjectEnumerable(p, x),
             _ => throw new ArgumentException($"The specified type is not supported for packet serialization: {value.GetType().Name}.", nameof(value))
         });
     }
@@ -99,6 +100,32 @@ public static partial class PacketExtensions
         p.WriteLegacyShort((short)collection.Count);
         foreach (object value in collection)
             WriteObject(p, value);
+        return p;
+    }
+
+    /// <summary>
+    /// Writes the specified enumerable to the packet.
+    /// The number of items is written as an int on Flash sessions, or a short on Unity sessions.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static TPacket WriteObjectEnumerable<TPacket>(this TPacket p, IEnumerable enumerable)
+        where TPacket : IPacket
+    {
+        int startPosition = p.Position;
+        p.WriteLegacyShort(-1);
+
+        int count = 0;
+        foreach (object item in enumerable)
+        {
+            p.WriteObject(item);
+            count++;
+        }
+
+        int endPosition = p.Position;
+        p.Position = startPosition;
+        p.WriteLegacyShort((short)count);
+        p.Position = endPosition;
+
         return p;
     }
 
@@ -132,6 +159,7 @@ public static partial class PacketExtensions
             string x => p.WriteString(x),
             IComposable x => p.Write(x),
             ICollection x => WriteObjectCollection(p, x),
+            IEnumerable x => WriteObjectEnumerable(p, x),
             _ => throw new ArgumentException($"The specified type is not supported for packet serialization: {typeof(T).Name}.", nameof(value))
         });
     }
@@ -146,6 +174,31 @@ public static partial class PacketExtensions
         p.WriteLegacyShort((short)collection.Count);
         foreach (T value in collection)
             Write(p, value);
+        return p;
+    }
+
+    /// <summary>
+    /// Writes the specified generically typed enumerable to the packet.
+    /// The number of items is written as an int on Flash sessions, or a short on Unity sessions.
+    /// </summary>
+    public static TPacket WriteEnumerable<TPacket, T>(this TPacket p, IEnumerable<T> enumerable)
+        where TPacket : IPacket
+    {
+        int startPosition = p.Position;
+        p.WriteLegacyShort(-1);
+
+        int count = 0;
+        foreach (T item in enumerable)
+        {
+            p.Write(item);
+            count++;
+        }
+
+        int endPosition = p.Position;
+        p.Position = startPosition;
+        p.WriteLegacyShort((short)count);
+        p.Position = endPosition;
+
         return p;
     }
     #endregion

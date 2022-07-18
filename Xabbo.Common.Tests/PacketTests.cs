@@ -1,4 +1,6 @@
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 using Xunit;
 
@@ -39,7 +41,7 @@ public class PacketTests
     [Fact]
     public void Read_Write_Generic()
     {
-        IPacket packet = new Packet();
+        IPacket packet = new Packet { Protocol = ClientType.Unity };
 
         packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
 
@@ -82,5 +84,50 @@ public class PacketTests
 
         // There is no more data in the packet
         Assert.Equal(0, packet.Available);
+    }
+
+    [Fact]
+    public void Write_Array()
+    {
+        int[] array = new[] { 1, 2, 3, 4 };
+
+        IPacket packet = new Packet { Protocol = ClientType.Flash };
+
+        packet.Write(array);
+
+        packet.Position = 0;
+        Assert.Equal(array.Length, packet.ReadInt());
+        for (int i = 0; i < array.Length; i++)
+            Assert.Equal(array[i], packet.ReadInt());
+    }
+
+    [Fact]
+    public void Write_Enumerable()
+    {
+        static int transform(int n) => n * 2;
+
+        IEnumerable<int> enumerable = Enumerable.Range(1, 10).Select(transform);
+
+        IPacket packet = new Packet { Protocol = ClientType.Flash };
+        packet.Write(enumerable);
+
+        packet.Position = 0;
+        Assert.Equal(enumerable.Count(), packet.ReadInt());
+        foreach (int n in enumerable)
+            Assert.Equal(n, packet.ReadInt());
+    }
+
+    [Fact]
+    public void Read_List()
+    {
+        List<int> source = new() { 2, 4, 6, 8 };
+
+        IPacket packet = new Packet { Protocol = ClientType.Flash };
+        packet.WriteCollection(source);
+
+        packet.Position = 0;
+        List<int> list = packet.ReadList<int>();
+
+        Assert.Equal(source, list);
     }
 }
