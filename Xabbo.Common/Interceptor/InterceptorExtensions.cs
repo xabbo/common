@@ -20,7 +20,7 @@ public static partial class InterceptorExtensions
     /// </summary>
     public static async ValueTask SendAsync(this IInterceptor interceptor, Header header)
     {
-        using Packet p = new(interceptor.Client, header);
+        using Packet p = new(header, interceptor.Client);
         await interceptor.SendAsync(p);
     }
 
@@ -29,7 +29,7 @@ public static partial class InterceptorExtensions
     /// </summary>
     public static void Send(this IInterceptor interceptor, Header header)
     {
-        using Packet p = new(interceptor.Client, header);
+        using Packet p = new(header, interceptor.Client);
         interceptor.Send(p);
     }
 

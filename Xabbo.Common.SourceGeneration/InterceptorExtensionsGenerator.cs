@@ -47,7 +47,7 @@ namespace Xabbo.Common.SourceGeneration
                 }
                 sb.AppendLine(")");
                 sb.AppendLine("\t{"); // Open method
-                sb.AppendLine("\t\tusing Packet packet = new Packet(interceptor.Client, header);");
+                sb.AppendLine("\t\tusing Packet packet = new Packet(header, interceptor.Client);");
                 sb.AppendLine("\t\tpacket");
                 for (int i = 1; i <= n; i++)
                 {
@@ -78,7 +78,7 @@ namespace Xabbo.Common.SourceGeneration
                 }
                 sb.AppendLine(")");
                 sb.AppendLine("\t{"); // Open method
-                sb.AppendLine("\t\tusing Packet packet = new Packet(interceptor.Client, header);");
+                sb.AppendLine("\t\tusing Packet packet = new Packet(header, interceptor.Client);");
                 sb.AppendLine("\t\tpacket");
                 for (int i = 1; i <= n; i++)
                 {

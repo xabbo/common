@@ -74,7 +74,7 @@ public class InterceptArgs : EventArgs, IDisposable
         Destination = destination;
         Packet = packet;
 
-        OriginalPacket = new Packet(packet.Protocol, packet.Header, packet.Buffer);
+        OriginalPacket = new Packet(packet.Header, packet.Buffer, packet.Protocol);
     }
 
     /// <summary>

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.Collections;
 using System.Text;
 using System.Globalization;
 
@@ -20,8 +19,7 @@ public partial class Packet : IPacket
         Int = typeof(int),
         Float = typeof(float),
         Long = typeof(long),
-        String = typeof(string),
-        ByteArray = typeof(byte[]);
+        String = typeof(string);
 
     private bool _disposed;
     private IMemoryOwner<byte> _memoryOwner;
@@ -69,28 +67,14 @@ public partial class Packet : IPacket
     public int Available => Length - Position;
 
     /// <summary>
-    /// Constructs a new packet.
-    /// </summary>
-    public Packet()
-        : this(ClientType.Unknown, Header.Unknown)
-    { }
-
-    /// <summary>
-    /// Constructs a new packet with the specified message header.
-    /// </summary>
-    public Packet(Header header)
-        : this(ClientType.Unknown, header)
-    { }
-
-    /// <summary>
     /// Constructs a new packet with the specified protocol and message header.
     /// </summary>
     /// <param name="protocol">The packet protocol hint.</param>
     /// <param name="header">The message header.</param>
-    /// <param name="initialSize">The initial size in bytes of the packet data buffer.</param>
-    public Packet(ClientType protocol, Header header, int initialSize = 8)
+    /// <param name="size">The initial size in bytes of the packet data buffer.</param>
+    public Packet(Header header, ClientType protocol = ClientType.Unknown, int size = 8)
     {
-        _memoryOwner = MemoryPool<byte>.Shared.Rent(initialSize);
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(size);
         _buffer = _memoryOwner.Memory[..0];
 
         Protocol = protocol;
@@ -101,8 +85,8 @@ public partial class Packet : IPacket
     /// Constructs a new packet with the specified protocol and header,
     /// copying the <see cref="ReadOnlySpan{T}"/> into its internal buffer.
     /// </summary>
-    public Packet(ClientType protocol, Header header, ReadOnlySpan<byte> data)
-        : this(protocol, header, data.Length)
+    public Packet(Header header, ReadOnlySpan<byte> data, ClientType protocol = ClientType.Unknown)
+        : this(header, protocol, data.Length)
     {
         Length = data.Length;
         _buffer = _memoryOwner.Memory[..Length];
@@ -110,42 +94,19 @@ public partial class Packet : IPacket
     }
 
     /// <summary>
-    /// Constructs a new packet with the specified header,
-    /// copying the <see cref="ReadOnlySpan{T}"/> into its internal buffer.
-    /// </summary>
-    public Packet(Header header, ReadOnlySpan<byte> data)
-        : this(ClientType.Unknown, header, data)
-    { }
-
-    /// <summary>
     /// Constructs a new packet with the specified protocol and header,
     /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
     /// </summary>
-    public Packet(ClientType protocol, Header header, in ReadOnlySequence<byte> data)
-        : this(protocol, header, (int)data.Length)
+    public Packet(Header header, in ReadOnlySequence<byte> data, ClientType protocol = ClientType.Unknown)
+        : this(header, protocol, (int)data.Length)
     {
         Length = (int)data.Length;
         _buffer = _memoryOwner.Memory[..Length];
         data.CopyTo(_buffer.Span);
     }
 
-    /// <summary>
-    /// Constructs a new packet with the specified header,
-    /// copying the <see cref="ReadOnlySequence{T}"/> into its internal buffer.
-    /// </summary>
-    public Packet(Header header, in ReadOnlySequence<byte> data)
-        : this(ClientType.Unknown, header, data)
-    { }
-
     /// <inheritdoc cref="IReadOnlyPacket.Copy" />
-    public Packet Copy()
-    {
-        return new Packet(
-            Protocol,
-            Header,
-            Buffer
-        );
-    }
+    public Packet Copy() => new(Header, Buffer, Protocol);
     IPacket IReadOnlyPacket.Copy() => Copy();
 
     /// <summary>
@@ -238,6 +199,43 @@ public partial class Packet : IPacket
     }
     IPacket IPacket.Skip(int bytes) => Skip(bytes);
     IReadOnlyPacket IReadOnlyPacket.Skip(int bytes) => Skip(bytes);
+
+    /// <summary>
+    /// Skips a value of the specified type.
+    /// </summary>
+    private void Skip(Type type)
+    {
+        Skip(Type.GetTypeCode(type) switch
+        {
+            TypeCode.Byte or TypeCode.Boolean => 1,
+            TypeCode.Int16 or TypeCode.UInt16 => 2,
+            TypeCode.Int32 or TypeCode.UInt32 => 4,
+            TypeCode.Int64 or TypeCode.UInt64 => Protocol switch
+            {
+                ClientType.Flash => 4,
+                ClientType.Unity => 8,
+                _ => throw new InvalidOperationException("Cannot skip long: packet protocol is not specified.")
+            },
+            TypeCode.Single => Protocol switch
+            {
+                ClientType.Flash => ReadShort(),
+                ClientType.Unity => 4,
+                _ => throw new InvalidOperationException("Cannot skip float: packet protocol is not specified.")
+            },
+            TypeCode.String => ReadShort(),
+            _ => throw new InvalidOperationException($"Cannot skip value of type \"{type.FullName}\".")
+        });
+    }
+
+    /// <inheritdoc cref="IPacket.Skip(Type[])" />
+    public Packet Skip(params Type[] types)
+    {
+        foreach (Type type in types)
+            Skip(type);   
+        return this;
+    }
+    IPacket IPacket.Skip(Type[] types) => Skip(types);
+    IReadOnlyPacket IReadOnlyPacket.Skip(Type[] types) => Skip(types);
 
     /// <inheritdoc />
     public byte ReadByte()
@@ -356,17 +354,20 @@ public partial class Packet : IPacket
         return value;
     }
 
+    /// <inheritdoc />
     public string ReadString(int position)
     {
         Position = position;
         return ReadString();
     }
 
+    /// <inheritdoc />
     public float ReadFloatAsString()
     {
         return float.Parse(ReadString(), CultureInfo.InvariantCulture);
     }
 
+    /// <inheritdoc />
     public float ReadFloatAsString(int position)
     {
         Position = position;
@@ -464,6 +465,9 @@ public partial class Packet : IPacket
 
     public Packet WriteLong(long value)
     {
+        if (Protocol == ClientType.Flash)
+            throw new InvalidOperationException("Cannot write long when the packet protocol is Flash.");
+
         Grow(8);
         BinaryPrimitives.WriteInt64BigEndian(_buffer.Span[Position..], value);
         Position += 8;
@@ -530,61 +534,6 @@ public partial class Packet : IPacket
         return WriteString(value);
     }
     IPacket IPacket.WriteString(string value, int position) => WriteString(value, position);
-
-    /*public Packet WriteValues(params object[] values)
-    {
-        foreach (object value in values)
-        {
-            switch (value)
-            {
-                case byte x: WriteByte(x); break;
-                case bool x: WriteBool(x); break;
-                case short x: WriteShort(x); break;
-                case ushort x: WriteShort((short)x); break;
-                case LegacyShort x: WriteLegacyShort(x); break;
-                case int x: WriteInt(x); break;
-                case long x: WriteLegacyLong(x); break;
-                case LegacyLong x: WriteLegacyLong(x); break;
-                case byte[] x:
-                    WriteInt(x.Length);
-                    WriteBytes(x);
-                    break;
-                case string x: WriteString(x); break;
-                case float x: WriteFloat(x); break;
-                case LegacyFloat x: WriteLegacyFloat(x); break;
-                case IComposable x: x.Compose(this); break;
-                case ICollection x:
-                    {
-                        WriteLegacyShort((short)x.Count);
-                        foreach (object o in x)
-                            WriteValues(o);
-                    }
-                    break;
-                case IEnumerable x:
-                    {
-                        int count = 0, startPosition = Position;
-                        WriteLegacyShort(-1);
-                        foreach (object o in x)
-                        {
-                            WriteValues(o);
-                            count++;
-                        }
-                        int endPosition = Position;
-                        Position = startPosition;
-                        WriteLegacyShort((short)count);
-                        Position = endPosition;
-                    }
-                    break;
-                default:
-                    if (value == null)
-                        throw new Exception("Null value");
-                    else
-                        throw new Exception($"Invalid value type: {value.GetType().Name}");
-            }
-        }
-
-        return this;
-    }*/
 
     #region - Legacy -
     /// <inheritdoc cref="IReadOnlyPacket.ReadLegacyShort()" />
@@ -658,6 +607,26 @@ public partial class Packet : IPacket
     #endregion
 
     #region - Replacement -
+    private void ReplaceValue(object value)
+    {
+        if (value is null) throw new ArgumentNullException(nameof(value));
+
+        switch (value)
+        {
+            case bool x: WriteBool(x); break;
+            case byte x: WriteByte(x); break;
+            case short x: WriteShort(x); break;
+            case ushort x: WriteShort((short)x); break;
+            case int x: WriteInt(x); break;
+            case uint x: WriteInt((int)x); break;
+            case float x: WriteLegacyFloat(x); break;
+            case long x: WriteLegacyLong(x); break;
+            case ulong x: WriteLegacyLong((long)x); break;
+            case string x: ReplaceString(x); break;
+            default: throw new ArgumentException($"Cannot replace value of type: {value.GetType().FullName}.");
+        }
+    }
+
     /// <inheritdoc cref="IPacket.ReplaceString(string)" />
     public Packet ReplaceString(string value)
     {
@@ -706,6 +675,26 @@ public partial class Packet : IPacket
         return ReplaceString(value);
     }
     IPacket IPacket.ReplaceString(string value, int position) => ReplaceString(value, position);
+
+    /// <inheritdoc cref="IPacket.ModifyString(Func{string, string})" />
+    public Packet ModifyString(Func<string, string> modifier)
+    {
+        int position = Position;
+        string value = ReadString();
+        ReplaceString(modifier(value), position);
+        return this;
+    }
+    IPacket IPacket.ModifyString(Func<string, string> modifier) => ModifyString(modifier);
+
+    /// <inheritdoc cref="IPacket.Replace(object[])" />
+    public Packet Replace(params object[] values)
+    {
+        foreach (object value in values)
+            ReplaceValue(value);
+
+        return this;
+    }
+    IPacket IPacket.Replace(object[] values) => Replace(values);
     #endregion
 
     /// <summary>

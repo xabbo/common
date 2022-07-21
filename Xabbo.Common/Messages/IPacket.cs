@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Xabbo.Messages;
 
@@ -24,6 +25,9 @@ public interface IPacket : IReadOnlyPacket
 
     /// <inheritdoc cref="IReadOnlyPacket.Skip(int)" />
     new IPacket Skip(int bytes);
+
+    /// <inheritdoc cref="IReadOnlyPacket.Skip(Type[])" />
+    new IPacket Skip(params Type[] types);
 
     /// <summary>
     /// <para>
@@ -160,14 +164,26 @@ public interface IPacket : IReadOnlyPacket
     /// <summary>
     /// Replaces a string at the current position in the packet.
     /// Adjusts the packet length and offsets any data after the string if the replacement causes the length to change.
-    /// Throws an exception if a string cannot be read at the current position in the packet.
+    /// Throws if a string cannot be read at the current position in the packet.
     /// </summary>
     IPacket ReplaceString(string value);
 
     /// <summary>
     /// Replaces a string at the specified position in the packet.
     /// Adjusts the packet length and offsets any data after the string if the replacement causes the length to change.
-    /// Throws an exception if a string cannot be read at the specified position in the packet.
+    /// Throws if a string cannot be read at the specified position in the packet.
     /// </summary>
     IPacket ReplaceString(string value, int position);
+
+    /// <summary>
+    /// Replaces a string at the current position in the packet using a transform function.
+    /// Adjusts the packet length and offsets any data after the string if the replacement causes the length to change.
+    /// Throws if a string cannot be read at the current position in the packet.
+    /// </summary>
+    IPacket ModifyString(Func<string, string> modifier);
+
+    /// <summary>
+    /// Replaces the specified values in the packet.
+    /// </summary>
+    IPacket Replace(params object[] values);
 }

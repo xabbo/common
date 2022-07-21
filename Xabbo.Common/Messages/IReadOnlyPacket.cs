@@ -61,6 +61,11 @@ public interface IReadOnlyPacket : IDisposable
     IReadOnlyPacket Skip(int bytes);
 
     /// <summary>
+    /// Skips values of the specified types.
+    /// </summary>
+    IReadOnlyPacket Skip(params Type[] types);
+
+    /// <summary>
     /// Reads a boolean from the current position in the packet.
     /// </summary>
     bool ReadBool();
