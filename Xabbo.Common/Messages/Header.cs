@@ -122,9 +122,9 @@ public class Header
         {
             return clientType switch
             {
-                ClientType.Flash => Flash?.Value ?? -1,
-                ClientType.Unity => Unity?.Value ?? -1,
-                _ => throw new Exception("Invalid client type specified.")
+                ClientType.Flash => Flash?.Value ?? throw new Exception($"Header value is unknown for client: {clientType}."),
+                ClientType.Unity => Unity?.Value ?? throw new Exception($"Header value is unknown for client: {clientType}."),
+                _ => throw new Exception($"Invalid client type specified: {clientType}.")
             };
         }
     }
