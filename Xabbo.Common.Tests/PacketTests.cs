@@ -15,7 +15,7 @@ public class PacketTests
     [Fact]
     public void Read_Write()
     {
-        IPacket packet = new Packet();
+        IPacket packet = new Packet(Header.Unknown);
 
         packet.WriteBool(true);
         packet.WriteBool(false);
@@ -41,7 +41,7 @@ public class PacketTests
     [Fact]
     public void Read_Write_Generic()
     {
-        IPacket packet = new Packet { Protocol = ClientType.Unity };
+        IPacket packet = new Packet(Header.Unknown, ClientType.Unity);
 
         packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
 
@@ -62,7 +62,7 @@ public class PacketTests
         int valueByteCount = Encoding.UTF8.GetByteCount(value);
         int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
 
-        IPacket packet = new Packet();
+        IPacket packet = new Packet(Header.Unknown);
 
         packet.WriteInt(1234);
         packet.WriteString(value);
@@ -91,7 +91,7 @@ public class PacketTests
     {
         int[] array = new[] { 1, 2, 3, 4 };
 
-        IPacket packet = new Packet { Protocol = ClientType.Flash };
+        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
 
         packet.Write(array);
 
@@ -108,7 +108,7 @@ public class PacketTests
 
         IEnumerable<int> enumerable = Enumerable.Range(1, 10).Select(transform);
 
-        IPacket packet = new Packet { Protocol = ClientType.Flash };
+        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
         packet.Write(enumerable);
 
         packet.Position = 0;
@@ -122,7 +122,7 @@ public class PacketTests
     {
         List<int> source = new() { 2, 4, 6, 8 };
 
-        IPacket packet = new Packet { Protocol = ClientType.Flash };
+        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
         packet.WriteCollection(source);
 
         packet.Position = 0;
