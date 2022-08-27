@@ -114,19 +114,28 @@ public class Header
     /// </summary>
     public short GetValue(ClientType clientType)
     {
+        short headerValue;
+
         if (Value.HasValue)
         {
-            return Value.Value;
+            headerValue = Value.Value;
         }
         else
         {
-            return clientType switch
+            headerValue = clientType switch
             {
-                ClientType.Flash => Flash?.Value ?? throw new Exception($"Header value is unknown for client: {clientType}."),
-                ClientType.Unity => Unity?.Value ?? throw new Exception($"Header value is unknown for client: {clientType}."),
+                ClientType.Flash => Flash?.Value ?? -1,
+                ClientType.Unity => Unity?.Value ?? -1,
                 _ => throw new Exception($"Invalid client type specified: {clientType}.")
             };
         }
+
+        if (headerValue <= 0)
+        {
+            throw new InvalidOperationException($"Header is unknown for client: {clientType}.");
+        }
+
+        return headerValue;
     }
 
     /// <summary>
