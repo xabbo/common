@@ -11,7 +11,7 @@ namespace Xabbo.Serialization;
 public class MessageMap
 {
     private static readonly Regex
-        _regexValidIdentifier = new Regex(@"^[a-z][a-z0-9]*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        _regexValidIdentifier = new Regex(@"^[a-z][a-z0-9]*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public List<MessageMapItem> Incoming { get; set; }
     public List<MessageMapItem> Outgoing { get; set; }
@@ -45,10 +45,10 @@ public class MessageMap
             else if (line.StartsWith('[') && line.EndsWith(']'))
             {
                 string sectionName = line[1..^1];
-                direction = sectionName.ToLower() switch
+                direction = sectionName.ToUpperInvariant() switch
                 {
-                    "incoming" => Direction.Incoming,
-                    "outgoing" => Direction.Outgoing,
+                    "INCOMING" => Direction.Incoming,
+                    "OUTGOING" => Direction.Outgoing,
                     _ => throw new Exception($"Invalid section name '{sectionName}' on line {lineNumber} in message map file.")
                 };
             }
