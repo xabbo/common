@@ -78,22 +78,6 @@ public class Header
         Destination = destination;
         Value = value;
         Name = name;
-
-        Unity = new ClientHeader
-        {
-            Client = ClientType.Unity,
-            Destination = destination,
-            Name = name ?? value.ToString(),
-            Value = value
-        };
-
-        Flash = new ClientHeader
-        {
-            Client = ClientType.Flash,
-            Destination = destination,
-            Name = name ?? value.ToString(),
-            Value = value
-        };
     }
 
     /// <summary>
@@ -114,21 +98,12 @@ public class Header
     /// </summary>
     public short GetValue(ClientType clientType)
     {
-        short headerValue;
-
-        if (Value.HasValue)
+        short headerValue = Value ?? clientType switch
         {
-            headerValue = Value.Value;
-        }
-        else
-        {
-            headerValue = clientType switch
-            {
-                ClientType.Flash => Flash?.Value ?? -1,
-                ClientType.Unity => Unity?.Value ?? -1,
-                _ => throw new Exception($"Invalid client type specified: {clientType}.")
-            };
-        }
+            ClientType.Flash => Flash?.Value,
+            ClientType.Unity => Unity?.Value,
+            _ => throw new Exception($"Invalid client type specified: {clientType}.")
+        } ?? -1;
 
         if (headerValue <= 0)
         {
@@ -141,7 +116,7 @@ public class Header
     /// <summary>
     /// Gets the name of the header for the specified client type.
     /// </summary>
-    public string? GetName(ClientType clientType) => GetClientHeader(clientType)?.Name;
+    public string? GetName(ClientType clientType) => GetClientHeader(clientType)?.Name ?? Name;
 
     /// <summary>
     /// Returns the hash code of this header.
