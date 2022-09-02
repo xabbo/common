@@ -9,9 +9,7 @@ namespace Xabbo.Messages;
 
 public abstract class Headers
 {
-    private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-
-    private readonly Type _selfType;
+    private readonly ReaderWriterLockSlim _lock = new();
 
     private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
     private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
@@ -20,8 +18,6 @@ public abstract class Headers
 
     public Headers(Destination destination)
     {
-        _selfType = GetType();
-
         Destination = destination;
 
         ResetProperties();
@@ -29,8 +25,7 @@ public abstract class Headers
 
     private void ResetProperties()
     {
-        var props = _selfType.GetProperties();
-        foreach (PropertyInfo prop in props)
+        foreach (PropertyInfo prop in GetType().GetProperties())
         {
             if (prop.PropertyType.Equals(typeof(Header)) &&
                 prop.GetMethod?.GetParameters().Length == 0)
@@ -82,12 +77,6 @@ public abstract class Headers
                 }
 
                 header = new Header(info.Destination, unityHeader, flashHeader);
-                /*{
-                    Destination = info.Destination,
-                    Name = info.UnityName ?? info.FlashName ?? "unknown",
-                    Flash = flashHeader,
-                    Unity = unityHeader
-                };*/
 
                 if (flashHeader is not null)
                 {
@@ -100,7 +89,7 @@ public abstract class Headers
                     _headerMap[(unityHeader.Client, unityHeader.Value)] = header;
                     _nameMap[unityHeader.Name] = header;
 
-                    PropertyInfo? prop = _selfType.GetProperty(unityHeader.Name, typeof(Header));
+                    PropertyInfo? prop = GetType().GetProperty(unityHeader.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                     if (prop is not null)
                         prop.SetValue(this, header);
                 }
