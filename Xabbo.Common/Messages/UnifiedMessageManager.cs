@@ -33,6 +33,12 @@ public class UnifiedMessageManager : IMessageManager
     private bool _initialized;
     private MessageMap? _messageMap;
 
+    /// <summary>
+    /// Whether to fetch the message map file from the Xabbo.Messages GitHub repo
+    /// upon initialization if it does not exist locally.
+    /// </summary>
+    public bool AutoFetch { get; set; } = true;
+
     public Incoming In { get; private set; }
     public Outgoing Out { get; private set; }
 
@@ -56,6 +62,11 @@ public class UnifiedMessageManager : IMessageManager
 
         if (!File.Exists(_mapFilePath))
         {
+            if (!AutoFetch)
+            {
+                throw new FileNotFoundException($"Message map file not found: '{_mapFilePath}'.");
+            }
+
             using HttpClient http = new();
             using Stream ins = await http.GetStreamAsync("https://raw.githubusercontent.com/b7c/Xabbo.Messages/master/messages.ini", cancellationToken);
             using Stream outs = File.OpenWrite(_mapFilePath);
