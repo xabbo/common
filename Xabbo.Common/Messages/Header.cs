@@ -107,7 +107,7 @@ public class Header
 
         if (headerValue <= 0)
         {
-            throw new InvalidOperationException($"Header is unknown for client: {clientType}.");
+            throw new UnresolvedHeaderException(clientType, this);
         }
 
         return headerValue;

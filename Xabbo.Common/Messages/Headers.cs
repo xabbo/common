@@ -152,7 +152,7 @@ public abstract class Headers
                 }
                 else
                 {
-                    throw new Exception($"Unknown header: \"{name}\".");
+                    throw new UnknownHeaderException(new Identifier(Destination, name));
                 }
             }
             finally { _lock.ExitReadLock(); }
