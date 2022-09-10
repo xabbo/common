@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-using Xabbo.Messages;
+﻿using Xabbo.Messages;
 
 namespace Xabbo.Common.Tests;
 

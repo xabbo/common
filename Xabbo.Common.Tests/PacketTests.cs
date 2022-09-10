@@ -2,8 +2,6 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 
-using Xunit;
-
 using Xabbo.Messages;
 
 namespace Xabbo.Common.Tests;
