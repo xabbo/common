@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Dispatcher;
 
-public class InterceptorBindingFailedException : Exception
+public sealed class InterceptorBindingFailedException : Exception
 {
     public IInterceptHandler Handler { get; }
     public Identifiers UnknownIdentifiers { get; }

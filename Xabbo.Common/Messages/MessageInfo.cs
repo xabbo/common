@@ -4,7 +4,7 @@ using Xabbo.Common;
 
 namespace Xabbo.Messages;
 
-public class MessageInfo : IMessageInfo
+public sealed class MessageInfo : IMessageInfo
 {
     public Direction Direction { get; set; }
     public Destination Destination => Direction.ToDestination();
@@ -30,7 +30,7 @@ public interface IClientMessageInfo
     string Name { get; }
 }
 
-public class ClientMessageInfo : IClientMessageInfo
+public sealed class ClientMessageInfo : IClientMessageInfo
 {
     public ClientType Client { get; set; }
     public Direction Direction { get; set; }

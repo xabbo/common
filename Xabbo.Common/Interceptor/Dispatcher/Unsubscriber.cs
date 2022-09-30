@@ -3,7 +3,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Dispatcher;
 
-internal class Unsubscriber : IDisposable
+internal sealed class Unsubscriber : IDisposable
 {
     private readonly IInterceptDispatcher _dispatcher;
     private readonly HeaderSet _headers;
@@ -18,7 +18,7 @@ internal class Unsubscriber : IDisposable
         _callback = callback;
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
         _disposed = true;

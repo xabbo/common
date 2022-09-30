@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Xabbo.Messages;
 
-public class Outgoing : Headers
+public sealed class Outgoing : Headers
 {
     public Outgoing()
         : base(Destination.Server)

@@ -20,7 +20,7 @@ internal abstract class InterceptCallback : BindingCallback
     public abstract void Invoke(InterceptArgs e);
 }
 
-internal class OpenInterceptCallback : InterceptCallback
+internal sealed class OpenInterceptCallback : InterceptCallback
 {
     private readonly Action<object, InterceptArgs> _callback;
 
@@ -39,7 +39,7 @@ internal class OpenInterceptCallback : InterceptCallback
     }
 }
 
-internal class ClosedInterceptCallback : InterceptCallback
+internal sealed class ClosedInterceptCallback : InterceptCallback
 {
     private readonly Action<InterceptArgs> _callback;
 

@@ -5,7 +5,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Dispatcher;
 
-public class UnknownIdentifiersException : Exception
+public sealed class UnknownIdentifiersException : Exception
 {
     public Identifiers Identifiers { get; }
 

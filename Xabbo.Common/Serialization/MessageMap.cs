@@ -8,7 +8,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Serialization;
 
-public class MessageMap
+public sealed class MessageMap
 {
     private static readonly Regex
         _regexValidIdentifier = new Regex(@"^[a-z][a-z0-9]*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);

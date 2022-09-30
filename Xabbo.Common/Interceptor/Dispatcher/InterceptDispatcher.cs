@@ -12,7 +12,7 @@ using Xabbo.Utility;
 namespace Xabbo.Interceptor.Dispatcher;
 
 /// <inheritdoc cref="IInterceptDispatcher" />
-public class InterceptDispatcher : IInterceptDispatcher
+public sealed class InterceptDispatcher : IInterceptDispatcher
 {
     private static ReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
     {

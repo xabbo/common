@@ -5,7 +5,7 @@ namespace Xabbo.Interceptor;
 /// <summary>
 /// The event arguments used when the connection to the remote interceptor is lost.
 /// </summary>
-public class DisconnectedEventArgs : EventArgs
+public sealed class DisconnectedEventArgs : EventArgs
 {
     /// <summary>
     /// Gets the error that caused the disconnection.

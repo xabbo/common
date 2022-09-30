@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a message name and direction.
 /// </summary>
-public class Identifier
+public sealed class Identifier
 {
     public Destination Destination { get; }
     public bool IsOutgoing => Destination == Destination.Server;

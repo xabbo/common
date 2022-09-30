@@ -10,7 +10,7 @@ namespace Xabbo.Interceptor.Tasks;
 /// <summary>
 /// Captures the first message with a matching target header.
 /// </summary>
-public class CaptureMessageTask : InterceptorTask<IPacket>
+public sealed class CaptureMessageTask : InterceptorTask<IPacket>
 {
     private readonly bool _block;
     private readonly Header[] _headers;

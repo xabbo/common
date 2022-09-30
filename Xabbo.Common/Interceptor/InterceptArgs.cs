@@ -7,7 +7,7 @@ namespace Xabbo.Interceptor;
 /// <summary>
 /// Contains event arguments of an intercepted packet.
 /// </summary>
-public class InterceptArgs : EventArgs, IDisposable
+public sealed class InterceptArgs : EventArgs, IDisposable
 {
     private bool _disposed;
 
@@ -83,7 +83,7 @@ public class InterceptArgs : EventArgs, IDisposable
     public void Block() => IsBlocked = true;
 
     /// <inheritdoc cref="Dispose()" />
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
         _disposed = true;

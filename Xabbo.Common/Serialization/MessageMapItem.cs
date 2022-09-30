@@ -2,7 +2,7 @@
 
 namespace Xabbo.Serialization;
 
-public class MessageMapItem
+public sealed class MessageMapItem
 {
     public string UnityName { get; set; }
     public short Header { get; set; }

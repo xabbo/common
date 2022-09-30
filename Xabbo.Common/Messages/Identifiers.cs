@@ -8,7 +8,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a set of <see cref="Identifier"/>s.
 /// </summary>
-public class Identifiers : HashSet<Identifier>
+public sealed class Identifiers : HashSet<Identifier>
 {
     public IEnumerable<Identifier> Unknown => this.Where(id => id.Destination == Destination.Unknown);
     public IEnumerable<Identifier> Incoming => this.Where(id => id.Destination == Destination.Client);

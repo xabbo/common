@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Xabbo.Interceptor.Dispatcher;
 
-internal class InterceptorBinding
+internal sealed class InterceptorBinding
 {
     public IInterceptHandler Handler { get; }
     public IReadOnlyCollection<BindingCallback> Callbacks { get; }

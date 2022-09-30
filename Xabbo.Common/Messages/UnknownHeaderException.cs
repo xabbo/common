@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Thrown when attempting to access a named header that does not exist.
 /// </summary>
-public class UnknownHeaderException : Exception
+public sealed class UnknownHeaderException : Exception
 {
     private static string BuildMessage(Identifier identifier)
     {

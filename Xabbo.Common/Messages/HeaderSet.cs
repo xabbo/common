@@ -8,7 +8,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Specifies a set of headers.
 /// </summary>
-public class HeaderSet : ICollection<Header>
+public sealed class HeaderSet : ICollection<Header>
 {
     private readonly HashSet<Header> _headers;
 

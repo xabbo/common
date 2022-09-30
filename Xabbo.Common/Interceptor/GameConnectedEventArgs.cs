@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor;
 
-public class GameConnectedEventArgs : EventArgs
+public sealed class GameConnectedEventArgs : EventArgs
 {
     public string Host { get; init; }
     public int Port { get; init; }

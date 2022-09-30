@@ -6,7 +6,7 @@ using Xabbo.Messages;
 
 namespace Xabbo.Interceptor.Dispatcher;
 
-public class UnresolvedIdentifiersException : Exception
+public sealed class UnresolvedIdentifiersException : Exception
 {
     public Identifiers Identifiers { get; }
 

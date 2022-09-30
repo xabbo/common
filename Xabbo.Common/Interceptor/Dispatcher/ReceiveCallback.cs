@@ -20,7 +20,7 @@ internal abstract class ReceiveCallback : BindingCallback
     protected abstract void OnInvoked(object? sender, IReadOnlyPacket packet);
 }
 
-internal class OpenReceiveCallback : ReceiveCallback
+internal sealed class OpenReceiveCallback : ReceiveCallback
 {
     private readonly Action<object, object?, IReadOnlyPacket> _callback;
 

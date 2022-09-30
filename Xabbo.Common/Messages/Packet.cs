@@ -10,7 +10,7 @@ using Xabbo.Common;
 namespace Xabbo.Messages;
 
 /// <inheritdoc />
-public partial class Packet : IPacket
+public sealed partial class Packet : IPacket
 {
     public static readonly Type
         Byte = typeof(byte),
@@ -707,7 +707,7 @@ public partial class Packet : IPacket
     }
 
     /// <inheritdoc cref="Dispose()" />
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
         _disposed = true;

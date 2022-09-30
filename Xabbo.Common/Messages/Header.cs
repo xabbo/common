@@ -10,7 +10,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Specifies message header information for multiple client types.
 /// </summary>
-public class Header
+public sealed class Header
 {
     /// <summary>
     /// Represents an unknown header.

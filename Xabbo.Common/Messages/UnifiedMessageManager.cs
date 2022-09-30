@@ -17,7 +17,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Manages messages of the Unity and Flash clients using a message mapping file.
 /// </summary>
-public class UnifiedMessageManager : IMessageManager
+public sealed class UnifiedMessageManager : IMessageManager
 {
     private readonly string _mapFilePath;
     private readonly List<MessageInfo> _messageInfos = new();

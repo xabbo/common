@@ -6,7 +6,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Thrown when attempting to access the value of a header which has not been resolved.
 /// </summary>
-public class UnresolvedHeaderException : Exception
+public sealed class UnresolvedHeaderException : Exception
 {
     private static string BuildMessage(ClientType client, Header header)
     {
