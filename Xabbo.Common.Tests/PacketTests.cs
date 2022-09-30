@@ -1,6 +1,7 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 
 using Xabbo.Messages;
 
@@ -8,6 +9,11 @@ namespace Xabbo.Common.Tests;
 
 public class PacketTests
 {
+    public static readonly object[] ClientTypes = {
+        new object[] { ClientType.Flash },
+        new object[] { ClientType.Unity }
+    };
+
     public PacketTests() { }
 
     [Fact]
@@ -87,7 +93,7 @@ public class PacketTests
     [Fact]
     public void Write_Array()
     {
-        int[] array = new[] { 1, 2, 3, 4 };
+        int[] array = Enumerable.Range(1, 10).ToArray();
 
         IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
 
@@ -99,28 +105,66 @@ public class PacketTests
             Assert.Equal(array[i], packet.ReadInt());
     }
 
-    [Fact]
-    public void Write_Enumerable()
+    [Theory]
+    [MemberData(nameof(ClientTypes))]
+    public void Read_Write_LegacyShort(ClientType client)
     {
-        static int transform(int n) => n * 2;
+        IPacket packet = new Packet(Header.Unknown, client);
+        packet.WriteLegacyShort(0);
 
-        IEnumerable<int> enumerable = Enumerable.Range(1, 10).Select(transform);
+        int expectedBytes = client == ClientType.Flash ? 4 : 2;
 
-        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
-        packet.Write(enumerable);
+        // Wrote the correct number of bytes.
+        Assert.Equal(expectedBytes, packet.Length);
 
         packet.Position = 0;
-        Assert.Equal(enumerable.Count(), packet.ReadInt());
-        foreach (int n in enumerable)
+        packet.ReadLegacyShort();
+
+        // Read the correct number of bytes.
+        Assert.Equal(expectedBytes, packet.Position);
+    }
+
+    [Theory]
+    [MemberData(nameof(ClientTypes))]
+    public void Read_Write_LegacyLong(ClientType client)
+    {
+        IPacket packet = new Packet(Header.Unknown, client);
+        packet.WriteLegacyLong(0);
+
+        int expectedBytes = client == ClientType.Flash ? 4 : 8;
+
+        // Wrote the correct number of bytes.
+        Assert.Equal(expectedBytes, packet.Length);
+
+        packet.Position = 0;
+        packet.ReadLegacyLong();
+
+        // Read the correct number of bytes.
+        Assert.Equal(expectedBytes, packet.Position);
+    }
+
+    [Theory(DisplayName = "Packet.Write(IEnumerable<int>)")]
+    [MemberData(nameof(ClientTypes))]
+    public void Read_Write_Enumerable(ClientType client)
+    {
+        IEnumerable<int> e = Enumerable.Range(1, 10);
+
+        IPacket packet = new Packet(Header.Unknown, client);
+        packet.Write((IEnumerable)e);
+
+        packet.Position = 0;
+        Assert.Equal(e.Count(), packet.ReadLegacyShort());
+        foreach (int n in e)
             Assert.Equal(n, packet.ReadInt());
     }
 
-    [Fact]
-    public void Read_List()
+    [Theory]
+    [MemberData(nameof(ClientTypes))]
+    public void Read_Write_Collection(ClientType client)
     {
         List<int> source = new() { 2, 4, 6, 8 };
 
-        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
+        IPacket packet = new Packet(Header.Unknown, client);
         packet.WriteCollection(source);
 
         packet.Position = 0;
