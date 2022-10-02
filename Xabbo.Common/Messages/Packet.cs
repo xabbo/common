@@ -9,7 +9,7 @@ using Xabbo.Common;
 
 namespace Xabbo.Messages;
 
-/// <inheritdoc />
+/// <inheritdoc cref="IPacket" />
 public sealed partial class Packet : IPacket
 {
     public static readonly Type
