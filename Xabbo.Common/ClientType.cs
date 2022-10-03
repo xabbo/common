@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo.Common;
+namespace Xabbo;
 
 /// <summary>
 /// Represents a type of game client.

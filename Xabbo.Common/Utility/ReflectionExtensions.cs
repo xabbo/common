@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Xabbo.Utility;
+namespace Xabbo;
 
 internal static class ReflectionExtensions
 {
