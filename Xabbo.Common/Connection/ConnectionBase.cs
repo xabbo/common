@@ -14,6 +14,17 @@ namespace Xabbo.Connection;
 public abstract partial class ConnectionBase : IConnection
 {
     /* Generic Send/Receive methods are implemented by the source generator. */
+    protected void Send(Header header)
+    {
+        using Packet packet = new(header, Client);
+        Send(packet);
+    }
+
+    protected async ValueTask SendAsync(Header header)
+    {
+        using Packet packet = new(header, Client);
+        await SendAsync(packet);
+    }
 
     /// <inheritdoc/>
     public abstract bool IsConnected { get; }
