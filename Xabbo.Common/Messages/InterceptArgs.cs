@@ -1,8 +1,8 @@
 ﻿using System;
 
-using Xabbo.Messages;
+using Xabbo.Interceptor;
 
-namespace Xabbo.Interceptor;
+namespace Xabbo.Messages;
 
 /// <summary>
 /// Contains event arguments of an intercepted packet.
