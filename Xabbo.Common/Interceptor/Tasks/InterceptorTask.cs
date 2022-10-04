@@ -56,14 +56,15 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
     /// </summary>
     /// <param name="timeout">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
+    /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
     public async Task<TResult> ExecuteAsync(int timeout, CancellationToken cancellationToken)
     {
         if (!_executionSemaphore.Wait(0, cancellationToken))
             throw new InvalidOperationException("The interceptor task has already been executed.");
 
         CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.Token.Register(() => SetCanceled());
-            if (timeout > 0) cts.CancelAfter(timeout);
+        cts.Token.Register(() => SetCanceled());
+        if (timeout > 0) cts.CancelAfter(timeout);
 
         _disconnectRegistration ??= Interceptor.DisconnectToken.Register(() => OnDisconnected());
 
@@ -91,12 +92,12 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
     }
 
     /// <summary>
-    /// Binds this task to the interceptor dispatcher.
+    /// Binds this task to the interceptor's dispatcher.
     /// </summary>
     protected virtual void OnBind() => Interceptor.Bind(this);
 
     /// <summary>
-    /// Releases this task from the interceptor dispatcher.
+    /// Releases this task from the interceptor's dispatcher.
     /// </summary>
     protected virtual void OnRelease() => Interceptor.Release(this);
 
