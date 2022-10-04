@@ -14,6 +14,7 @@ public sealed class CaptureMessageTask : InterceptorTask<IPacket>
 {
     private readonly bool _block;
     private readonly Header[] _headers;
+    private readonly Func<IReadOnlyPacket, bool>? _shouldCapture;
 
     /// <summary>
     /// Creates a new <see cref="CaptureMessageTask"/> targeting the specified headers.
@@ -21,11 +22,14 @@ public sealed class CaptureMessageTask : InterceptorTask<IPacket>
     /// <param name="interceptor">The interceptor to bind to.</param>
     /// <param name="headers">The headers to listen for.</param>
     /// <param name="block">Whether to block the captured packet.</param>
+    /// <param name="shouldCapture">A callback that may inspect an intercepted packet and return whether or not it should be captured.</param>
     public CaptureMessageTask(IInterceptor interceptor,
-        IEnumerable<Header> headers, bool block = false)
+        IEnumerable<Header> headers, bool block = false,
+        Func<IReadOnlyPacket, bool>? shouldCapture = null)
         : base(interceptor)
     {
         _block = block;
+        _shouldCapture = shouldCapture;
 
         if (headers is Header[] array)
         {
@@ -55,6 +59,9 @@ public sealed class CaptureMessageTask : InterceptorTask<IPacket>
     {
         try
         {
+            if (_shouldCapture?.Invoke(e.Packet) == false)
+                return;
+
             if (SetResult(e.Packet.Copy()))
             {
                 if (_block)
