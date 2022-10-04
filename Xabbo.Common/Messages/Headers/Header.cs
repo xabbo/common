@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-using Xabbo.Common;
-
 namespace Xabbo.Messages;
 
 /// <summary>

@@ -1,8 +1,4 @@
-﻿using System;
-
-using Xabbo.Common;
-
-namespace Xabbo.Messages;
+﻿namespace Xabbo.Messages;
 
 /// <summary>
 /// Specifies message header information for a specific client type.

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
-using Xabbo.Common;
-
 namespace Xabbo.Messages;
 
 public abstract class Headers

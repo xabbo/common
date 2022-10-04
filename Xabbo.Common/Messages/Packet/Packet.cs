@@ -5,8 +5,6 @@ using System.Buffers.Binary;
 using System.Text;
 using System.Globalization;
 
-using Xabbo.Common;
-
 namespace Xabbo.Messages;
 
 /// <inheritdoc cref="IPacket" />
