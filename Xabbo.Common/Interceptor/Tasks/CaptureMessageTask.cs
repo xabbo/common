@@ -37,13 +37,13 @@ public sealed class CaptureMessageTask : InterceptorTask<IPacket>
         }
     }
 
-    protected override void Bind()
+    protected override void OnBind()
     {
         foreach (Header header in _headers)
             Interceptor.Dispatcher.AddIntercept(header, OnIntercept, Interceptor.Client);
     }
 
-    protected override void Release()
+    protected override void OnRelease()
     {
         foreach (Header header in _headers)
             Interceptor.Dispatcher.RemoveIntercept(header, OnIntercept);

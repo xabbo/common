@@ -15,6 +15,8 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
     private readonly SemaphoreSlim _executionSemaphore = new(1);
     private readonly TaskCompletionSource<TResult> _completion;
 
+    private CancellationTokenRegistration? _disconnectRegistration;
+
     /// <summary>
     /// The interceptor that this task is bound to.
     /// </summary>
@@ -59,15 +61,15 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
         if (!_executionSemaphore.Wait(0, cancellationToken))
             throw new InvalidOperationException("The interceptor task has already been executed.");
 
-        CancellationTokenSource? cts = null;
-
-        try
-        {
-            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.Token.Register(() => SetCanceled());
             if (timeout > 0) cts.CancelAfter(timeout);
 
-            Bind();
+        _disconnectRegistration ??= Interceptor.DisconnectToken.Register(() => OnDisconnected());
+
+        try
+        {
+            OnBind();
 
             await OnExecuteAsync().ConfigureAwait(false);
             return await _completion.Task;
@@ -79,34 +81,29 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
         }
         finally
         {
-            Release();
-            cts?.Cancel();
+            OnRelease();
+
             cts?.Dispose();
+            _disconnectRegistration?.Unregister();
+
+            _executionSemaphore.Dispose();
         }
     }
 
     /// <summary>
     /// Binds this task to the interceptor dispatcher.
     /// </summary>
-    protected virtual void Bind()
-    {
-        Interceptor.Bind(this);
-        Interceptor.Disconnected += OnDisconnected;
-    }
+    protected virtual void OnBind() => Interceptor.Bind(this);
 
     /// <summary>
     /// Releases this task from the interceptor dispatcher.
     /// </summary>
-    protected virtual void Release()
-    {
-        Interceptor.Release(this);
-        Interceptor.Disconnected -= OnDisconnected;
-    }
+    protected virtual void OnRelease() => Interceptor.Release(this);
 
     /// <summary>
     /// Invoked when the connection ends while the interceptor task is in progress.
     /// </summary>
-    protected virtual void OnDisconnected(object? sender, EventArgs e)
+    protected virtual void OnDisconnected()
     {
         _completion.TrySetException(
             new Exception($"Disconnected while executing interceptor task '{GetType().FullName}'.")
