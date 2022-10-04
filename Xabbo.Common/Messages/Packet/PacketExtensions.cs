@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Xabbo.Common;
 
-namespace Xabbo.Messages;
+using Xabbo.Messages;
+
+namespace Xabbo;
 
 /// <summary>
 /// Provides extensions for reading/writing values to/from packets.

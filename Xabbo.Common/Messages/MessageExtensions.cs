@@ -1,7 +1,8 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
-namespace Xabbo.Messages;
+using Xabbo.Messages;
+
+namespace Xabbo;
 
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class MessageExtensions
