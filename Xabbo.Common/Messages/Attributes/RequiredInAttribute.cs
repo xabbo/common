@@ -1,8 +1,6 @@
 ﻿using System;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor;
+namespace Xabbo.Messages;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
 public sealed class RequiredInAttribute : IdentifiersAttribute

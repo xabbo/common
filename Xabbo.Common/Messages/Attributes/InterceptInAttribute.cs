@@ -1,6 +1,4 @@
-﻿using Xabbo.Messages;
-
-namespace Xabbo.Interceptor;
+﻿namespace Xabbo.Messages;
 
 public sealed class InterceptInAttribute : InterceptAttribute
 {
