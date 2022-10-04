@@ -1,0 +1,40 @@
+﻿using Xabbo.Messages;
+
+namespace Xabbo;
+
+{{~
+	func gtypes; ret array.join $[0] ', ' @(do(x); ret 'T'+x; end); end
+    func gargs; ret array.join $[0] ', ' @(do(x); ret 'T'+x+' arg'+x; end); end
+-}}
+
+public static partial class PacketExtensions
+{
+	#region Generic Read
+	{{~ for n in 2..max_params ~}}
+	/// <summary>
+	/// Reads the specified generically typed values from the packet into a tuple.
+	/// </summary>
+	public static ({{gtypes 1..n}}) Read<{{gtypes 1..n}}>(this IReadOnlyPacket packet) => (
+		{{~ for i in 1..n ~}}
+		packet.Read<T{{i}}>(){{ for.last ? '' : ',' }}
+		{{~ end ~}}
+	);{{ for.last ? '' : '\n' }}
+	{{~ end ~}}
+	#endregion
+
+	#region Generic Write
+	{{~ for n in 2..max_params ~}}
+	/// <summary>
+	/// Writes the specified generically typed values to the packet.
+	/// </summary>
+	public static TPacket Write<TPacket, {{gtypes 1..n}}>(this TPacket packet, {{gargs 1..n}})
+		where TPacket : IPacket
+	{
+		return packet
+		{{~ for i in 1..n ~}}
+			.Write(arg{{i}}){{ for.last ? ';' : '' }}
+		{{~ end ~}}
+	}
+	{{~ end ~}}
+	#endregion
+}

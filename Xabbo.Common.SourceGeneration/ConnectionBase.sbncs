@@ -1,0 +1,44 @@
+﻿using System.Threading.Tasks;
+
+using Xabbo;
+using Xabbo.Messages;
+
+namespace Xabbo.Connection;
+
+{{~
+    func gtypes; ret array.join $[0] ', ' @(do(x); ret 'T'+x; end); end
+    func gargs; ret array.join $[0] ', ' @(do(x); ret 'T'+x+' arg'+x; end); end
+-}}
+
+public abstract partial class ConnectionBase : IConnection
+{
+    #region Generic Send
+    {{~ for n in 1..max_params ~}}
+    /// <summary>
+    /// Sends a packet with the specified header and values to either the client or server, depending on the header destination.
+    /// </summary>
+    protected void Send<{{gtypes 1..n}}>(Header header, {{gargs 1..n}})
+    {
+        using Packet packet = new Packet(header, Client);
+        packet
+        {{~ for i in 1..n ~}}
+            .Write<Packet, T{{i}}>(arg{{i}}){{for.last?';':''}}
+        {{~ end ~}}
+        Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to either the client or server, depending on the header destination.
+    /// </summary>
+    protected async ValueTask SendAsync<{{gtypes 1..n}}>(Header header, {{gargs 1..n}})
+    {
+        using Packet packet = new Packet(header, Client);
+        packet
+        {{~ for i in 1..n ~}}
+            .Write<Packet, T{{i}}>(arg{{i}}){{for.last?';':''}}
+        {{~ end ~}}
+        await SendAsync(packet);
+    }{{ for.last ? '' : '\n' }}
+    {{~ end ~}}
+    #endregion
+}
