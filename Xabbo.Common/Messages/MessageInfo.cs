@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Xabbo.Common;
-
 namespace Xabbo.Messages;
 
 public sealed class MessageInfo : IMessageInfo

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 
-using Xabbo.Common;
 using Xabbo.Serialization;
 
 namespace Xabbo.Messages;

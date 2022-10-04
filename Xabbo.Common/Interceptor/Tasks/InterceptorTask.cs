@@ -10,7 +10,7 @@ namespace Xabbo.Interceptor.Tasks;
 /// A base class used to implement a task that can intercept packets and asynchronously return a result.
 /// </summary>
 /// <typeparam name="TResult">The result type of the task.</typeparam>
-public abstract class InterceptorTask<TResult> : IInterceptHandler
+public abstract class InterceptorTask<TResult> : IMessageHandler
 {
     private readonly SemaphoreSlim _executionSemaphore = new(1);
     private readonly TaskCompletionSource<TResult> _completion;
