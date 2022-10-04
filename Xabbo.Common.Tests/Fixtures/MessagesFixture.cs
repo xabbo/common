@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
+using Xabbo.Messages.Dispatcher;
 
 namespace Xabbo.Common.Tests;
 

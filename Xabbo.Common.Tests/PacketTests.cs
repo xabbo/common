@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections;
 
 using Xabbo.Messages;
+using Xabbo.Connection;
 
 namespace Xabbo.Common.Tests;
 
