@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 internal abstract class InterceptCallback : BindingCallback
 {
@@ -41,16 +39,16 @@ internal sealed class OpenInterceptCallback : InterceptCallback
 
 internal sealed class ClosedInterceptCallback : InterceptCallback
 {
-    private readonly Action<InterceptArgs> _callback;
+    private readonly Action<InterceptArgs> _handler;
 
-    public ClosedInterceptCallback(Header header, object? target, MethodInfo method, Action<InterceptArgs> callback)
-        : base(header, target, method, callback)
+    public ClosedInterceptCallback(Header header, object? target, MethodInfo method, Action<InterceptArgs> handler)
+        : base(header, target, method, handler)
     {
-        _callback = callback;
+        _handler = handler;
     }
 
     public override void Invoke(InterceptArgs e)
     {
-        _callback(e);
+        _handler(e);
     }
 }

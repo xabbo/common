@@ -5,14 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-using Xabbo.Common;
-using Xabbo.Messages;
-using Xabbo.Utility;
+using Xabbo.Interceptor;
 
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
-/// <inheritdoc cref="IInterceptDispatcher" />
-public sealed class InterceptDispatcher : IInterceptDispatcher
+/// <inheritdoc cref="IMessageDispatcher" />
+public sealed class MessageDispatcher : IMessageDispatcher
 {
     private static ReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
     {
@@ -32,7 +30,7 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
     private static IReadOnlyList<InterceptCallback> InterceptCallbackListFactory(ClientHeader key)
         => new List<InterceptCallback>();
 
-    private readonly ConcurrentDictionary<IInterceptHandler, InterceptorBinding> _bindings = new();
+    private readonly ConcurrentDictionary<IMessageHandler, InterceptorBinding> _bindings = new();
     private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<ReceiveCallback>> _receiveCallbacks = new();
     private readonly ConcurrentDictionary<ClientHeader, IReadOnlyList<InterceptCallback>> _interceptCallbacks = new();
 
@@ -42,10 +40,10 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
     public IMessageManager Messages { get; }
 
     /// <summary>
-    /// Creates a new <see cref="InterceptDispatcher"/> using the specified <see cref="IMessageManager"/>.
+    /// Creates a new <see cref="MessageDispatcher"/> using the specified <see cref="IMessageManager"/>.
     /// </summary>
     /// <param name="messages"></param>
-    public InterceptDispatcher(IMessageManager messages)
+    public MessageDispatcher(IMessageManager messages)
     {
         Messages = messages;
     }
@@ -90,7 +88,7 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
     /// <summary>
     /// Dispatches the specified message to all bound receive callbacks.
     /// </summary>
-    public void DispatchMessage(object? sender, IReadOnlyPacket packet)
+    public void DispatchPacket(IInterceptor? sender, IReadOnlyPacket packet)
     {
         ClientHeader? clientHeader = packet.Header.GetClientHeader(packet.Protocol);
         if (clientHeader is null) return;
@@ -99,7 +97,7 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
             InvokeReceiverCallbacks(list, sender, packet);
     }
 
-    private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, object? sender, IReadOnlyPacket packet)
+    private void InvokeReceiverCallbacks(IEnumerable<ReceiveCallback> callbacks, IInterceptor? sender, IReadOnlyPacket packet)
     {
         ClientHeader? header = packet.Header.GetClientHeader(packet.Protocol);
         if (header is null) return;
@@ -311,12 +309,12 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
         if (header.Unity is not null) AddInterceptCallbacks(header.Unity, callbacks);
     }
 
-    public bool IsBound(IInterceptHandler handler)
+    public bool IsBound(IMessageHandler handler)
     {
         return _bindings.ContainsKey(handler);
     }
 
-    public bool Bind(IInterceptHandler handler, ClientType requiredClientHeaders = ClientType.Flash | ClientType.Unity)
+    public bool Bind(IMessageHandler handler, ClientType requiredClientHeaders = ClientType.Flash | ClientType.Unity)
     {
         Type handlerType = handler.GetType();
         MethodInfo[] methods = handlerType.FindAllMethods().ToArray();
@@ -512,7 +510,7 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
         if (header.Unity is not null) RemoveInterceptCallbacks(header.Unity, callbacks);
     }
 
-    public bool Release(IInterceptHandler handler)
+    public bool Release(IMessageHandler handler)
     {
         if (!_bindings.TryRemove(handler, out InterceptorBinding? binding))
             return false;
@@ -558,7 +556,7 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
     }
 
     #region - Intercepts -
-    private void AddIntercept(Header header, ClientHeader key, Action<InterceptArgs> callback)
+    private void AddIntercept(Header header, ClientHeader key, Action<InterceptArgs> handler)
     {
         IReadOnlyList<InterceptCallback> previousList, newList;
 
@@ -566,14 +564,14 @@ public sealed class InterceptDispatcher : IInterceptDispatcher
         {
             previousList = _interceptCallbacks.GetOrAdd(key, InterceptCallbackListFactory);
 
-            if (previousList.Any(x => x.Delegate.Equals(callback)))
+            if (previousList.Any(x => x.Delegate.Equals(handler)))
             {
                 throw new InvalidOperationException("The specified intercept callback has already been added.");
             }
             else
             {
                 List<InterceptCallback> list = previousList.ToList();
-                list.Add(new ClosedInterceptCallback(header, callback.Target, callback.Method, callback));
+                list.Add(new ClosedInterceptCallback(header, handler.Target, handler.Method, handler));
                 newList = list;
             }
         }

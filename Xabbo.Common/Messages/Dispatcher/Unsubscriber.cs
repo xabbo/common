@@ -1,17 +1,16 @@
 ﻿using System;
-using Xabbo.Messages;
 
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 internal sealed class Unsubscriber : IDisposable
 {
-    private readonly IInterceptDispatcher _dispatcher;
+    private readonly IMessageDispatcher _dispatcher;
     private readonly HeaderSet _headers;
     private readonly Action<InterceptArgs> _callback;
 
     private bool _disposed;
 
-    public Unsubscriber(IInterceptDispatcher dispatcher, HeaderSet headers, Action<InterceptArgs> callback)
+    public Unsubscriber(IMessageDispatcher dispatcher, HeaderSet headers, Action<InterceptArgs> callback)
     {
         _dispatcher = dispatcher;
         _headers = headers;

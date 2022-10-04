@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Text;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 public sealed class UnresolvedIdentifiersException : Exception
 {

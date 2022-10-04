@@ -2,9 +2,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 internal static class InterceptDelegateFactory
 {

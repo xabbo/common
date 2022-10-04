@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 internal sealed class InterceptorBinding
 {
-    public IInterceptHandler Handler { get; }
+    public IMessageHandler Handler { get; }
     public IReadOnlyCollection<BindingCallback> Callbacks { get; }
 
-    public InterceptorBinding(IInterceptHandler handler, IEnumerable<BindingCallback> callbacks)
+    public InterceptorBinding(IMessageHandler handler, IEnumerable<BindingCallback> callbacks)
     {
         Handler = handler;
         Callbacks = new List<BindingCallback>(callbacks).AsReadOnly();

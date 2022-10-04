@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 public abstract class BindingCallback
 {

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Text;
 
-using Xabbo.Messages;
-
-namespace Xabbo.Interceptor.Dispatcher;
+namespace Xabbo.Messages.Dispatcher;
 
 public sealed class InterceptorBindingFailedException : Exception
 {
-    public IInterceptHandler Handler { get; }
+    public IMessageHandler Handler { get; }
     public Identifiers UnknownIdentifiers { get; }
     public Identifiers UnresolvedIdentifiers { get; }
 
     public InterceptorBindingFailedException(
-        IInterceptHandler handler,
+        IMessageHandler handler,
         Identifiers unknownIdentifiers,
         Identifiers unresolvedIdentifiers)
         : base(BuildMessage(handler, unknownIdentifiers, unresolvedIdentifiers))
@@ -22,7 +20,7 @@ public sealed class InterceptorBindingFailedException : Exception
         UnresolvedIdentifiers = unresolvedIdentifiers;
     }
 
-    private static string BuildMessage(IInterceptHandler handler,
+    private static string BuildMessage(IMessageHandler handler,
         Identifiers unknownIdentifiers,
         Identifiers unresolvedIdentifiers)
     {
