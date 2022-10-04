@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 using Scriban;
 
@@ -21,8 +23,11 @@ namespace Xabbo.Common.SourceGeneration
             }
         }
 
-        private static string RenderTemplate(string resourceName, object model)
-            => Template.Parse(GetTemplate(resourceName)).Render(model);
+        private static SourceText RenderTemplate(string resourceName, object model)
+        {
+            string renderedTemplate = Template.Parse(GetTemplate(resourceName)).Render(model);
+            return SourceText.From(renderedTemplate, Encoding.UTF8);
+        }
 
         public void Initialize(GeneratorInitializationContext context) { }
 
