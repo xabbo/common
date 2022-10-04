@@ -1,10 +1,19 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Xabbo.Interceptor;
+namespace Xabbo.Extension;
 
-public interface IRemoteInterceptor : IInterceptor
+/// <summary>
+/// Represents an extension interface provided by a remote packet interceptor service.
+/// </summary>
+public interface IRemoteExtension : IExtension
 {
+    /// <summary>
+    /// Gets the port that the remote interceptor is currently connected on.
+    /// </summary>
+    int Port { get; }
+
     /// <summary>
     /// Gets whether the remote interceptor service is running or not.
     /// </summary>
@@ -16,14 +25,9 @@ public interface IRemoteInterceptor : IInterceptor
     bool IsInterceptorConnected { get; }
 
     /// <summary>
-    /// Gets the port that the remote interceptor is currently connected on.
-    /// </summary>
-    int Port { get; }
-
-    /// <summary>
     /// Connects to the remote interceptor and processes incoming packets.
     /// </summary>
-    Task RunAsync();
+    Task RunAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Requests to stop the remote interceptor service.
