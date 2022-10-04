@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo.Interceptor;
+namespace Xabbo.Extension;
 
 /// <summary>
 /// The event arguments used when connection to the remote interceptor fails.

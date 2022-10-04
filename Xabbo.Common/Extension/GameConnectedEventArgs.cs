@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Xabbo.Common;
 using Xabbo.Messages;
 
-namespace Xabbo.Interceptor;
+namespace Xabbo.Extension;
 
 public sealed class GameConnectedEventArgs : EventArgs
 {
