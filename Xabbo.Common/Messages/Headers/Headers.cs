@@ -5,6 +5,11 @@ using System.Threading;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a dictionary that stores <see cref="Header"/>s.
+/// Any children of this class may expose <see cref="Header"/> properties
+/// which will internally map to the dictionary by their name.
+/// </summary>
 public abstract class Headers
 {
     private readonly ReaderWriterLockSlim _lock = new();
@@ -12,8 +17,14 @@ public abstract class Headers
     private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
     private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The destination of the headers stored in this dictionary.
+    /// </summary>
     public Destination Destination { get; }
 
+    /// <summary>
+    /// Constructs a new header dictionary with the specified destination.
+    /// </summary>
     public Headers(Destination destination)
     {
         Destination = destination;
@@ -35,6 +46,9 @@ public abstract class Headers
         }
     }
 
+    /// <summary>
+    /// Resets this dictionary and initializes it from the specified message information.
+    /// </summary>
     public void Load(IEnumerable<IMessageInfo> messages)
     {
         _lock.EnterWriteLock();
@@ -96,6 +110,9 @@ public abstract class Headers
         finally { _lock.ExitWriteLock(); }
     }
 
+    /// <summary>
+    /// Gets if a message with the specified name exists in this dictionary.
+    /// </summary>
     public bool MessageExists(string name)
     {
         _lock.EnterReadLock();
@@ -103,6 +120,10 @@ public abstract class Headers
         finally { _lock.ExitReadLock(); }
     }
 
+    /// <summary>
+    /// Attempts to get the name of the message with the specified client type and header value.
+    /// </summary>
+    /// <returns><see langword="true"/> if the name of the message was found.</returns>
     public bool TryGetName(ClientType clientType, short value, out string? name)
     {
         _lock.EnterReadLock();
@@ -123,6 +144,10 @@ public abstract class Headers
         finally { _lock.ExitReadLock(); }
     }
 
+    /// <summary>
+    /// Attempts to get the <see cref="Header"/> with the specified client type and value.
+    /// </summary>
+    /// <returns><see langword="true"/> if the header was found.</returns>
     public bool TryGetHeader(ClientType clientType, short value, out Header? header)
     {
         _lock.EnterReadLock();
@@ -130,6 +155,10 @@ public abstract class Headers
         finally { _lock.ExitReadLock(); }
     }
 
+    /// <summary>
+    /// Attempts to get the <see cref="Header"/> with the specified name.
+    /// </summary>
+    /// <returns><see langword="true"/> if the header was found.</returns>
     public bool TryGetHeader(string name, out Header? header)
     {
         _lock.EnterReadLock();
@@ -137,6 +166,10 @@ public abstract class Headers
         finally { _lock.ExitReadLock(); }
     }
 
+    /// <summary>
+    /// Gets the <see cref="Header"/> with the specified name, or throws if it does not exist.
+    /// </summary>
+    /// <exception cref="UnknownHeaderException">If a header with the specified name does not exist.</exception>
     public Header this[string name]
     {
         get

@@ -2,6 +2,9 @@
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents the direction of a message.
+/// </summary>
 [Flags]
 public enum Direction
 {

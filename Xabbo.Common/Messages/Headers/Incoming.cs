@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
+﻿#nullable disable
 #pragma warning disable CS1591
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// A header dictionary that provides named incoming header properties based on the Unity client.
+/// </summary>
 public sealed class Incoming : Headers
 {
     public Incoming()

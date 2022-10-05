@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a service that manages client specific message &amp; header information.
+/// </summary>
 public interface IMessageManager
 {
     /// <summary>

@@ -13,13 +13,18 @@ namespace Xabbo.Connection;
 /// </summary>
 public abstract partial class ConnectionBase : IConnection
 {
-    /* Generic Send/Receive methods are implemented by the source generator. */
+    /// <summary>
+    /// Sends a packet with the specified header to either the client or server, depending on the header destination.
+    /// </summary>
     protected void Send(Header header)
     {
         using Packet packet = new(header, Client);
         Send(packet);
     }
 
+    /// <summary>
+    /// Sends a packet with the specified header to either the client or server, depending on the header destination.
+    /// </summary>
     protected async ValueTask SendAsync(Header header)
     {
         using Packet packet = new(header, Client);

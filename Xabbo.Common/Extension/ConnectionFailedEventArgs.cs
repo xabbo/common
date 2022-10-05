@@ -3,7 +3,7 @@
 namespace Xabbo.Extension;
 
 /// <summary>
-/// The event arguments used when connection to the remote interceptor fails.
+/// Provides data for the <see cref="IRemoteExtension.InterceptorConnectionFailed"/> event.
 /// </summary>
 public sealed class ConnectionFailedEventArgs : EventArgs
 {
@@ -11,11 +11,16 @@ public sealed class ConnectionFailedEventArgs : EventArgs
     /// Gets the current number of attempts made to connect to the remote interceptor.
     /// </summary>
     public int Attempt { get; }
+
     /// <summary>
     /// Gets or sets whether to retry connecting to the remote interceptor.
     /// </summary>
     public bool Retry { get; set; }
 
+    /// <summary>
+    /// Constructs a new <see cref="ConnectionFailedEventArgs"/>.
+    /// </summary>
+    /// <param name="attempt">The current number of attempts made to connect to the remote interceptor.</param>
     public ConnectionFailedEventArgs(int attempt)
     {
         Attempt = attempt;

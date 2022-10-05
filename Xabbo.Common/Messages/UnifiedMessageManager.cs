@@ -41,12 +41,23 @@ public sealed class UnifiedMessageManager : IMessageManager
     public Incoming In { get; private set; }
     public Outgoing Out { get; private set; }
 
+    /// <summary>
+    /// Gets the header
+    /// </summary>
+    /// <param name="identifier"></param>
+    /// <returns></returns>
     public Header this[Identifier identifier] => GetHeaders(identifier.Destination)[identifier.Name];
 
+    /// <summary>
+    /// Constructs a new <see cref="UnifiedMessageManager"/> using the specified configuration.
+    /// </summary>
     public UnifiedMessageManager(IConfiguration config)
         : this(config.GetValue("Xabbo:Messages:MapFilePath", "messages.ini"))
     { }
 
+    /// <summary>
+    /// Constructs a new <see cref="UnifiedMessageManager"/> using the message map file path.
+    /// </summary>
     public UnifiedMessageManager(string filePath)
     {
         _mapFilePath = filePath;

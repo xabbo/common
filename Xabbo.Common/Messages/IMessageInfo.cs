@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Xabbo.Messages;
+﻿namespace Xabbo.Messages;
 
 public interface IMessageInfo
 {

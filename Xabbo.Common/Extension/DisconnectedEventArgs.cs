@@ -3,7 +3,7 @@
 namespace Xabbo.Extension;
 
 /// <summary>
-/// The event arguments used when the connection to the remote interceptor is lost.
+/// Provides data for the <see cref="IRemoteExtension.InterceptorDisconnected"/> event.
 /// </summary>
 public sealed class DisconnectedEventArgs : EventArgs
 {
@@ -17,6 +17,10 @@ public sealed class DisconnectedEventArgs : EventArgs
     /// </summary>
     public bool Reconnect { get; set; }
 
+    /// <summary>
+    /// Constructs a new <see cref="DisconnectedEventArgs"/>.
+    /// </summary>
+    /// <param name="error">The error that caused the disconnection.</param>
     public DisconnectedEventArgs(Exception? error)
     {
         Error = error;

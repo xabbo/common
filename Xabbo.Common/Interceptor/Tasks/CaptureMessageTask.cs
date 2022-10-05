@@ -8,7 +8,7 @@ using Xabbo.Messages;
 namespace Xabbo.Interceptor.Tasks;
 
 /// <summary>
-/// Captures the first message with a matching target header.
+/// A task that captures the first intercepted message with a specified header.
 /// </summary>
 public sealed class CaptureMessageTask : InterceptorTask<IPacket>
 {
@@ -17,7 +17,7 @@ public sealed class CaptureMessageTask : InterceptorTask<IPacket>
     private readonly Func<IReadOnlyPacket, bool>? _shouldCapture;
 
     /// <summary>
-    /// Creates a new <see cref="CaptureMessageTask"/> targeting the specified headers.
+    /// Constructs a new <see cref="CaptureMessageTask"/> targeting the specified headers.
     /// </summary>
     /// <param name="interceptor">The interceptor to bind to.</param>
     /// <param name="headers">The headers to listen for.</param>
