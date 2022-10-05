@@ -13,6 +13,11 @@
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
+
+  <!-- GitVersion -->
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3" PrivateAssets="all" />
+  </ItemGroup>
 	
 	<!-- Source generation -->
 	<ItemGroup>
@@ -24,9 +29,6 @@
 		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
 		<PackageId>Xabbo.Common</PackageId>
 		<Description>Common library for interfacing with Habbo packet interceptors.</Description>
-		<Version Condition="'$(Configuration)'=='Release'">1.0.0-beta.3</Version>
-		<Version Condition="'$(Configuration)'=='Debug'">0.0.0-dev</Version>
-		<InformationalVersion>$(Version)</InformationalVersion>
 		<RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -58,9 +60,9 @@
 	</ItemGroup>
 
 	<!-- Add package to local source after pack -->
-	<Target Name="NugetAddPackage" AfterTargets="Pack">
+	<!--<Target Name="NugetAddPackage" AfterTargets="Pack">
 		<Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
 		<Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
-	</Target>
+	</Target>-->
 
 </Project>
