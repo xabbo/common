@@ -7,7 +7,7 @@ See [Xabbo.GEarth](https://github.com/b7c/Xabbo.GEarth) for a [G-Earth](https://
 ### Build
 Requires the [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 
-- Checkout the repo.
+- Clone the repository.
 ```
 git clone https://github.com/b7c/Xabbo.Common
 ```
