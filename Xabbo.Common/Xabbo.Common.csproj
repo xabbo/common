@@ -59,10 +59,4 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
 	</ItemGroup>
 
-	<!-- Add package to local source after pack -->
-	<!--<Target Name="NugetAddPackage" AfterTargets="Pack">
-		<Exec Command="nuget delete $(PackageId) $(Version) -Source $(LocalPackageSource) -NonInteractive" ContinueOnError="true" />
-		<Exec Command="nuget add bin\$(Configuration)\$(PackageId).$(Version).nupkg -Source $(LocalPackageSource)" />
-	</Target>-->
-
 </Project>
