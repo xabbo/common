@@ -1,60 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<!-- Project -->
-	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
-		<RootNamespace>Xabbo</RootNamespace>
-		<Nullable>enable</Nullable>
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
+  <PropertyGroup Label="Project">
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <RootNamespace>Xabbo</RootNamespace>
+    <Nullable>enable</Nullable>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<None Include="..\.editorconfig" Link=".editorconfig" />
-	</ItemGroup>
+  <PropertyGroup Label="Package">
+    <PackageId>Xabbo.Common</PackageId>
+    <Description>Common library for interfacing with Habbo packet interceptors.</Description>
+    <RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>img\package-icon.png</PackageIcon>
+    <Authors>b7</Authors>
+    <PackageTags>xabbo;habbo</PackageTags>
+  </PropertyGroup>
 
-  <!-- GitVersion -->
-  <ItemGroup>
-    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3" PrivateAssets="all" />
+  <ItemGroup Label="Include package icon">
+    <None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
   </ItemGroup>
-	
-	<!-- Source generation -->
-	<ItemGroup>
-		<ProjectReference Include="..\Xabbo.Common.SourceGeneration\Xabbo.Common.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
 
-	<!-- Package -->
-	<PropertyGroup>
-		<LocalPackageSource>%USERPROFILE%\.nuget\local</LocalPackageSource>
-		<PackageId>Xabbo.Common</PackageId>
-		<Description>Common library for interfacing with Habbo packet interceptors.</Description>
-		<RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageIcon>img\package-icon.png</PackageIcon>
-		<Authors>b7</Authors>
-		<PackageTags>xabbo;habbo</PackageTags>
-	</PropertyGroup>
+  <PropertyGroup Label="Rename paths">
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=Xabbo.Common\</PathMap>
+  </PropertyGroup>
 
-	<!-- Include package icon -->
-	<ItemGroup>
-		<None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
-	</ItemGroup>
-
-	<!-- Rename paths -->
-	<PropertyGroup>
-		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-		<PathMap>$(AppOutputBase)=Xabbo.Common\</PathMap>
-	</PropertyGroup>
-
-	<!-- Documentation -->
-	<PropertyGroup>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-	</PropertyGroup>
-
-	<!-- References -->
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-	</ItemGroup>
+  <PropertyGroup Label="Include documentation">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <ItemGroup Label="References">
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3" PrivateAssets="all" />
+    <ProjectReference Include="..\Xabbo.Common.SourceGeneration\Xabbo.Common.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+  </ItemGroup>
 
 </Project>
