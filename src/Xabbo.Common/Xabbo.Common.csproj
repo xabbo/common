@@ -13,13 +13,13 @@
     <RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>img\package-icon.png</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <Authors>b7</Authors>
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Label="Include package icon">
-    <None Include="res\img\xabbo-skull-128.png" Pack="true" PackagePath="img\package-icon.png" />
+    <None Include="..\..\res\xabbo-skull-128.png" Pack="true" PackagePath="icon.png" />
   </ItemGroup>
 
   <PropertyGroup Label="Rename paths">
