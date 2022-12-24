@@ -48,7 +48,6 @@ public class Hotel
         {
             hotels = new List<Hotel>()
             {
-                new("Sandbox", "s2", subdomain: "sandbox"),
                 new("US", "us"),
                 new("Spain", domain: "es"),
                 new("Finland", domain: "fi"),
@@ -57,7 +56,8 @@ public class Hotel
                 new("Germany", domain: "de"),
                 new("France", domain: "fr"),
                 new("Brazil", identifier: "br", domain: "com.br"),
-                new("Turkey", identifier: "tr", domain: "com.tr")
+                new("Turkey", identifier: "tr", domain: "com.tr"),
+                new("Sandbox", "s2", subdomain: "sandbox")
             };
         }
 
@@ -107,12 +107,16 @@ public class Hotel
         string subdomain = "www", string domain = "com",
         string? host = null, string? gameHost = null)
     {
+        identifier ??= domain;
+        host ??= $"{subdomain}.habbo.{domain}";
+        gameHost ??= $"game-{identifier}.habbo.com";
+
         Name = name;
-        Identifier = identifier ?? domain;
+        Identifier = identifier;
         Subdomain = subdomain;
         Domain = domain;
-        Host = host ?? $"{subdomain}.habbo.{domain}";
-        GameHost = gameHost ?? $"game-{identifier}.habbo.com";
+        Host = host;
+        GameHost = gameHost;
     }
 
     /// <summary>
