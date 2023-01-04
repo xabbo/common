@@ -10,14 +10,30 @@ namespace Xabbo.Messages;
 /// <inheritdoc cref="IPacket" />
 public sealed partial class Packet : IPacket
 {
-    public static readonly Type
-        Byte = typeof(byte),
-        Bool = typeof(bool),
-        Short = typeof(short),
-        Int = typeof(int),
-        Float = typeof(float),
-        Long = typeof(long),
-        String = typeof(string);
+    /// <inheritdoc cref="byte" />
+    public static readonly Type Byte = typeof(byte);
+
+    /// <summary>
+    /// Represents a boolean as an 8-bit unsigned integer.
+    /// </summary>
+    public static readonly Type Bool = typeof(bool);
+
+    /// <inheritdoc cref="short" />
+    public static readonly Type Short = typeof(short);
+
+    /// <inheritdoc cref="int" />
+    public static readonly Type Int = typeof(int);
+
+    /// <inheritdoc cref="float" />
+    public static readonly Type Float = typeof(float);
+
+    /// <inheritdoc cref="long" />
+    public static readonly Type Long = typeof(long);
+
+    /// <summary>
+    /// Represents a UTF-8 encoded string preceded by a 2-byte integer specifying its length.
+    /// </summary>
+    public static readonly Type String = typeof(string);
 
     private bool _disposed;
     private IMemoryOwner<byte> _memoryOwner;
