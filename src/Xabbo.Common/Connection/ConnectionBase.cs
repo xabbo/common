@@ -43,6 +43,12 @@ public abstract partial class ConnectionBase : IConnection
     /// <inheritdoc/>
     public abstract string ClientIdentifier { get; }
 
+    /// <inheritdoc />
+    public abstract string ClientVersion { get; }
+
+    /// <inheritdoc />
+    public abstract Hotel Hotel { get; }
+
     /// <inheritdoc/>
     public abstract void Send(IReadOnlyPacket packet);
 

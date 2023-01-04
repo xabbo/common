@@ -32,6 +32,16 @@ public interface IConnection
     string ClientIdentifier { get; }
 
     /// <summary>
+    /// Gets the client version for this connection.
+    /// </summary>
+    string ClientVersion { get; }
+
+    /// <summary>
+    /// Gets the hotel this connection is associated with.
+    /// </summary>
+    Hotel Hotel { get; }
+
+    /// <summary>
     /// Sends a packet to the client or server, specified by the destination of the packet's header.
     /// </summary>
     void Send(IReadOnlyPacket packet);
