@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a <see cref="long"/> that is serialized to an <see cref="int"/> on Flash sessions for compatibility.
+/// Represents a <see cref="long"/> that is serialized as an <see cref="int"/> on Flash sessions for compatibility.
 /// </summary>
 public struct LegacyLong
 {

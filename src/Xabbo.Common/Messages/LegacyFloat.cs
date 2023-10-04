@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a <see cref="float"/> that is serialized to a <see cref="string"/> on Flash sessions for compatibility.
+/// Represents a <see cref="float"/> that is serialized as a <see cref="string"/> on Flash sessions for compatibility.
 /// </summary>
 public struct LegacyFloat
 {

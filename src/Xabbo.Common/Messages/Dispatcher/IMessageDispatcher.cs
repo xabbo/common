@@ -26,7 +26,7 @@ public interface IMessageDispatcher
     bool IsBound(IMessageHandler handler);
 
     /// <summary>
-    /// Binds the specified message handler to this dispatcher.
+    /// Binds the specified message handler instance to this dispatcher.
     /// Throws an exception if any of the message identifiers are unable to be resolved.
     /// </summary>
     /// <param name="handler">The message handler to bind.</param>
@@ -38,7 +38,7 @@ public interface IMessageDispatcher
     bool Bind(IMessageHandler handler, ClientType requiredClientHeaders);
 
     /// <summary>
-    /// Releases the binding to the specified intercept handler.
+    /// Releases the binding to the specified message handler.
     /// </summary>
     /// <returns>Whether the binding was released or not.</returns>
     bool Release(IMessageHandler handler);
