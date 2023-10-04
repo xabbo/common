@@ -6,6 +6,6 @@ namespace Xabbo.Messages;
 public sealed class RequiredOutAttribute : IdentifiersAttribute
 {
     public RequiredOutAttribute(params string[] identifiers)
-      : base(Destination.Server, identifiers)
+      : base(Direction.Outgoing, identifiers)
     { }
 }

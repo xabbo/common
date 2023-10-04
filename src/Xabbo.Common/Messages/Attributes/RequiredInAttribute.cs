@@ -6,6 +6,6 @@ namespace Xabbo.Messages;
 public sealed class RequiredInAttribute : IdentifiersAttribute
 {
     public RequiredInAttribute(params string[] identifiers)
-      : base(Destination.Client, identifiers)
+      : base(Direction.Incoming, identifiers)
     { }
 }

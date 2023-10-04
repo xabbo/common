@@ -42,11 +42,11 @@ public sealed class UnifiedMessageManager : IMessageManager
     public Outgoing Out { get; private set; }
 
     /// <summary>
-    /// Gets the header
+    /// Gets a header by its identifier.
     /// </summary>
     /// <param name="identifier"></param>
     /// <returns></returns>
-    public Header this[Identifier identifier] => GetHeaders(identifier.Destination)[identifier.Name];
+    public Header this[Identifier identifier] => GetHeaders(identifier.Direction)[identifier.Name];
 
     /// <summary>
     /// Constructs a new <see cref="UnifiedMessageManager"/> using the specified configuration.
@@ -88,13 +88,13 @@ public sealed class UnifiedMessageManager : IMessageManager
         _initialized = true;
     }
 
-    private Headers GetHeaders(Destination destination)
+    private Headers GetHeaders(Direction direction)
     {
-        return destination switch
+        return direction switch
         {
-            Destination.Client => In,
-            Destination.Server => Out,
-            _ => throw new Exception("Invalid destination")
+            Direction.Incoming => In,
+            Direction.Outgoing => Out,
+            _ => throw new Exception("Invalid direction.")
         };
     }
 
@@ -104,7 +104,7 @@ public sealed class UnifiedMessageManager : IMessageManager
         {
             Direction.Incoming => _incomingHeaderMap,
             Direction.Outgoing => _outgoingHeaderMap,
-            _ => throw new Exception("Invalid direction")
+            _ => throw new Exception("Invalid direction.")
         };
     }
 
@@ -213,22 +213,22 @@ public sealed class UnifiedMessageManager : IMessageManager
 
     public bool IdentifierExists(Identifier identifier)
     {
-        return GetHeaders(identifier.Destination).TryGetHeader(identifier.Name, out _);
+        return GetHeaders(identifier.Direction).TryGetHeader(identifier.Name, out _);
     }
 
     public bool TryGetHeader(Identifier identifier, [NotNullWhen(true)] out Header? header)
     {
-        return TryGetHeaderByName(identifier.Destination, identifier.Name, out header);
+        return TryGetHeaderByName(identifier.Direction, identifier.Name, out header);
     }
 
-    public bool TryGetHeaderByValue(Destination destination, ClientType clientType, short value, [NotNullWhen(true)] out Header? header)
+    public bool TryGetHeaderByValue(Direction direction, ClientType clientType, short value, [NotNullWhen(true)] out Header? header)
     {
-        return GetHeaders(destination).TryGetHeader(clientType, value, out header);
+        return GetHeaders(direction).TryGetHeader(clientType, value, out header);
     }
 
-    public bool TryGetHeaderByName(Destination destination, string name, [NotNullWhen(true)] out Header? header)
+    public bool TryGetHeaderByName(Direction direction, string name, [NotNullWhen(true)] out Header? header)
     {
-        return GetHeaders(destination).TryGetHeader(name, out header);
+        return GetHeaders(direction).TryGetHeader(name, out header);
     }
 
     public bool TryGetInfoByHeader(Direction direction, ClientType clientType, short header, [NotNullWhen(true)] out MessageInfo? info)

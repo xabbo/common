@@ -19,13 +19,13 @@ public abstract class IdentifiersAttribute : Attribute
     /// </summary>
     public IReadOnlyList<Identifier> Identifiers { get; }
 
-    public IdentifiersAttribute(Destination destination, params string[] identifiers)
+    public IdentifiersAttribute(Direction direction, params string[] identifiers)
     {
         if (identifiers is null || identifiers.Length == 0)
             throw new ArgumentException("At least one identifier must be defined.", nameof(identifiers));
 
         Identifiers = identifiers
-            .Select(name => new Identifier(destination, name))
+            .Select(name => new Identifier(direction, name))
             .Distinct()
             .ToList()
             .AsReadOnly();

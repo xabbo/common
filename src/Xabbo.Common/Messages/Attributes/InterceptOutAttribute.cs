@@ -3,6 +3,6 @@
 public sealed class InterceptOutAttribute : InterceptAttribute
 {
     public InterceptOutAttribute(params string[] identifiers)
-        : base(Destination.Server, identifiers)
+        : base(Direction.Outgoing, identifiers)
     { }
 }

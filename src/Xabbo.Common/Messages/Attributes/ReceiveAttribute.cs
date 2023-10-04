@@ -6,6 +6,6 @@ namespace Xabbo.Messages;
 public sealed class ReceiveAttribute : IdentifiersAttribute
 {
     public ReceiveAttribute(params string[] identifiers)
-        : base(Destination.Client, identifiers)
+        : base(Direction.Incoming, identifiers)
     { }
 }

@@ -27,6 +27,18 @@ public static partial class InterceptorExtensions
     }
 
     /// <summary>
+    /// Sends a packet with the header specified by an identifier to either the client or server, depending on the destination.
+    /// If a direction is not specified, it is assumed to be outgoing.
+    /// </summary>
+    public static ValueTask SendAsync(this IInterceptor interceptor, Identifier identifier)
+    {
+        if (identifier.Direction == Direction.Unknown)
+            identifier = identifier.WithDirection(Direction.Outgoing);
+
+        return SendAsync(interceptor, interceptor.Messages[identifier]);
+    }
+
+    /// <summary>
     /// Sends a packet with the specified header to either the client or server, depending on the header destination.
     /// </summary>
     public static void Send(this IInterceptor interceptor, Header header)
@@ -34,6 +46,12 @@ public static partial class InterceptorExtensions
         using Packet p = new(header, interceptor.Client);
         interceptor.Send(p);
     }
+
+    /// <summary>
+    /// Sends a packet with the header specified by an identifier to either the client or server, depending on the destination.
+    /// </summary>
+    public static void Send(this IInterceptor interceptor, Identifier identifier)
+        => Send(interceptor, interceptor.Messages[identifier]);
 
     /// <summary>
     /// Asynchronously receives a packet with any of the specified headers.

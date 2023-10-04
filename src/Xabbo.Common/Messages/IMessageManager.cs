@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,14 +47,14 @@ public interface IMessageManager
     bool TryGetHeader(Identifier identifier, [NotNullWhen(true)] out Header? header);
 
     /// <summary>
-    /// Attempts to get a header by its destination and value.
+    /// Attempts to get a header by its direction and value.
     /// </summary>
-    bool TryGetHeaderByValue(Destination destination, ClientType clientType, short value, [NotNullWhen(true)] out Header? header);
+    bool TryGetHeaderByValue(Direction direction, ClientType clientType, short value, [NotNullWhen(true)] out Header? header);
 
     /// <summary>
-    /// Attempts to get a header by its destination and name.
+    /// Attempts to get a header by its direction and name.
     /// </summary>
-    bool TryGetHeaderByName(Destination destination, string name, [NotNullWhen(true)] out Header? header);
+    bool TryGetHeaderByName(Direction direction, string name, [NotNullWhen(true)] out Header? header);
 
     /// <summary>
     /// Attempts to get a message's info by its direction and header.

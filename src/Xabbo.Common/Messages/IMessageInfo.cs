@@ -3,11 +3,6 @@
 public interface IMessageInfo
 {
     /// <summary>
-    /// Gets the destination of the message.
-    /// </summary>
-    Destination Destination { get; }
-
-    /// <summary>
     /// Gets the direction of the message.
     /// </summary>
     Direction Direction { get; }

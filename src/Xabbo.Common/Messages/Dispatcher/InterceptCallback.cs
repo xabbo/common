@@ -5,14 +5,14 @@ namespace Xabbo.Messages.Dispatcher;
 
 internal abstract class InterceptCallback : BindingCallback
 {
-    public Destination Destination { get; }
-    public bool IsOutgoing => Destination == Destination.Server;
-    public bool IsIncoming => Destination == Destination.Client;
+    public Direction Direction { get; }
+    public bool IsOutgoing => Direction == Direction.Outgoing;
+    public bool IsIncoming => Direction == Direction.Incoming;
 
     public InterceptCallback(Header header, object? target, MethodInfo method, Delegate @delegate)
         : base(header, target, method, @delegate)
     {
-        Destination = header.Destination;
+        Direction = header.Direction;
     }
 
     public abstract void Invoke(InterceptArgs e);

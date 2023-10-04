@@ -164,7 +164,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
                 }
 
                 string messageName = header.Value.ToString();
-                if (Messages.TryGetInfoByHeader(e.Destination.ToDirection(),
+                if (Messages.TryGetInfoByHeader(e.Direction,
                     e.Packet.Protocol, header.Value, out MessageInfo? messageInfo))
                 {
                     messageName = messageInfo.UnityName ?? messageInfo.FlashName ?? messageName;

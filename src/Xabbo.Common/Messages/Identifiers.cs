@@ -13,15 +13,15 @@ public sealed class Identifiers : HashSet<Identifier>
     /// <summary>
     /// Gets the identifiers in this set with an unknown destination.
     /// </summary>
-    public IEnumerable<Identifier> Unknown => this.Where(id => id.Destination == Destination.Unknown);
+    public IEnumerable<Identifier> Unknown => this.Where(id => id.Direction == Direction.Unknown);
     /// <summary>
     /// Gets the incoming identifiers in this set.
     /// </summary>
-    public IEnumerable<Identifier> Incoming => this.Where(id => id.Destination == Destination.Client);
+    public IEnumerable<Identifier> Incoming => this.Where(id => id.Direction == Direction.Incoming);
     /// <summary>
     /// Gets the outgoing identifiers in this set.
     /// </summary>
-    public IEnumerable<Identifier> Outgoing => this.Where(id => id.Destination == Destination.Server);
+    public IEnumerable<Identifier> Outgoing => this.Where(id => id.Direction == Direction.Outgoing);
 
     /// <summary>
     /// Creates an empty identifier set.
@@ -45,30 +45,30 @@ public sealed class Identifiers : HashSet<Identifier>
         if (incoming != null)
         {
             foreach (string identifier in incoming)
-                Add(new Identifier(Destination.Client, identifier));
+                Add(new Identifier(Direction.Incoming, identifier));
         }
 
         if (outgoing != null)
         {
             foreach (string identifier in outgoing)
-                Add(new Identifier(Destination.Server, identifier));
+                Add(new Identifier(Direction.Outgoing, identifier));
         }
     }
 
     /// <summary>
-    /// Adds a new identifier with the specified destination and name to this set.
+    /// Adds a new identifier with the specified direction and name to this set.
     /// </summary>
-    /// <param name="destination"></param>
+    /// <param name="direction"></param>
     /// <param name="name"></param>
-    public void Add(Destination destination, string name) => Add(new Identifier(destination, name));
+    public void Add(Direction direction, string name) => Add(new Identifier(direction, name));
 
     /// <summary>
-    /// Adds a range of new identifiers with the specified destination and names to this set.
+    /// Adds a range of new identifiers with the specified direction and names to this set.
     /// </summary>
-    public void Add(Destination destination, params string[] names)
+    public void Add(Direction direction, params string[] names)
     {
         foreach (string name in names)
-            Add(destination, name);
+            Add(direction, name);
     }
 
     /// <summary>

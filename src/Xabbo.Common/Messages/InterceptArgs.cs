@@ -22,9 +22,9 @@ public sealed class InterceptArgs : EventArgs, IDisposable
     public DateTime Timestamp { get; }
 
     /// <summary>
-    /// Gets the destination of the packet.
+    /// Gets the direction of the packet.
     /// </summary>
-    public Destination Destination { get; }
+    public Direction Direction { get; }
 
     /// <summary>
     /// Gets the sequence number of the intercepted packet.
@@ -42,14 +42,14 @@ public sealed class InterceptArgs : EventArgs, IDisposable
     public IReadOnlyPacket OriginalPacket { get; }
 
     /// <summary>
-    /// Gets if the packet's destination is to the client.
+    /// Gets if the packet's direction is incoming.
     /// </summary>
-    public bool IsIncoming => Destination == Destination.Client;
+    public bool IsIncoming => Direction == Direction.Incoming;
 
     /// <summary>
-    /// Gets if the packet's destination is to the server.
+    /// Gets if the packet's direction is outgoing.
     /// </summary>
-    public bool IsOutgoing => Destination == Destination.Server;
+    public bool IsOutgoing => Direction == Direction.Outgoing;
 
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
@@ -67,11 +67,11 @@ public sealed class InterceptArgs : EventArgs, IDisposable
     /// <summary>
     /// Constructs a new InterceptArgs instance with the specified destination and packet.
     /// </summary>
-    public InterceptArgs(IInterceptor interceptor, Destination destination, IPacket packet)
+    public InterceptArgs(IInterceptor interceptor, Direction destination, IPacket packet)
     {
         Interceptor = interceptor;
         Timestamp = DateTime.Now;
-        Destination = destination;
+        Direction = destination;
         Packet = packet;
 
         OriginalPacket = new Packet(packet.Header, packet.Buffer, packet.Protocol);
