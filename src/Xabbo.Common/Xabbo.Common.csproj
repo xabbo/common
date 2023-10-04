@@ -5,6 +5,8 @@
     <RootNamespace>Xabbo</RootNamespace>
     <Nullable>enable</Nullable>
     <DebugType>embedded</DebugType>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Label="Package">
@@ -17,6 +19,11 @@
     <Authors>b7</Authors>
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup Label="Exclude generated source files">
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
 
   <ItemGroup Label="Include package icon">
     <None Include="..\..\res\xabbo-skull-128.png" Pack="true" PackagePath="icon.png" />
