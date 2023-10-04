@@ -1,0 +1,567 @@
+LegacyBannerPublicKey
+ClubAndSecurityLevels; UserRights
+Ok; AuthenticationOK
+Film
+UserObject; *
+WalletBalance; CreditBalance
+ScrSendUserInfo; *
+IsFirstLoginOfDay; *
+ScrSendKickbackInfo; *
+Token; !
+MessengerInit; *
+FriendListUpdate; *
+FriendListFragment; *
+CloseConnection; *
+OpenConnectionConfirmation; OpenConnection
+NoLoginPermission
+RoomExitReason
+DeleteFlatResult
+Chat; *
+Whisper; *
+Shout; *
+FloodControl; *
+UsersInRoom; Users
+UserLoggedOut; UserRemove
+StackingHeightmap; HeightMap
+ActiveObjects; Objects
+Error; GenericError
+Status; UserUpdate
+UserBanned; *
+PetNameApproved
+PetStatusUpdate; *
+PetLevelUpdate; *
+YouAreController; *
+YouAreNotController; *
+NoSuchFlat; *
+Items; *
+FlatProperty; RoomProperty
+YouAreOwner; *
+ItemData; ItemDataUpdate
+ServiceIsClosed
+Ping; *
+RegOk
+PickedUpPetFromRoom
+FlatCreated; *
+SubFlatCreated
+PickedUpAllItems
+DoorFlat
+DoorOtherEndDeleted
+DoorNotInstalled
+PurchaseError; *
+CatalogUrl
+PurchaseOk; *
+NotEnoughBalance; *
+RoomReady; *
+YouAreModerator
+PhTickets
+PhNoTickets
+JumpData
+JumpDataSaved
+UserNotFound
+JumpsForUser
+GotoJumpingPlace
+OwnerPresence
+AddItem; ItemAdd
+RemoveItem; ItemRemove
+UpdateItem; ItemUpdate
+StuffDataUpdate; ObjectDataUpdate
+DoorOut
+DiceValue; *
+DoorbellRinging; Doorbell
+DoorIn
+ActiveObjectAdd; ObjectAdd
+ActiveObjectRemove; ObjectRemove
+ActiveObjectUpdate; ObjectUpdate
+InventoryAddOrUpdateFurni; FurniListAddOrUpdate
+InventoryRemoveFurni; FurniListRemove
+InventoryInvalidate; FurniListInvalidate
+TradeYouAreNotAllowed; TradingYouAreNotAllowed
+TradeOtherNotAllowed; TradingOtherNotAllowed
+TradeOpen; TradingOpen
+TradeOpenFail; TradeOpenFailed
+TradeNoTradeOpen; TradingNotOpen
+TradeNoSuchItem
+TradeItems; TradingItemList
+TradeAccept; TradingAccept
+TradeClose; TradingClose
+TradeConfirmation; TradingConfirmation
+TradeCompleted; TradingCompleted
+Trigger
+TeleportRelinkResponse
+FurniRentOrBuyoutOffer; *
+DonationSettings; !
+DonateResult; !
+PhLiftDoorOpen
+PhLiftDoorClose
+PhTicketsBuy
+PhJumpingPlaceOk
+CatalogIndex; *
+CatalogPage; *
+MemberInfo
+PresentOpen; PresentOpened
+FlatPasswordOk
+NewBuddyRequest; NewFriendRequest
+CancelBuddyRequest
+MessengerNewConsoleMessage; NewConsole
+MessengerRoomInvite; RoomInvite
+SystemBroadcast; HabboBroadcast
+InventoryPush; FurniList
+PostItPlaced; *
+MemberRoom
+ServiceClosed
+RoomUsers
+NewUnit
+UnitRemove
+UnitUpdated
+SystemDown
+SystemOpened
+UserProfile
+UserMatch
+CloseVotingDialog
+ModeratorCaution; *
+UnitClosed
+ModeratorMessage
+AgeCheckResult
+TrackingRequest
+ReregistrationRequired
+AccountUpdateStatus
+PurchaseRoomAdResult
+RoomAd
+UserCreditTransactions
+UpdateOk
+VoucherRedeemOk
+VoucherRedeemError
+StackingHeightmapDiff; HeightMapUpdate
+UserFlatCategories; UserFlatCats
+EventFlatCategories; UserEventCats
+CanNotConnect; CantConnect
+SelectedBadges; HabboUserBadges
+AvailableBadges; Badges
+QueueMoveUpdate; SlideObjectBundle
+FullGameStatus
+GameStatus
+YouAreSpectator; *
+LevelEditorNotification
+SessionParams
+Interstitial; *
+RoomQueueStatus
+MessengerError
+InstantMessageError
+RoomInviteError
+BuddyList
+EmailChangeResult
+UpdateAvatar; UserChange
+UserWardrobe; Wardrobe
+AccountSafetyLockStatus
+EmailStatus
+HotLooks; *
+CallDeleted
+CallReply
+RegUpdateRequest
+PartnerStatus
+LegacyBannerHandshake
+DhInitHandshake; InitDiffieHandshake
+DhCompleteHandshake; CompleteDiffieHandshake
+CSubscriptionUserGifts; ClubGiftNotification
+AccountSafetyLockQuestions
+SpectatingEnded
+RoomForward; *
+AvailabilityStatus; *
+InfoHotelClosing
+InfoHotelClosed; *
+AvailabilityTime
+LoginFailedHotelClosed
+PurchaseNotAllowed
+FurniAliases; FurnitureAliases
+SpectatorAmount
+ErrorReport
+SongInfo
+MachineSoundPackages
+UserSoundPackages
+SongId
+AccountPreferences; *
+HabboGroupBadge; HabboGroupBadges
+FavoriteMembershipUpdate
+HabboGroupDetails; *
+OneWayDoorStatusChange
+MessengerConsoleMessages
+BuddyRequests; FriendRequests
+AcceptFriendResult
+PollOffer
+PollContents
+PollError
+PendingCallsForHelp
+PendingCallsForHelpDeleted
+CallForHelpResult
+SongList
+SoundMachinePlayList
+SongMissingPackages
+PlayListInvalid
+SongListFull
+NowPlaying
+CallForHelpDisabled
+HabboGroupDeactivated
+SongAdded
+InvalidSongName
+UserSongDiscs
+JukeboxDiscs
+SongLocked
+JukeboxPlayListFull
+InvalidSongData
+SongSaved
+MuteAllInRoomResponse
+RoomRating; *
+UpdateFigure; FigureUpdate
+FollowFriendFailed
+ClientLatencyPingResponse; LatencyPingResponse
+ShowMysteryBoxWait
+CancelMysteryBoxWait
+GotMysteryBoxPrize
+FriendFurniStartConfirmLock
+FriendFurniCancelLock
+FriendFurniLockConfirmedOther
+UserTypingStatusChange; UserTyping
+HighlightUser
+MiniMailArrived
+MiniMailUnreadCount
+RoomDimmerPresets
+RoomEventCanCreateEvent
+RoomEventEventTypes
+RoomEventEventsByEventType
+RoomEventEventInfo; RoomEvent
+RoomAdAllowedRooms
+RoomAdListAds
+RoomAdUpdated
+RoomAdError
+RoomAdCancelled
+IgnoreUserResult
+RequestIgnoreList; IgnoredUsers
+HabboSearchResult
+PossibleUserAchievements; Achievements
+AchievementNotification
+ActivityPointNotification; HabboActivityPointNotification
+UniqueMachineId
+RespectNotification
+CatalogExpired
+AchievementScore; AchievementsScore
+ResolutionCompleted
+OfficialRooms
+GuestRoomSearchResult; *
+PopularRoomTagsResult
+GetGuestRoomResult; *
+NavigatorSettings; *
+RoomInfoUpdatedNotification
+RoomThumbnailUpdateResult
+Favourites; *
+FavouriteChanged; *
+AvatarEffects; *
+AvatarEffectAdded
+AvatarEffectActivated
+AvatarEffectExpired
+AvatarEffectSelected
+RoomSettingsData; *
+RoomSettingsError
+RoomSettingsSaved; *
+RoomSettingsSaveError
+FloorHeightmap; *
+RoomEntryInfo; *
+RoomVisualizationSettings; *
+MultipleStuffDataUpdate; ObjectsDataUpdate
+RoomChatSettings; *
+RoomFilterSettings
+EnforceRoomCategorySelect
+SpecialRoomEffect
+RoomTypes
+RoomDance; Dance
+RoomExpression; Expression
+RoomCarryObject; CarryObject
+RoomJoiningGame
+RoomNotJoiningGame
+RoomAvatarEffect; AvatarEffect
+RoomAvatarSleeping; Sleep
+RoomUseObject
+JudgeGuiStatus
+StageOpenPerformerGui
+StageClosePerformerGui
+StageStartPlayingSong
+StageStopPlayingSong
+FlatCategoriesWithVisitorData
+TradingAllowed
+FlatControllerAdded
+FlatControllerRemoved
+CanCreateRoom
+ConvertedRoomId
+StripItemNotTradeable
+ClientInfoFeedEnabled; InfoFeedEnable
+FaqClientFaqs
+FaqCategories
+FaqText
+FaqSearchResults
+FaqCategory
+IssueInfo
+ModeratorInit
+IssuePickFailed
+ModeratorUserInfo
+CfhChatLog
+RoomChatLog
+UserChatLog
+RoomVisits
+ModeratorRoomInfo
+ModeratorActionResult
+IssueCloseNotification
+HelpRequestSessionAttached
+HelpRequestSessionStarted
+HelpRequestSessionEnded
+HelpRequestSessionDetached
+GuideTicketSessionError
+HelpRequestSessionMessage
+HelpRequestSessionRequesterRoom
+HelpRequestSessionRequesterInvitedToGuideRoom
+HelpRequestSessionTyping
+GuideOnDutyStatus
+ModeratorToolPreferences
+CfhTopicsInit; *
+CfhNextSanction
+CfhSanctionStatus
+UpdateRoomFloorPropertiesResponse
+QuizData
+QuizResult
+TalentTrack
+TalentTrackLevelUp
+TalentTrackLevel
+ChangeUserNameResult
+CheckUserNameResult
+UserNameChanged
+HotelMergeNameChange
+ChangePetNameResult
+GetPetConfigurationsResult
+PetSupplementedNotification
+PetBreeding
+PetInventory; *
+PetInfo
+PetLevelNotification
+PetAddedToInventory
+PetRemovedFromInventory
+PetCommands
+PetRespectNotification
+PetReceivedNotification
+PetPlacingFailed
+PetExperience
+MarketplaceMakeOfferResult; *
+MarketplaceCanMakeOfferResult; *
+MarketplaceConfiguration; *
+MarketplaceBuyOfferResult; *
+MarketplaceCancelOfferResult; *
+MarketplaceOpenOfferList; MarketPlaceOffers
+MarketplaceOwnOfferList; MarketPlaceOwnOffers
+MarketplaceItemStats; *
+GiftWrappingConfiguration; *
+PetRespectFailed
+IsOfferGiftable
+SelectableClubGiftInfo; ClubGiftInfo
+ClubGiftSelected; ClubGiftSelected
+HabboClubOffers; *
+LoginWithPasswordAccountsDEPRECATED
+BadgePointLimits; *
+ActivityPoints; *
+BonusRareInfo; *
+HabboClubExtendOffer
+DirectClubBuyAllowed
+XmasCalendarDailyOffer
+BadgeReceived; *
+HabboSnowWarGameTokensOffer
+BundleDiscountRuleset; *
+LimitedEditionSoldOut
+ProductOffer
+CatalogPageWithEarliestExpiry
+LimitedFurniTimingInfo
+EarnedCommunityGoalPrizes
+CatalogPageExpirationData
+CompetitionEntrySubmitResult
+CompetitionVotingInfo
+SecondsUntil
+CommunityGoalHallOfFame
+IsUserPartOfCompetition
+IsBadgeRequestFulfilled
+CurrentTimingCode; *
+UserDefinedRoomEventsTrigger
+UserDefinedRoomEventsAction
+UserDefinedRoomEventsCondition
+UserDefinedRoomEventsOpen
+UserDefinedRoomEventsRewardResult; WiredRewardResult
+UserDefinedRoomEventsValidationError
+UserDefinedRoomEventsSaveSuccess
+ConcurrentUsersGoalProgress
+PromoArticles
+CommunityGoalVoteAcknowledged
+Notification; NotificationDialog
+OfferRewardDelivered
+GameYouArePlayer; YouArePlayingGame
+GameNumberValue
+PerkAllowances; *
+ChangePassword
+CitizenshipVipPromoEnable
+CaptchaResponse
+CommunityGoalProgress
+EpicPopup
+CompetitionRoomsData
+NoOwnedRoomsAlert
+Quests
+QuestCompleted
+Quest
+QuestCancelled
+QuestDaily
+QuestsSeasonal
+HandItemReceived; *
+MotdResponse
+MuteTimeRemaining; RemainingMutePeriod
+GetDeviceTokensResponse
+LoginTokensCleared
+RestoreClientFromMinimizedState
+OpenPetPackageRequested
+OpenPetPackageResult
+SellablePetPalettes
+PetBreedingResult
+FriendBarFindFriendsResult
+UnseenElements; UnseenItems
+FriendBarEventNotification
+AccountProgressedInfo
+AccountProgressionInfo
+AvatarList
+NewAvatarInfo
+DeactivateAvatarInfo
+InitialRooms
+InitialRoomSelected
+RequestSpamWallPostItMessage
+RoomMessageNotification
+PossibleAchievement; Achievement
+RelationshipStatusInfo; *
+ExtendedProfile; *
+HabboGroupJoinFailed
+GuildCreationInfo
+GuildEditInfo
+GuildEditorData
+GuildMembershipUpdated
+GuildMembershipRejected
+GuildEditFailed
+ExtendedProfileChanged; *
+GuildMemberMgmtFailed
+GuildMembers
+GuildMemberships
+GuildCreated
+GuildMemberFurniCountInHq
+FlatControllers; *
+GroupMembershipRequested
+GroupDetailsChanged
+UsersBannedFromRoom; BannedUsersFromRoom
+UserUnbannedFromRoom; *
+MuteAllInRoom
+UpdatePetFigure
+GuildFurniContextmenuInfo
+MaintenanceStatus
+AvailableResolutionAchievements
+ResolutionProgress
+ConfirmBreedingRequest
+GoToBreedingNestFailure
+ConfirmBreedingResult
+NestBreedingSuccess
+CustomUserNotification
+MysteryBoxKeys; *
+BuildersClubMembershipStatus; BuildersClubSubscriptionStatus
+BuildersClubFurniCount; *
+Navigator2MetaData; NavigatorMetaData
+Navigator2SearchResultBlocks; NavigatorSearchResultBlocks
+Navigator2LiftArea; NavigatorLiftedRooms
+Navigator2UserPreferences; NewNavigatorPreferences
+Navigator2UserSavedSearches; NavigatorSavedSearches
+Navigator2UserCollapsedCategories; NavigatorCollapsedCategories
+CraftableProducts
+CraftingRecipe
+CraftingResult
+CraftingRecipesAvailable
+ProductOffers
+CampaignCalendarData; *
+CampaignCalendarDoorOpened; *
+PickUpAllFurniAndResetHeightmap
+StackingHelperHeightUpdate
+RoomEntryTile; *
+RoomOccupiedTiles
+YoutubeDisplayVideo
+YoutubePlayLists
+YoutubeControlVideo
+RentableSpaceInfo
+RentableSpaceRentOk
+RentableSpaceRentFailed
+TryPhoneNumberResult
+VerifyCodeResult
+VerificationState
+NuxNotComplete
+NuxGiftOffer
+TargetedOffer
+TargetedOfferNotFound; *
+TargetedOfferList
+GuideReportingStatus
+ChatReviewSessionOfferedToGuide
+ChatReviewSessionStarted
+ChatReviewSessionResults
+ChatReviewTicketCreationResult
+ChatReviewSessionDetached
+ChatReviewSessionVotingStatus
+ChatReviewTicketResolution
+AccountSafetyLock
+PointElement
+InClientLink
+NoobnessLevel; *
+SubmitGdprRequestResult
+CancelGdprRequestResult
+GetGdprRequestResult
+ForumStats
+ForumThreads
+ForumThreadMessages
+ForumThread
+ForumMessage
+ForumsList
+UnreadForumsCount; *
+PostForumThreadOk
+PostForumMessageOk
+UserClassifications
+CameraToken
+PhotoPurchaseSuccess
+CameraPictureUrl
+CameraPhotoPrice
+PhotoPublishStatus
+PhotoCompetitionEntryStatus
+RoomThumbnailStatus
+Question
+QuestionAnswered
+QuestionFinished
+Reputation
+InventoryFurniByRoomResult
+BotInventory
+BotAddedToInventory
+BotRemovedFromInventory
+BotReceived
+BotError
+BotCommandConfigurationData
+BotUpdateSkillList
+BotForceOpenContextMenu
+FigureSetIds; *
+MarketplaceCancelAllOffersResult
+SendPetToHolidayResult
+AgreementTypesResult
+IdentityAgreements
+GuildMembershipRequests
+FlatFavouriteCount
+StartCreateGuildResponse
+CommitCreateGuildResponse
+MeltdownWatchVerify
+EarningStatus; IncomeRewardStatus
+ClaimEarningResult; IncomeRewardClaimResponse
+VaultStatus; CreditVaultStatus
+UpdateAccountPreferencesResult
+LinkIdentificationMethodResult
+BanInfo
+AntiSpamTriggered
+ServerDebugPong
+DisconnectionReason; DisconnectReason
+ProxyId

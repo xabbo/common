@@ -1,0 +1,24 @@
+namespace Xabbo.Messages;
+
+#nullable disable
+
+public sealed partial class {{direction}} : Headers
+{
+	{{~ for $kp in messages ~}}
+		{{ message = $kp.value }}
+	/// <summary>
+	/// Gets the {{direction|string.downcase}} header for the {{message.name}} ({{message.client}}) message.
+		{{~ if !message.is_both ~}}
+			{{~ if message.is_unity && message.flash_name ~}}
+	/// The Flash equivalent for this message is <see cref="{{direction}}.{{message.flash_name}}" />.
+			{{~ else if message.is_flash && message.unity_name ~}}
+	/// The Unity equivalent for this message is <see cref="{{direction}}.{{message.unity_name}}" />.
+			{{~ end ~}}
+		{{~ end ~}}
+		{{~ if message.description ~}}
+	/// {{message.description}}
+		{{~ end ~}}
+	/// </summary>
+	public Header {{message.name}} => Get("{{message.name}}");
+	{{~ end ~}}
+}
