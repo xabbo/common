@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a message name and direction.
 /// </summary>
-public sealed class Identifier
+public readonly struct Identifier
 {
     /// <summary>
     /// Gets the direction of this message.
@@ -42,7 +42,7 @@ public sealed class Identifier
                 "The direction of an identifier must be incoming, outgoing or unknown.",
                 nameof(direction)
             );
-    }
+        }
 
         ArgumentException.ThrowIfNullOrEmpty(name);
 
@@ -61,11 +61,7 @@ public sealed class Identifier
     /// <returns>A new instance of <see cref="Identifier"/> with the destination changed.</returns>
     public Identifier WithDirection(Direction direction) => new(direction, Name);
 
-    public override int GetHashCode()
-    {
-        int hashCode = Name.GetHashCode();
-        return IsOutgoing ? hashCode : ~hashCode;
-    }
+    public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
 
     public override bool Equals(object? obj)
     {
@@ -93,12 +89,7 @@ public sealed class Identifier
 
     public override string ToString() => Name;
 
-    public static bool operator ==(Identifier a, Identifier b)
-    {
-        if (a is null)
-            return b is null;
-        return a.Equals(b);
-    }
+    public static bool operator ==(Identifier a, Identifier b) => a.Equals(b);
 
     public static bool operator !=(Identifier a, Identifier b) => !(a == b);
 
