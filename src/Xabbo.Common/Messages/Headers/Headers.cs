@@ -17,33 +17,29 @@ public abstract class Headers
     private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
     private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
 
+    protected Header Get(string name)
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            if (!_nameMap.TryGetValue(name, out Header? header))
+                return Header.Unknown;
+            return header;
+        }
+        finally { _lock.ExitReadLock(); }
+    }
+
     /// <summary>
-    /// The destination of the headers stored in this dictionary.
+    /// The direction of the headers stored in this dictionary.
     /// </summary>
-    public Destination Destination { get; }
+    public Direction Direction { get; }
 
     /// <summary>
     /// Constructs a new header dictionary with the specified destination.
     /// </summary>
-    public Headers(Destination destination)
+    public Headers(Direction direction)
     {
-        Destination = destination;
-
-        ResetProperties();
-    }
-
-    private void ResetProperties()
-    {
-        foreach (PropertyInfo prop in GetType().GetProperties())
-        {
-            if (prop.PropertyType.Equals(typeof(Header)) &&
-                prop.GetMethod?.GetParameters().Length == 0)
-            {
-                Header header = new(Destination, name: prop.Name); 
-                _nameMap[prop.Name] = header;
-                prop.SetValue(this, header);
-            }
-        }
+        Direction = direction;
     }
 
     /// <summary>
@@ -57,8 +53,6 @@ public abstract class Headers
             _headerMap.Clear();
             _nameMap.Clear();
 
-            ResetProperties();
-
             foreach (IMessageInfo info in messages)
             {
                 Header? header;
@@ -71,7 +65,7 @@ public abstract class Headers
                     flashHeader = new ClientHeader
                     {
                         Client = ClientType.Flash,
-                        Destination = info.Destination,
+                        Direction = info.Direction,
                         Value = info.FlashHeader,
                         Name = info.FlashName ?? string.Empty
                     };
@@ -82,13 +76,13 @@ public abstract class Headers
                     unityHeader = new ClientHeader
                     {
                         Client = ClientType.Unity,
-                        Destination = info.Destination,
+                        Direction = info.Direction,
                         Value = info.UnityHeader,
                         Name = info.UnityName ?? string.Empty
                     };
                 }
 
-                header = new Header(info.Destination, unityHeader, flashHeader);
+                header = new Header(info.Direction, unityHeader, flashHeader);
 
                 if (flashHeader is not null)
                 {
@@ -100,10 +94,6 @@ public abstract class Headers
                 {
                     _headerMap[(unityHeader.Client, unityHeader.Value)] = header;
                     _nameMap[unityHeader.Name] = header;
-
-                    PropertyInfo? prop = GetType().GetProperty(unityHeader.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                    if (prop is not null)
-                        prop.SetValue(this, header);
                 }
             }
         }
@@ -183,7 +173,7 @@ public abstract class Headers
                 }
                 else
                 {
-                    throw new UnknownHeaderException(new Identifier(Destination, name));
+                    throw new UnknownHeaderException(new Identifier(Direction, name));
                 }
             }
             finally { _lock.ExitReadLock(); }

@@ -16,19 +16,19 @@ public sealed class Header
     public static readonly Header Unknown = new();
 
     /// <summary>
-    /// Gets the destination of this header.
+    /// Gets the direction of this header.
     /// </summary>
-    public Destination Destination { get; init; }
+    public Direction Direction { get; init; }
 
     /// <summary>
     /// Gets if this is an incoming header.
     /// </summary>
-    public bool IsIncoming => Destination == Destination.Client;
+    public bool IsIncoming => Direction == Direction.Incoming;
 
     /// <summary>
     /// Gets if this is an outgoing header.
     /// </summary>
-    public bool IsOutgoing => Destination == Destination.Server;
+    public bool IsOutgoing => Direction == Direction.Outgoing;
 
     /// <summary>
     /// Gets the header information for the Flash client.
@@ -56,11 +56,11 @@ public sealed class Header
     [EditorBrowsable(EditorBrowsableState.Never)]
     public short? Value { get; init; }
 
-    private Header() { Destination = Destination.Unknown; }
+    private Header() { Direction = Direction.Unknown; }
 
-    public Header(Destination destination, ClientHeader? unityHeader, ClientHeader? flashHeader)
+    public Header(Direction direction, ClientHeader? unityHeader, ClientHeader? flashHeader)
     {
-        Destination = destination;
+        Direction = direction;
         Unity = unityHeader;
         Flash = flashHeader;
 
@@ -68,12 +68,12 @@ public sealed class Header
     }
 
     /// <summary>
-    /// Creates a new header with the specified destination and explicit value.
+    /// Creates a new header with the specified direction and explicit value.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public Header(Destination destination, short value = -1, string? name = null)
+    public Header(Direction direction, short value = -1, string? name = null)
     {
-        Destination = destination;
+        Direction = direction;
         Value = value;
         Name = name;
     }
@@ -137,9 +137,9 @@ public sealed class Header
             return false;
         }
 
-        if (Destination != Destination.Unknown &&
-            other.Destination != Destination.Unknown &&
-            Destination != other.Destination)
+        if (Direction != Direction.Unknown &&
+            other.Direction != Direction.Unknown &&
+            Direction != other.Direction)
         {
             return false;
         }
@@ -155,9 +155,9 @@ public sealed class Header
         StringBuilder sb = new();
 
         sb
-            .Append(Destination switch {
-                Destination.Client => "in:",
-                Destination.Server => "out:",
+            .Append(Direction switch {
+                Direction.Incoming => "in:",
+                Direction.Outgoing => "out:",
                 _ => string.Empty
             })
             .Append(header.Name);
@@ -176,9 +176,9 @@ public sealed class Header
     public override string ToString()
     {
         return new StringBuilder()
-            .Append(Destination switch {
-                Destination.Client => "in:",
-                Destination.Server => "out:",
+            .Append(Direction switch {
+                Direction.Incoming => "in:",
+                Direction.Outgoing => "out:",
                 _ => string.Empty
             })
             .Append(Name ?? Value?.ToString() ?? "unknown")
@@ -191,12 +191,12 @@ public sealed class Header
     /// <summary>
     /// Creates an outgoing header with the specified explicit value.
     /// </summary>
-    public static Header In(short value) => new(Destination.Client, value);
+    public static Header In(short value) => new(Direction.Incoming, value);
 
     /// <summary>
     /// Creates an incoming header with the specified explicit value.
     /// </summary>
-    public static Header Out(short value) => new(Destination.Server, value);
+    public static Header Out(short value) => new(Direction.Outgoing, value);
 
     /// <summary>
     /// Converts the specified tuple into an array of headers.

@@ -9,7 +9,7 @@ namespace Xabbo.Messages;
 public sealed class Outgoing : Headers
 {
     public Outgoing()
-        : base(Destination.Server)
+        : base(Direction.Outgoing)
     { }
 
     public Header InfoRetrieve { get; private set; }

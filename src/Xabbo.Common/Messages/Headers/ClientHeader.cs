@@ -11,9 +11,9 @@ public class ClientHeader
     public ClientType Client { get; init; }
 
     /// <summary>
-    /// The destination of this header.
+    /// The direction of this header.
     /// </summary>
-    public Destination Destination { get; init; }
+    public Direction Direction { get; init; }
 
     /// <summary>
     /// The value of this header.
@@ -27,7 +27,7 @@ public class ClientHeader
 
     public ClientHeader() { }
 
-    public override int GetHashCode() => (Client, Destination, Value).GetHashCode();
+    public override int GetHashCode() => (Client, Direction, Value).GetHashCode();
     public override bool Equals(object? obj) => obj is ClientHeader other && Equals(other);
 
     /// <summary>
@@ -38,16 +38,16 @@ public class ClientHeader
     {
         return
             Client == other.Client &&
-            Destination == other.Destination &&
+            Direction == other.Direction &&
             Value == other.Value;
     }
 
-    public static implicit operator ClientHeader((ClientType, Destination, short) tuple)
+    public static implicit operator ClientHeader((ClientType, Direction, short) tuple)
     {
         return new ClientHeader()
         {
             Client = tuple.Item1,
-            Destination = tuple.Item2,
+            Direction = tuple.Item2,
             Value = tuple.Item3
         };
     }

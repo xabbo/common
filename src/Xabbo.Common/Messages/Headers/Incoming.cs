@@ -9,7 +9,7 @@ namespace Xabbo.Messages;
 public sealed class Incoming : Headers
 {
     public Incoming()
-        : base(Destination.Client)
+        : base(Direction.Incoming)
     { }
 
     public Header LegacyBannerPublicKey { get; private set; }
