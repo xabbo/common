@@ -38,4 +38,7 @@ public class MessageTests : IClassFixture<MessagesFixture>
     public void CheckUnknownHeader() => Assert.Throws<UnknownHeaderException>(
         () => Messages.In["UnknownHeader"]
     );
+
+    [Fact(DisplayName = "Equivalent Unity/Flash messages access the same Header instance")]
+    public void CheckHeaderEquivalence() => Assert.True(ReferenceEquals(Messages.In.Ok, Messages.In.AuthenticationOK));
 }

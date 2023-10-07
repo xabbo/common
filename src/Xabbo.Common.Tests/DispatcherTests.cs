@@ -35,7 +35,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         Dispatcher.AddIntercept(Messages.Out.Move, mockHandler.Object, ClientType.Flash);
 
         var packet = new Packet(Messages.Out["MoveAvatar"], ClientType.Flash);
-        var interceptArgs = new InterceptArgs(Mock.Of<IInterceptor>(), Destination.Server, packet);
+        var interceptArgs = new InterceptArgs(Mock.Of<IInterceptor>(), Direction.Outgoing, packet);
 
         Dispatcher.DispatchIntercept(interceptArgs);
 
@@ -58,7 +58,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         mockHandler.Setup(x => x.OnMove(It.IsAny<InterceptArgs>()));
 
         var packet = new Packet(Messages.Out.Move, ClientType.Flash);
-        var interceptArgs = new InterceptArgs(Mock.Of<IInterceptor>(), Destination.Server, packet);
+        var interceptArgs = new InterceptArgs(Mock.Of<IInterceptor>(), Direction.Outgoing, packet);
 
         Dispatcher.Bind(mockHandler.Object, ClientType.Flash);
 
