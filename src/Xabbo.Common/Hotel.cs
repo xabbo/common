@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace Xabbo;
 
@@ -16,78 +17,79 @@ public class Hotel
     /// <summary>
     /// Represents an unknown hotel.
     /// </summary>
-    public static readonly Hotel Unknown = new() { Name = "Unknown" };
+    public static readonly Hotel Unknown = new()
+    {
+        Name = "Unknown",
+        Identifier = "?",
+    };
+
+    private static readonly Lazy<ImmutableDictionary<string, Hotel>> _hotels = new(LoadHotels);
 
     /// <summary>
-    /// Contains the definitions of all hotels.
+    /// Contains the definitions of all hotels, mapped by their identifier.
     /// </summary>
-    public static readonly ImmutableArray<Hotel> All;
+    public static ImmutableDictionary<string, Hotel> All => _hotels.Value;
 
-    static Hotel()
+    private static ImmutableDictionary<string, Hotel> LoadHotels()
     {
-        string fileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? Environment.ExpandEnvironmentVariables(@"%APPDATA%\xabbo\hotels.json")
-            : Environment.ExpandEnvironmentVariables(@"%HOME%/.xabbo/hotels.json");
+        string basePath = Environment.ExpandEnvironmentVariables(
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? @"%LOCALAPPDATA%\xabbo"
+            : @"%HOME%/.local/xabbo");
 
-        FileInfo file = new(fileName);
+        FileInfo fileHotelsOverride = new(Path.Join(basePath, "hotels.override.json"));
+        FileInfo fileHotels = new(Path.Join(basePath, "hotels.json"));
 
-        List<Hotel>? hotels = null;
+        List<Hotel>? hotels = [
+            new("US", "us"),
+            new("Spain", domain: "es"),
+            new("Finland", domain: "fi"),
+            new("Italy", domain: "it"),
+            new("Netherlands", domain: "nl"),
+            new("Germany", domain: "de"),
+            new("France", domain: "fr"),
+            new("Brazil", identifier: "br", domain: "com.br"),
+            new("Turkey", identifier: "tr", domain: "com.tr"),
+            new("Sandbox", "s2", subdomain: "sandbox")
+        ];
 
-        try
-        {
-            if (File.Exists(fileName))
-            {
-                string json = File.ReadAllText(file.FullName);
-                hotels = JsonSerializer.Deserialize<List<Hotel>>(json);
-            }
-        }
-        catch { }
+        if (fileHotelsOverride.Exists)
+            hotels = JsonSerializer.Deserialize<List<Hotel>>(File.ReadAllText(fileHotelsOverride.FullName)) ?? [];
+        if (fileHotels.Exists)
+            hotels.AddRange(JsonSerializer.Deserialize<List<Hotel>>(File.ReadAllText(fileHotelsOverride.FullName)) ?? []);
 
-        if (hotels is null ||
-            hotels.Count == 0)
-        {
-            hotels = new List<Hotel>()
-            {
-                new("US", "us"),
-                new("Spain", domain: "es"),
-                new("Finland", domain: "fi"),
-                new("Italy", domain: "it"),
-                new("Netherlands", domain: "nl"),
-                new("Germany", domain: "de"),
-                new("France", domain: "fr"),
-                new("Brazil", identifier: "br", domain: "com.br"),
-                new("Turkey", identifier: "tr", domain: "com.tr"),
-                new("Sandbox", "s2", subdomain: "sandbox")
-            };
-        }
-
-        All = hotels.ToImmutableArray();
+        return hotels.ToImmutableDictionary(x => x.Identifier, StringComparer.InvariantCultureIgnoreCase);
     }
 
     /// <summary>
-    /// Gets the name of this hotel.
+    /// Gets the name of this hotel, e.g. "US", "Netherlands".
     /// </summary>
     public string Name { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the identifier of this hotel.
+    /// Gets the identifier of this hotel, e.g. "us", "nl".
     /// </summary>
     public string Identifier { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the subdomain of this hotel.
+    /// Gets the subdomain of this hotel, e.g. "www", "sandbox".
     /// </summary>
     public string Subdomain { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the domain of this hotel.
+    /// Gets the top-level domain of this hotel, e.g. "com", "com.br".
     /// </summary>
     public string Domain { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the web host for this hotel.
+    /// Gets the hostname for this hotel, e.g. "habbo".
     /// </summary>
-    public string Host { get; init; } = string.Empty;
+    public string HostName { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Gets the web host for this hotel, e.g. "www.habbo.com".
+    /// </summary>
+    public string WebHost { get; } = string.Empty;
 
     /// <summary>
     /// Gets the game host for this hotel.
@@ -97,54 +99,61 @@ public class Hotel
     /// <summary>
     /// Creates a new hotel instance.
     /// </summary>
-    public Hotel() { }
+    protected Hotel() { }
 
     /// <summary>
     /// Creates a new hotel instance.
     /// </summary>
+    /// <param name="name">The name of the hotel.</param>
+    /// <param name="identifier">The short identifier of the hotel, e.g. "us".</param>
+    /// <param name="subdomain">The subdomain, e.g. "www", "sandbox".</param>
+    /// <param name="domain">The top-level domain, e.g. "com", "com.br".</param>
+    /// <param name="host">The hostname, e.g. "habbo".</param>
+    /// <param name="gameHost">The game host, defaults to "game-{identifier}.habbo.com".</param>
+    [JsonConstructor]
     public Hotel(
         string name, string? identifier = null,
         string subdomain = "www", string domain = "com",
-        string? host = null, string? gameHost = null)
+        string host = "habbo", string? gameHost = null)
     {
         identifier ??= domain;
-        host ??= $"{subdomain}.habbo.{domain}";
-        gameHost ??= $"game-{identifier}.habbo.com";
+        gameHost ??= $"game-{identifier}.{host}.com";
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subdomain);
+        ArgumentException.ThrowIfNullOrWhiteSpace(domain);
+        ArgumentException.ThrowIfNullOrWhiteSpace(host);
+        ArgumentException.ThrowIfNullOrWhiteSpace(gameHost);
 
         Name = name;
         Identifier = identifier;
         Subdomain = subdomain;
         Domain = domain;
-        Host = host;
+        HostName = host;
+
+        WebHost = "";
+        if (!string.IsNullOrWhiteSpace(Subdomain))
+            WebHost += $"{Subdomain}.";
+        WebHost += $"{HostName}.{Domain}";
         GameHost = gameHost;
     }
 
     /// <summary>
-    /// Gets the hotel with the specified identifier. (ex. <c>us</c>)
+    /// Gets the hotel with the specified identifier, e.g. "us".
     /// </summary>
-    public static Hotel FromIdentifier(string identifier) => All.FirstOrDefault(x => x.Identifier == identifier)
-        ?? throw new Exception($"Unknown hotel identifier: \"{identifier}\".");
+    /// <returns>
+    /// The matching Hotel, or <see cref="Unknown"/> if it was not found.
+    /// </returns>
+    public static Hotel FromIdentifier(string identifier) =>
+        All.TryGetValue(identifier, out Hotel? hotel) ? hotel : Unknown;
 
     /// <summary>
-    /// Gets the hotel with the specified domain. (ex. <c>com</c>)
+    /// Gets the hotel with the specified game host, e.g. "game-us.habbo.com".
     /// </summary>
-    public static Hotel FromDomain(string domain) => All.FirstOrDefault(x => x.Domain == domain)
-        ?? throw new Exception($"Unknown hotel domain: \"{domain}\".");
-
-    /// <summary>
-    /// Gets the hotel with the specified host. (ex. <c>www.habbo.com</c>)
-    /// </summary>
-    public static Hotel FromHost(string host)
-    {
-        if (host.StartsWith("habbo."))
-            host = "www." + host;
-        return All.FirstOrDefault(x => x.Host.Equals(host, StringComparison.OrdinalIgnoreCase))
-            ?? throw new Exception($"Unknown hotel host: \"{host}\".");
-    }
-
-    /// <summary>
-    /// Gets the hotel with the specified game host. (ex. <c>game-us.habbo.com</c>)
-    /// </summary>
-    public static Hotel FromGameHost(string gameHost) => All.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase))
-        ?? throw new Exception($"Unknown game host: \"{gameHost}\".");
+    /// <returns>
+    /// The matching Hotel, or <see cref="Unknown"/> if it was not found.
+    /// </returns>
+    public static Hotel FromGameHost(string gameHost) =>
+        All.Values.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase)) ?? Unknown;
 }
