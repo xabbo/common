@@ -75,7 +75,7 @@ public sealed partial class Packet : IPacket
     }
 
     /// <inheritdoc />
-    public int Length { get; private set; }
+    public int Length => _buffer.Length;
 
     /// <inheritdoc />
     public int Available => Length - Position;
@@ -85,10 +85,10 @@ public sealed partial class Packet : IPacket
     /// </summary>
     /// <param name="protocol">The packet protocol hint.</param>
     /// <param name="header">The message header.</param>
-    /// <param name="size">The initial size in bytes of the packet data buffer.</param>
-    public Packet(Header header, ClientType protocol = ClientType.Unknown, int size = 8)
+    /// <param name="capacity">The initial capacity in bytes.</param>
+    public Packet(Header header, ClientType protocol = ClientType.Unknown, int capacity = 8)
     {
-        _memoryOwner = MemoryPool<byte>.Shared.Rent(size);
+        _memoryOwner = MemoryPool<byte>.Shared.Rent(capacity);
         _buffer = _memoryOwner.Memory[..0];
 
         Protocol = protocol;
@@ -102,8 +102,7 @@ public sealed partial class Packet : IPacket
     public Packet(Header header, ReadOnlySpan<byte> data, ClientType protocol = ClientType.Unknown)
         : this(header, protocol, data.Length)
     {
-        Length = data.Length;
-        _buffer = _memoryOwner.Memory[..Length];
+        _buffer = _memoryOwner.Memory[..data.Length];
         data.CopyTo(_buffer.Span);
     }
 
@@ -114,8 +113,7 @@ public sealed partial class Packet : IPacket
     public Packet(Header header, in ReadOnlySequence<byte> data, ClientType protocol = ClientType.Unknown)
         : this(header, protocol, (int)data.Length)
     {
-        Length = (int)data.Length;
-        _buffer = _memoryOwner.Memory[..Length];
+        _buffer = _memoryOwner.Memory[..(int)data.Length];
         data.CopyTo(_buffer.Span);
     }
 
@@ -147,11 +145,8 @@ public sealed partial class Packet : IPacket
             oldMemoryOwner.Memory.CopyTo(_memoryOwner.Memory);
         }
         
-        if (Length < minSize)
-        {
-            Length = minSize;
-            _buffer = _memoryOwner.Memory[..Length];
-        }
+        if (_buffer.Length < minSize)
+            _buffer = _memoryOwner.Memory[..minSize];
     }
 
     /// <summary>
@@ -658,8 +653,7 @@ public sealed partial class Packet : IPacket
         }
         else if (diff < 0)
         {
-            Length += diff;
-            _buffer = _memoryOwner.Memory[..Length];
+            _buffer = _memoryOwner.Memory[..(Length + diff)];
         }
         else
         {
@@ -715,7 +709,6 @@ public sealed partial class Packet : IPacket
     public Packet Clear()
     {
         _buffer = _buffer[0..0];
-        Length = 0;
         Position = 0;
         return this;
     }
