@@ -185,4 +185,9 @@ public interface IPacket : IReadOnlyPacket
     /// Replaces the specified values in the packet.
     /// </summary>
     IPacket Replace(params object[] values);
+
+    /// <summary>
+    /// Clears the packet's buffer.
+    /// </summary>
+    IPacket Clear();
 }

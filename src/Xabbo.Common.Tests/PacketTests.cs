@@ -18,6 +18,32 @@ public class PacketTests
     public PacketTests() { }
 
     [Fact]
+    public void Clear()
+    {
+        IPacket packet = new Packet(Header.Unknown);
+        packet.WriteInt(123);
+
+        Assert.Equal(4, packet.Length);
+        Assert.Equal(4, packet.Buffer.Length);
+        Assert.Equal(4, packet.Position);
+
+        packet.Clear();
+
+        Assert.Equal(0, packet.Length);
+        Assert.Equal(0, packet.Buffer.Length);
+        Assert.Equal(0, packet.Position);
+
+        packet.WriteInt(456);
+        packet.WriteInt(789);
+
+        Assert.Equal(8, packet.Length);
+        Assert.Equal(8, packet.Buffer.Length);
+        Assert.Equal(8, packet.Position);
+        Assert.Equal(456, packet.ReadInt(0));
+        Assert.Equal(789, packet.ReadInt(4));
+    }
+
+    [Fact]
     public void Read_Write()
     {
         IPacket packet = new Packet(Header.Unknown);

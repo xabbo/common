@@ -711,6 +711,18 @@ public sealed partial class Packet : IPacket
     IPacket IPacket.Replace(object[] values) => Replace(values);
     #endregion
 
+    /// <inheritdoc cref="IPacket.Clear" />
+    public Packet Clear()
+    {
+        _buffer = _buffer[0..0];
+        Length = 0;
+        Position = 0;
+        return this;
+    }
+
+    /// <inheritdoc />
+    IPacket IPacket.Clear() => Clear();
+
     /// <summary>
     /// Disposes of this packet and its memory.
     /// </summary>
