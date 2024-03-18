@@ -25,8 +25,6 @@ public class ClientHeader
     /// </summary>
     public string Name { get; init; } = string.Empty;
 
-    public ClientHeader() { }
-
     public override int GetHashCode() => (Client, Direction, Value).GetHashCode();
     public override bool Equals(object? obj) => obj is ClientHeader other && Equals(other);
 

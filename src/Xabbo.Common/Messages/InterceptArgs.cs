@@ -7,24 +7,27 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Contains event arguments of an intercepted packet.
 /// </summary>
-public sealed class InterceptArgs : EventArgs, IDisposable
+/// <remarks>
+/// Constructs a new InterceptArgs instance with the specified destination and packet.
+/// </remarks>
+public sealed class InterceptArgs(IInterceptor interceptor, Direction destination, IPacket packet) : EventArgs, IDisposable
 {
     private bool _disposed;
 
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
     /// </summary>
-    public IInterceptor Interceptor { get; }
+    public IInterceptor Interceptor { get; } = interceptor;
 
     /// <summary>
     /// Gets the time that the packet was intercepted.
     /// </summary>
-    public DateTime Timestamp { get; }
+    public DateTime Timestamp { get; } = DateTime.Now;
 
     /// <summary>
     /// Gets the direction of the packet.
     /// </summary>
-    public Direction Direction { get; }
+    public Direction Direction { get; } = destination;
 
     /// <summary>
     /// Gets the sequence number of the intercepted packet.
@@ -34,12 +37,12 @@ public sealed class InterceptArgs : EventArgs, IDisposable
     /// <summary>
     /// Gets or replaces the intercepted packet.
     /// </summary>
-    public IPacket Packet { get; set; }
+    public IPacket Packet { get; set; } = packet;
 
     /// <summary>
     /// Gets the original, unmodified packet that was intercepted.
     /// </summary>
-    public IReadOnlyPacket OriginalPacket { get; }
+    public IReadOnlyPacket OriginalPacket { get; } = new Packet(packet.Header, packet.Buffer, packet.Protocol);
 
     /// <summary>
     /// Gets if the packet's direction is incoming.
@@ -63,19 +66,6 @@ public sealed class InterceptArgs : EventArgs, IDisposable
         Packet.Header != OriginalPacket.Header ||
         Packet.Length != OriginalPacket.Length ||
         !Packet.Buffer.SequenceEqual(OriginalPacket.Buffer);
-
-    /// <summary>
-    /// Constructs a new InterceptArgs instance with the specified destination and packet.
-    /// </summary>
-    public InterceptArgs(IInterceptor interceptor, Direction destination, IPacket packet)
-    {
-        Interceptor = interceptor;
-        Timestamp = DateTime.Now;
-        Direction = destination;
-        Packet = packet;
-
-        OriginalPacket = new Packet(packet.Header, packet.Buffer, packet.Protocol);
-    }
 
     /// <summary>
     /// Flags the packet to be blocked from its destination by the interceptor.

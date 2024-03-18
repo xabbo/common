@@ -10,15 +10,19 @@ using Xabbo.Interceptor;
 namespace Xabbo.Messages.Dispatcher;
 
 /// <inheritdoc cref="IMessageDispatcher" />
-public sealed class MessageDispatcher : IMessageDispatcher
+/// <summary>
+/// Creates a new <see cref="MessageDispatcher"/> using the specified <see cref="IMessageManager"/>.
+/// </summary>
+/// <param name="messages"></param>
+public sealed class MessageDispatcher(IMessageManager messages) : IMessageDispatcher
 {
-    private static ReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
+    private static OpenReceiveCallback CreateCallback(Header header, object target, MethodInfo method)
     {
         var callback = ReceiveDelegateFactory.GetOpenDelegate(method);
         return new OpenReceiveCallback(header, target, method, callback);
     }
 
-    private static InterceptCallback CreateInterceptCallback(Header header, object target, MethodInfo method)
+    private static OpenInterceptCallback CreateInterceptCallback(Header header, object target, MethodInfo method)
     {
         var callback = InterceptDelegateFactory.GetOpenDelegate(method);
         return new OpenInterceptCallback(header, target, method, callback);
@@ -37,16 +41,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
     /// <summary>
     /// Gets the message manager used by this dispatcher.
     /// </summary>
-    public IMessageManager Messages { get; }
-
-    /// <summary>
-    /// Creates a new <see cref="MessageDispatcher"/> using the specified <see cref="IMessageManager"/>.
-    /// </summary>
-    /// <param name="messages"></param>
-    public MessageDispatcher(IMessageManager messages)
-    {
-        Messages = messages;
-    }
+    public IMessageManager Messages { get; } = messages;
 
     private static bool IsValidParameter(ParameterInfo param)
     {
@@ -59,7 +54,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             return false;
 
         ParameterInfo[] parameters = methodInfo.GetParameters();
-        if (!parameters.All(param => IsValidParameter(param)))
+        if (!parameters.All(IsValidParameter))
             return false;
 
         return parameters.Length switch
@@ -82,7 +77,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
         return
             parameters.Length == 1 &&
             parameters[0].ParameterType.Equals(typeof(InterceptArgs)) &&
-            parameters.All(param => IsValidParameter(param));
+            parameters.All(IsValidParameter);
     }
 
     /// <summary>
@@ -209,7 +204,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             }
             else
             {
-                List<ReceiveCallback> list = previousList.ToList();
+                List<ReceiveCallback> list = [.. previousList];
                 list.Add(new ClosedReceiveCallback(header, handler.Target, handler.Method, handler));
                 newList = list;
 
@@ -247,7 +242,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             }
             else
             {
-                List<ReceiveCallback> list = previousList.ToList();
+                List<ReceiveCallback> list = [.. previousList];
                 list.Remove(callback);
                 newList = list;
 
@@ -277,7 +272,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
         do
         {
             previousList = _receiveCallbacks.GetOrAdd(key, ReceiverCallbackListFactory);
-            updatedList = previousList.ToList();
+            updatedList = [.. previousList];
             updatedList.AddRange(callbacks);
         }
         while (!_receiveCallbacks.TryUpdate(key, updatedList, previousList));
@@ -297,7 +292,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
         do
         {
             previousList = _interceptCallbacks.GetOrAdd(key, InterceptCallbackListFactory);
-            updatedList = previousList.ToList();
+            updatedList = [.. previousList];
             updatedList.AddRange(callbacks);
         }
         while (!_interceptCallbacks.TryUpdate(key, updatedList, previousList));
@@ -320,8 +315,8 @@ public sealed class MessageDispatcher : IMessageDispatcher
         MethodInfo[] methods = handlerType.FindAllMethods().ToArray();
 
         Identifiers
-            unknownIdentifiers = new(),
-            unresolvedIdentifiers = new();
+            unknownIdentifiers = [],
+            unresolvedIdentifiers = [];
 
         /*
             Detect unknown, invalid identifiers
@@ -382,7 +377,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             throw new InterceptorBindingFailedException(handler, unknownIdentifiers, unresolvedIdentifiers);
         }
 
-        List<BindingCallback> callbackList = new();
+        List<BindingCallback> callbackList = [];
 
         /*
             Generate receive/intercept callbacks
@@ -401,7 +396,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
                     );
                 }
 
-                HashSet<Header> uniqueHeaders = new();
+                HashSet<Header> uniqueHeaders = [];
                 foreach (Identifier identifier in receiveAttribute.Identifiers)
                 {
                     Header header = Messages[identifier];
@@ -427,7 +422,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
                     );
                 }
 
-                HashSet<Header> uniqueHeaders = new();
+                HashSet<Header> uniqueHeaders = [];
                 foreach (Identifier identifier in interceptAttribute.Identifiers)
                 {
                     Header header = Messages[identifier];
@@ -438,7 +433,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             }
         }
 
-        if (!callbackList.Any())
+        if (callbackList.Count == 0)
         {
             return false;
         }
@@ -474,7 +469,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             if (!_receiveCallbacks.TryGetValue(key, out previousList))
                 break;
 
-            newList = previousList.ToList();
+            newList = [.. previousList];
             foreach (ReceiveCallback callback in callbacks)
                 newList.Remove(callback);
         }
@@ -497,7 +492,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             if (!_interceptCallbacks.TryGetValue(key, out previousList))
                 break;
 
-            newList = previousList.ToList();
+            newList = [.. previousList];
             foreach (InterceptCallback callback in callbacks)
                 newList.Remove(callback);
         }
@@ -570,7 +565,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             }
             else
             {
-                List<InterceptCallback> list = previousList.ToList();
+                List<InterceptCallback> list = [.. previousList];
                 list.Add(new ClosedInterceptCallback(header, handler.Target, handler.Method, handler));
                 newList = list;
             }
@@ -614,7 +609,7 @@ public sealed class MessageDispatcher : IMessageDispatcher
             InterceptCallback? callback = previousList.FirstOrDefault(x => x.Delegate.Equals(action));
             if (callback != null)
             {
-                List<InterceptCallback> list = previousList.ToList();
+                List<InterceptCallback> list = [.. previousList];
                 result = list.Remove(callback);
                 newList = list;
             }

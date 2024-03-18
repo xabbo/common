@@ -51,8 +51,7 @@ public sealed partial class Packet : IPacket
     {
         get
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(Packet));
+            ObjectDisposedException.ThrowIf(_disposed, this);
             return _buffer.Span;
         }
     }
@@ -131,8 +130,7 @@ public sealed partial class Packet : IPacket
     /// </summary>
     private void GrowToSize(int minSize)
     {
-        if (_disposed)
-            throw new ObjectDisposedException(nameof(Packet));
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         int size = _memoryOwner.Memory.Length;
         if (size < minSize)
@@ -618,7 +616,7 @@ public sealed partial class Packet : IPacket
     #region - Replacement -
     private void ReplaceValue(object value)
     {
-        if (value is null) throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(value);
 
         switch (value)
         {

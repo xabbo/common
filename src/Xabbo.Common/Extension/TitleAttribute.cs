@@ -6,18 +6,10 @@ namespace Xabbo.Extension;
 /// Specifies the title of the extension.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class TitleAttribute : Attribute
+public class TitleAttribute(string title) : Attribute
 {
     /// <summary>
     /// Gets the title of the extension.
     /// </summary>
-    public string Title { get; }
-
-    /// <summary>
-    /// Constructs a new <see cref="TitleAttribute"/> with the specified title.
-    /// </summary>
-    public TitleAttribute(string title)
-    {
-        Title = title;
-    }
+    public string Title { get; } = title;
 }

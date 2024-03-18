@@ -15,25 +15,16 @@ internal static class InterceptDelegateFactory
             MethodInfo? delegateGenerator = typeof(InterceptDelegateFactory).GetMethod(
                 nameof(GenerateWeaklyTypedOpenDelegate),
                 BindingFlags.NonPublic | BindingFlags.Static
-            );
-
-            if (delegateGenerator is null)
-            {
-                throw new Exception("Failed to get delegate generator method");
-            }
+            ) ?? throw new Exception("Failed to get delegate generator method");
 
             if (methodInfo.DeclaringType is null)
-            {
                 throw new InvalidOperationException("The declaring type of the generator method is null");
-            }
 
             var generator = delegateGenerator.MakeGenericMethod(methodInfo.DeclaringType);
             @delegate = (Delegate?)generator.Invoke(null, new object[] { methodInfo });
 
             if (@delegate is null)
-            {
                 throw new Exception("Failed to generate delegate");
-            }
         }
 
         return (Action<object, InterceptArgs>)@delegate;

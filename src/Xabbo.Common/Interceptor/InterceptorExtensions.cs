@@ -69,7 +69,7 @@ public static partial class InterceptorExtensions
     /// Asynchronously receives a packet with the specified header.
     /// </summary>
     public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor, Header header, int timeout = -1, bool block = false, CancellationToken cancellationToken = default)
-        => ReceiveAsync(interceptor, new HeaderSet() { header }, timeout, block, cancellationToken);
+        => ReceiveAsync(interceptor, [header], timeout, block, cancellationToken);
 
     /// <summary>
     /// Registers a callback that is invoked when a packet with a matching header is intercepted.

@@ -13,7 +13,7 @@ public sealed class GameConnectedEventArgs : EventArgs
     /// <summary>
     /// Gets the host name.
     /// </summary>
-    public string Host { get; init; }
+    public string Host { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets the port.
@@ -23,7 +23,7 @@ public sealed class GameConnectedEventArgs : EventArgs
     /// <summary>
     /// Gets the client type.
     /// </summary>
-    public ClientType ClientType { get; init; }
+    public ClientType ClientType { get; init; } = ClientType.Unknown;
 
     /// <summary>
     /// Gets the client identifier, if it is available.
@@ -43,14 +43,5 @@ public sealed class GameConnectedEventArgs : EventArgs
     /// <summary>
     /// Gets a list of client specific message information provided by the interceptor service.
     /// </summary>
-    public List<IClientMessageInfo> Messages { get; init; } = new();
-
-    /// <summary>
-    /// Constructs a new <see cref="GameConnectedEventArgs"/>.
-    /// </summary>
-    public GameConnectedEventArgs()
-    {
-        Host = string.Empty;
-        ClientType = ClientType.Unknown;
-    }
+    public List<IClientMessageInfo> Messages { get; init; } = [];
 }

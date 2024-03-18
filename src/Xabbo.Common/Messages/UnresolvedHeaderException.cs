@@ -8,9 +8,7 @@ namespace Xabbo.Messages;
 public sealed class UnresolvedHeaderException : Exception
 {
     private static string BuildMessage(ClientType client, Header header)
-    {
-        return $"Unresolved {(header.IsOutgoing ? "outgoing" : "incoming")} header value for {client} message: \"{header.GetName(client) ?? "?"}\".";
-    }
+        => $"Unresolved {(header.IsOutgoing ? "outgoing" : "incoming")} header value for {client} message: \"{header.GetName(client) ?? "?"}\".";
 
     /// <summary>
     /// The client for which the header is unresolved.

@@ -6,18 +6,10 @@ namespace Xabbo.Extension;
 /// Specifies the version of the extension.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class VersionAttribute : Attribute
+public class VersionAttribute(string version) : Attribute
 {
     /// <summary>
     /// Gets the version of the extension.
     /// </summary>
-    public string Version { get; }
-
-    /// <summary>
-    /// Constructs a new <see cref="VersionAttribute"/> with the specified version.
-    /// </summary>
-    public VersionAttribute(string version)
-    {
-        Version = version;
-    }
+    public string Version { get; } = version;
 }

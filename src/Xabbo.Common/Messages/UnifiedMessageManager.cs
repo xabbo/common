@@ -16,14 +16,17 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Manages messages of the Unity and Flash clients using a message mapping file.
 /// </summary>
-public sealed class UnifiedMessageManager : IMessageManager
+/// <remarks>
+/// Constructs a new <see cref="UnifiedMessageManager"/> using the message map file path.
+/// </remarks>
+public sealed class UnifiedMessageManager(string filePath) : IMessageManager
 {
-    private readonly string _mapFilePath;
-    private readonly List<MessageInfo> _messageInfos = new();
+    private readonly string _mapFilePath = filePath;
+    private readonly List<MessageInfo> _messageInfos = [];
 
     private readonly Dictionary<(ClientType, short), MessageInfo>
-        _incomingHeaderMap = new(),
-        _outgoingHeaderMap = new();
+        _incomingHeaderMap = [],
+        _outgoingHeaderMap = [];
 
     private readonly Dictionary<string, MessageInfo>
         _incomingNameMap = new(StringComparer.OrdinalIgnoreCase),
@@ -38,8 +41,8 @@ public sealed class UnifiedMessageManager : IMessageManager
     /// </summary>
     public bool AutoFetch { get; set; } = true;
 
-    public Incoming In { get; private set; }
-    public Outgoing Out { get; private set; }
+    public Incoming In { get; private set; } = new Incoming();
+    public Outgoing Out { get; private set; } = new Outgoing();
 
     /// <summary>
     /// Gets a header by its identifier.
@@ -54,17 +57,6 @@ public sealed class UnifiedMessageManager : IMessageManager
     public UnifiedMessageManager(IConfiguration config)
         : this(config.GetValue("Xabbo:Messages:MapFilePath", "messages.ini"))
     { }
-
-    /// <summary>
-    /// Constructs a new <see cref="UnifiedMessageManager"/> using the message map file path.
-    /// </summary>
-    public UnifiedMessageManager(string filePath)
-    {
-        _mapFilePath = filePath;
-
-        In = new Incoming();
-        Out = new Outgoing();
-    }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -151,7 +143,7 @@ public sealed class UnifiedMessageManager : IMessageManager
 
         foreach (MessageMapItem item in list)
         {
-            MessageInfo messageInfo = new MessageInfo
+            var messageInfo = new MessageInfo
             {
                 Direction = direction,
                 UnityHeader = item.Header,
@@ -197,12 +189,11 @@ public sealed class UnifiedMessageManager : IMessageManager
         headerMap[(info.Client, info.Header)] = messageInfo;
     }
 
-
     public void LoadMessages(IEnumerable<IClientMessageInfo> messages)
     {
         Reset();
 
-        foreach (IClientMessageInfo message in messages)
+        foreach (var message in messages)
         {
             Merge(message);
         }

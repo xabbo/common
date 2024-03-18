@@ -34,21 +34,13 @@ public readonly struct Identifier
     /// <param name="name">The name of the message.</param>
     public Identifier(Direction direction, string name)
     {
-        if (direction != Direction.Incoming
-            && direction != Direction.Outgoing
-            && direction != Direction.Unknown)
-        {
-            throw new ArgumentException(
-                "The direction of an identifier must be incoming, outgoing or unknown.",
-                nameof(direction)
-            );
-        }
-
+        if (!Enum.IsDefined(direction))
+            throw new ArgumentException($"Unknown direction: {direction}.");
         ArgumentException.ThrowIfNullOrEmpty(name);
 
         for (int i = 0; i < name.Length; i++)
             if (!char.IsAsciiLetterOrDigit(name[i]))
-                throw new ArgumentException("Identifier name must only consist of alphanumeric characters.", nameof(name));
+                throw new ArgumentException($"Identifier name \"{name}\" must only consist of alphanumeric characters.", nameof(name));
 
         Direction = direction;
         Name = name;
@@ -58,17 +50,11 @@ public readonly struct Identifier
     /// Returns a new <see cref="Identifier"/> with the destination changed.
     /// </summary>
     /// <param name="direction">The new direction.</param>
-    /// <returns>A new instance of <see cref="Identifier"/> with the destination changed.</returns>
     public Identifier WithDirection(Direction direction) => new(direction, Name);
 
     public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
 
-    public override bool Equals(object? obj)
-    {
-        return
-            obj is Identifier other &&
-            Equals(other);
-    }
+    public override bool Equals(object? obj) => obj is Identifier other && Equals(other);
 
     /// <summary>
     /// Gets if this identifier is equal or compatible with the <paramref name="other"/>.
@@ -102,6 +88,10 @@ public readonly struct Identifier
         else if (name.StartsWith("out:"))
         {
             return new(Direction.Outgoing, name[4..]);
+        }
+        else if (name.StartsWith("both:"))
+        {
+            return new(Direction.Both, name[5..]);
         }
         else
         {

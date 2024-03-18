@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 
 namespace Xabbo.Messages;
@@ -10,11 +9,14 @@ namespace Xabbo.Messages;
 /// Any children of this class may expose <see cref="Header"/> properties
 /// which will internally map to the dictionary by their name.
 /// </summary>
-public abstract class Headers
+/// <remarks>
+/// Constructs a new header dictionary with the specified destination.
+/// </remarks>
+public abstract class Headers(Direction direction)
 {
     private readonly ReaderWriterLockSlim _lock = new();
 
-    private readonly Dictionary<(ClientType, short), Header> _headerMap = new();
+    private readonly Dictionary<(ClientType, short), Header> _headerMap = [];
     private readonly Dictionary<string, Header> _nameMap = new(StringComparer.OrdinalIgnoreCase);
 
     protected Header Get(string name)
@@ -32,15 +34,7 @@ public abstract class Headers
     /// <summary>
     /// The direction of the headers stored in this dictionary.
     /// </summary>
-    public Direction Direction { get; }
-
-    /// <summary>
-    /// Constructs a new header dictionary with the specified destination.
-    /// </summary>
-    public Headers(Direction direction)
-    {
-        Direction = direction;
-    }
+    public Direction Direction { get; } = direction;
 
     /// <summary>
     /// Resets this dictionary and initializes it from the specified message information.

@@ -2,20 +2,13 @@
 
 namespace Xabbo.Messages.Dispatcher;
 
-internal sealed class Unsubscriber : IDisposable
+internal sealed class Unsubscriber(IMessageDispatcher dispatcher, HeaderSet headers, Action<InterceptArgs> callback) : IDisposable
 {
-    private readonly IMessageDispatcher _dispatcher;
-    private readonly HeaderSet _headers;
-    private readonly Action<InterceptArgs> _callback;
+    private readonly IMessageDispatcher _dispatcher = dispatcher;
+    private readonly HeaderSet _headers = headers;
+    private readonly Action<InterceptArgs> _callback = callback;
 
     private bool _disposed;
-
-    public Unsubscriber(IMessageDispatcher dispatcher, HeaderSet headers, Action<InterceptArgs> callback)
-    {
-        _dispatcher = dispatcher;
-        _headers = headers;
-        _callback = callback;
-    }
 
     private void Dispose(bool disposing)
     {

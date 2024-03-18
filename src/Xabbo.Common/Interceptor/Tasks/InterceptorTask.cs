@@ -66,7 +66,7 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
         cts.Token.Register(() => SetCanceled());
         if (timeout > 0) cts.CancelAfter(timeout);
 
-        _disconnectRegistration ??= Interceptor.DisconnectToken.Register(() => OnDisconnected());
+        _disconnectRegistration ??= Interceptor.DisconnectToken.Register(OnDisconnected);
 
         try
         {

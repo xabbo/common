@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Xabbo.Messages;
+﻿namespace Xabbo.Messages;
 
 /// <summary>
 /// Represents a composable object that can be serialized to a packet.

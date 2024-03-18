@@ -48,7 +48,7 @@ public static partial class PacketExtensions
     /// </summary>
     public static List<T> ReadList<T>(this IReadOnlyPacket p)
     {
-        List<T> list = new();
+        List<T> list = [];
         int n = p.ReadLegacyShort();
         for (int i = 0; i < n; i++)
             list.Add(p.Read<T>());
@@ -65,8 +65,7 @@ public static partial class PacketExtensions
     public static TPacket WriteObject<TPacket>(this TPacket p, object value)
         where TPacket : IPacket
     {
-        if (value is null)
-            throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(value);
 
         return (TPacket)(value switch
         {
@@ -98,6 +97,8 @@ public static partial class PacketExtensions
     public static TPacket WriteObjectCollection<TPacket>(this TPacket p, ICollection collection)
         where TPacket : IPacket
     {
+        ArgumentNullException.ThrowIfNull(collection);
+
         p.WriteLegacyShort((short)collection.Count);
         foreach (object value in collection)
             WriteObject(p, value);
@@ -112,6 +113,8 @@ public static partial class PacketExtensions
     public static TPacket WriteObjectEnumerable<TPacket>(this TPacket p, IEnumerable enumerable)
         where TPacket : IPacket
     {
+        ArgumentNullException.ThrowIfNull(enumerable);
+
         int startPosition = p.Position;
         p.WriteLegacyShort(-1);
 
@@ -172,6 +175,8 @@ public static partial class PacketExtensions
     public static TPacket WriteCollection<TPacket, T>(this TPacket p, ICollection<T> collection)
         where TPacket : IPacket
     {
+        ArgumentNullException.ThrowIfNull(collection);
+
         p.WriteLegacyShort((short)collection.Count);
         foreach (T value in collection)
             Write(p, value);
@@ -185,6 +190,8 @@ public static partial class PacketExtensions
     public static TPacket WriteEnumerable<TPacket, T>(this TPacket p, IEnumerable<T> enumerable)
         where TPacket : IPacket
     {
+        ArgumentNullException.ThrowIfNull(enumerable);
+
         int startPosition = p.Position;
         p.WriteLegacyShort(-1);
 

@@ -3,22 +3,12 @@ using System.Text;
 
 namespace Xabbo.Messages.Dispatcher;
 
-public sealed class InterceptorBindingFailedException : Exception
+public sealed class InterceptorBindingFailedException(IMessageHandler handler, Identifiers unknownIdentifiers, Identifiers unresolvedIdentifiers)
+    : Exception(BuildMessage(handler, unknownIdentifiers, unresolvedIdentifiers))
 {
-    public IMessageHandler Handler { get; }
-    public Identifiers UnknownIdentifiers { get; }
-    public Identifiers UnresolvedIdentifiers { get; }
-
-    public InterceptorBindingFailedException(
-        IMessageHandler handler,
-        Identifiers unknownIdentifiers,
-        Identifiers unresolvedIdentifiers)
-        : base(BuildMessage(handler, unknownIdentifiers, unresolvedIdentifiers))
-    {
-        Handler = handler;
-        UnknownIdentifiers = unknownIdentifiers;
-        UnresolvedIdentifiers = unresolvedIdentifiers;
-    }
+    public IMessageHandler Handler { get; } = handler;
+    public Identifiers UnknownIdentifiers { get; } = unknownIdentifiers;
+    public Identifiers UnresolvedIdentifiers { get; } = unresolvedIdentifiers;
 
     private static string BuildMessage(IMessageHandler handler,
         Identifiers unknownIdentifiers,

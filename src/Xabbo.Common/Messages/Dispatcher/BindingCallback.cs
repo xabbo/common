@@ -3,26 +3,15 @@ using System.Reflection;
 
 namespace Xabbo.Messages.Dispatcher;
 
-public abstract class BindingCallback
+public abstract class BindingCallback(Header header, object? target, MethodInfo method, Delegate @delegate)
 {
     protected volatile bool _isUnsubscribed = false;
 
-    public Header Header { get; }
-    public object? Target { get; }
-    public MethodInfo Method { get; }
-    public Delegate Delegate { get; }
+    public Header Header { get; } = header;
+    public object? Target { get; } = target;
+    public MethodInfo Method { get; } = method;
+    public Delegate Delegate { get; } = @delegate;
     public bool IsUnsubscribed => _isUnsubscribed;
 
-    public BindingCallback(Header header, object? target, MethodInfo method, Delegate @delegate)
-    {
-        Header = header;
-        Target = target;
-        Method = method;
-        Delegate = @delegate;
-    }
-
-    public void Unsubscribe()
-    {
-        _isUnsubscribed = true;
-    }
+    public void Unsubscribe() => _isUnsubscribed = true;
 }

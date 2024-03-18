@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Xabbo.Messages.Dispatcher;
 
-internal sealed class InterceptorBinding
+internal sealed class InterceptorBinding(IMessageHandler handler, IEnumerable<BindingCallback> callbacks)
 {
-    public IMessageHandler Handler { get; }
-    public IReadOnlyCollection<BindingCallback> Callbacks { get; }
-
-    public InterceptorBinding(IMessageHandler handler, IEnumerable<BindingCallback> callbacks)
-    {
-        Handler = handler;
-        Callbacks = new List<BindingCallback>(callbacks).AsReadOnly();
-    }
+    public IMessageHandler Handler { get; } = handler;
+    public IReadOnlyCollection<BindingCallback> Callbacks { get; } = new List<BindingCallback>(callbacks).AsReadOnly();
 }

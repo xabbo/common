@@ -3,9 +3,5 @@
 namespace Xabbo.Messages;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-public sealed class RequiredInAttribute : IdentifiersAttribute
-{
-    public RequiredInAttribute(params string[] identifiers)
-      : base(Direction.Incoming, identifiers)
-    { }
-}
+public sealed class RequiredInAttribute(params string[] identifiers)
+    : IdentifiersAttribute(Direction.Incoming, identifiers) { }

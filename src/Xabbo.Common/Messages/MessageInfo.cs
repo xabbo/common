@@ -8,15 +8,9 @@ public sealed class MessageInfo : IMessageInfo
     public bool IsIncoming => Direction == Direction.Incoming;
     public bool IsOutgoing => Direction == Direction.Outgoing;
     public string? UnityName { get; set; }
-    public short UnityHeader { get; set; }
+    public short UnityHeader { get; set; } = -1;
     public string? FlashName { get; set; }
-    public short FlashHeader { get; set; }
-
-    public MessageInfo()
-    {
-        UnityHeader = -1;
-        FlashHeader = -1;
-    }
+    public short FlashHeader { get; set; } = -1;
 }
 
 public interface IClientMessageInfo

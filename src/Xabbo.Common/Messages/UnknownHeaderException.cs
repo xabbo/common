@@ -8,9 +8,7 @@ namespace Xabbo.Messages;
 public sealed class UnknownHeaderException : Exception
 {
     private static string BuildMessage(Identifier identifier)
-    {
-        return $"Unknown {(identifier.IsIncoming ? "incoming" : "outgoing")} header: \"{identifier.Name}\".";
-    }
+        => $"Unknown {(identifier.IsIncoming ? "incoming" : "outgoing")} header: \"{identifier.Name}\".";
 
     /// <summary>
     /// The identifier of the header.
