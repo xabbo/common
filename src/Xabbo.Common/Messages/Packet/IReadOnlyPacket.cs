@@ -43,16 +43,6 @@ public interface IReadOnlyPacket : IDisposable
     ReadOnlyMemory<byte> GetMemory();
 
     /// <summary>
-    /// Advances the packet's position by the specified number of bytes.
-    /// </summary>
-    IReadOnlyPacket Skip(int bytes);
-
-    /// <summary>
-    /// Skips values of the specified types.
-    /// </summary>
-    IReadOnlyPacket Skip(params Type[] types);
-
-    /// <summary>
     /// Reads a boolean from the current position in the packet.
     /// </summary>
     bool ReadBool();

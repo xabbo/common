@@ -37,4 +37,20 @@ public static partial class PacketExtensions
 	}
 	{{~ end ~}}
 	#endregion
+
+	#region Generic Skip
+	{{~ for n in 2..max_params ~}}
+	/// <summary>
+	/// Skips the specified value types.
+	/// </summary>
+	public static TPacket Skip<TPacket, {{gtypes 1..n}}>(this TPacket packet)
+		where TPacket : IReadOnlyPacket
+	{
+		return packet
+		{{~for i in 1..n ~}}
+			.Skip<TPacket, T{{i}}>(){{ for.last ? ';' : '' }}
+		{{~ end ~}}
+	}
+	{{~ end ~}}
+	#endregion
 }

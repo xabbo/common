@@ -147,52 +147,6 @@ public sealed partial class Packet : IPacket
             _buffer = _memoryOwner.Memory[..minSize];
     }
 
-    /// <inheritdoc cref="IPacket.Skip(int)" />
-    public Packet Skip(int bytes)
-    {
-        Position += bytes;
-        return this;
-    }
-    IPacket IPacket.Skip(int bytes) => Skip(bytes);
-    IReadOnlyPacket IReadOnlyPacket.Skip(int bytes) => Skip(bytes);
-
-    /// <summary>
-    /// Skips a value of the specified type.
-    /// </summary>
-    private void Skip(Type type)
-    {
-        Skip(Type.GetTypeCode(type) switch
-        {
-            TypeCode.Byte or TypeCode.Boolean => 1,
-            TypeCode.Int16 or TypeCode.UInt16 => 2,
-            TypeCode.Int32 or TypeCode.UInt32 => 4,
-            TypeCode.Int64 or TypeCode.UInt64 => Protocol switch
-            {
-                ClientType.Flash => 4,
-                ClientType.Unity => 8,
-                _ => throw new InvalidOperationException("Cannot skip long: packet protocol is not specified.")
-            },
-            TypeCode.Single => Protocol switch
-            {
-                ClientType.Flash => ReadShort(),
-                ClientType.Unity => 4,
-                _ => throw new InvalidOperationException("Cannot skip float: packet protocol is not specified.")
-            },
-            TypeCode.String => ReadShort(),
-            _ => throw new InvalidOperationException($"Cannot skip value of type \"{type.FullName}\".")
-        });
-    }
-
-    /// <inheritdoc cref="IPacket.Skip(Type[])" />
-    public Packet Skip(params Type[] types)
-    {
-        foreach (Type type in types)
-            Skip(type);   
-        return this;
-    }
-    IPacket IPacket.Skip(Type[] types) => Skip(types);
-    IReadOnlyPacket IReadOnlyPacket.Skip(Type[] types) => Skip(types);
-
     /// <inheritdoc cref="IPacket.Clear" />
     public Packet Clear()
     {

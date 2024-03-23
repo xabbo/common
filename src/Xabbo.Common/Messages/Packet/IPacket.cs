@@ -22,12 +22,6 @@ public interface IPacket : IReadOnlyPacket
     /// </summary>
     new Memory<byte> GetMemory();
 
-    /// <inheritdoc cref="IReadOnlyPacket.Skip(int)" />
-    new IPacket Skip(int bytes);
-
-    /// <inheritdoc cref="IReadOnlyPacket.Skip(Type[])" />
-    new IPacket Skip(params Type[] types);
-
     /// <summary>
     /// <para>
     /// Returns a span of bytes of the specified length from the current position in the packet that maps to the packet's internal buffer.
