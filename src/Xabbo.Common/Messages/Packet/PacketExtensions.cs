@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
@@ -14,6 +16,54 @@ namespace Xabbo;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static partial class PacketExtensions
 {
+    /// <summary>
+    /// Returns whether a boolean can be read from the current position in the packet.
+    /// </summary>
+    /// <returns><c>true</c> if a byte can be read from the current position in the packet and its value is either <c>0</c> or <c>1</c>.</returns>
+    public static bool CanReadBool(this IReadOnlyPacket p)
+        => p.Available >= 1 && p.Buffer[p.Position] <= 1;
+
+    /// <summary>
+    /// Returns whether a byte can be read from the current position in the packet.
+    /// </summary>
+    /// <returns><c>true</c> if the number of available bytes is &gt;= <c>1</c>.</returns>
+    public static bool CanReadByte(this IReadOnlyPacket p) => p.Available >= 1;
+
+    /// <summary>
+    /// Returns whether a short can be read from the current position in the packet.
+    /// </summary>
+    public static bool CanReadShort(this IReadOnlyPacket p) => p.Available >= 2;
+
+    /// <summary>
+    /// Returns whether an int can be read from the current position in the packet.
+    /// </summary>
+    public static bool CanReadInt(this IReadOnlyPacket p) => p.Available >= 4;
+
+    /// <summary>
+    /// Returns whether a long can be read from the current position in the packet.
+    /// </summary>
+    public static bool CanReadLong(this IReadOnlyPacket p) => p.Available >= 8;
+
+    /// <summary>
+    /// Returns whether a float can be read as a string from the current position in the packet.
+    /// </summary>
+    public static bool CanReadFloatAsString(this IReadOnlyPacket p)
+    {
+        if (!p.CanReadString()) return false;
+
+        int pos = p.Position;
+        bool success = double.TryParse(p.ReadString(), NumberStyles.Float, CultureInfo.InvariantCulture, out _);
+        p.Position = pos;
+
+        return success;
+    }
+
+    /// <summary>
+    /// Returns whether a string can be read from the current position in the packet.
+    /// </summary>
+    public static bool CanReadString(this IReadOnlyPacket p)
+        => p.Available >= 2 && p.Available >= 2 + BinaryPrimitives.ReadUInt16BigEndian(p.Buffer[p.Position..]);
+
     #region Generic read
     /// <summary>
     /// Reads a generically typed value from the packet.

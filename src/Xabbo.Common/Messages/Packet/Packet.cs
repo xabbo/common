@@ -147,57 +147,6 @@ public sealed partial class Packet : IPacket
             _buffer = _memoryOwner.Memory[..minSize];
     }
 
-    /// <summary>
-    /// Returns whether a byte can be read from the current position in the packet.
-    /// </summary>
-    /// <returns><c>true</c> if the number of available bytes is &gt;= <c>1</c>.</returns>
-    public bool CanReadByte() => Available >= 1;
-
-    /// <summary>
-    /// Returns whether a bool can be read from the current position in the packet.
-    /// </summary>
-    /// <returns><c>true</c> if a byte can be read from the current position in the packet and its value is either <c>0</c> or <c>1</c>.</returns>
-    public bool CanReadBool()
-    {
-        if (!CanReadByte()) return false;
-        byte b = ReadByte();
-        Position -= 1;
-        return b <= 1;
-    }
-
-    public bool CanReadShort() => Available >= 2;
-
-    /// <summary>
-    /// Returns whether an int can be read from the current position in the packet.
-    /// </summary>
-    /// <returns></returns>
-    public bool CanReadInt() => Available >= 4;
-
-    /// <summary>
-    /// Returns whether a string can be read from the current position in the packet.
-    /// </summary>
-    public bool CanReadString()
-    {
-        return
-            Available >= 2 &&
-            Available >= 2 + BinaryPrimitives.ReadUInt16BigEndian(_buffer.Span[Position..]);
-    }
-
-    /// <summary>
-    /// Returns whether a float can be read as a string from the current position in the packet.
-    /// </summary>
-    /// <returns></returns>
-    public bool CanReadFloatAsString()
-    {
-        if (!CanReadString()) return false;
-
-        int pos = Position;
-        bool success = double.TryParse(ReadString(), NumberStyles.Float, CultureInfo.InvariantCulture, out _);
-        Position = pos;
-
-        return success;
-    }
-
     /// <inheritdoc cref="IPacket.Skip(int)" />
     public Packet Skip(int bytes)
     {

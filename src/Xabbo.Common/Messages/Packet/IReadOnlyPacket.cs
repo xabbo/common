@@ -43,17 +43,6 @@ public interface IReadOnlyPacket : IDisposable
     ReadOnlyMemory<byte> GetMemory();
 
     /// <summary>
-    /// Returns whether a boolean can be read from the current position in the packet.
-    /// </summary>
-    /// <returns><c>true</c> if a byte can be read from the current position in the packet and its value is either <c>0</c> or <c>1</c>.</returns>
-    bool CanReadBool();
-
-    /// <summary>
-    /// Returns whether a string can be read from the current position in the packet.
-    /// </summary>
-    bool CanReadString();
-
-    /// <summary>
     /// Advances the packet's position by the specified number of bytes.
     /// </summary>
     IReadOnlyPacket Skip(int bytes);
