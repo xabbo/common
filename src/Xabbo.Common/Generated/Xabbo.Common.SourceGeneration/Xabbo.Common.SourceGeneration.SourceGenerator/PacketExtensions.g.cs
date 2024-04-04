@@ -697,363 +697,332 @@ public static partial class PacketExtensions
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>();
+		packet.Read<T1>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>();
+		packet.Read<T1>();
+		packet.Read<T2>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>()
-			.Skip<TPacket, T16>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>()
-			.Skip<TPacket, T16>()
-			.Skip<TPacket, T17>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
+		packet.Read<T16>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>()
-			.Skip<TPacket, T16>()
-			.Skip<TPacket, T17>()
-			.Skip<TPacket, T18>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
+		packet.Read<T16>();
+		packet.Read<T17>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>()
-			.Skip<TPacket, T16>()
-			.Skip<TPacket, T17>()
-			.Skip<TPacket, T18>()
-			.Skip<TPacket, T19>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
+		packet.Read<T16>();
+		packet.Read<T17>();
+		packet.Read<T18>();
 	}
 	/// <summary>
 	/// Skips the specified value types.
 	/// </summary>
-	public static TPacket Skip<TPacket, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this TPacket packet)
-		where TPacket : IReadOnlyPacket
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this IReadOnlyPacket packet)
 	{
-		return packet
-			.Skip<TPacket, T1>()
-			.Skip<TPacket, T2>()
-			.Skip<TPacket, T3>()
-			.Skip<TPacket, T4>()
-			.Skip<TPacket, T5>()
-			.Skip<TPacket, T6>()
-			.Skip<TPacket, T7>()
-			.Skip<TPacket, T8>()
-			.Skip<TPacket, T9>()
-			.Skip<TPacket, T10>()
-			.Skip<TPacket, T11>()
-			.Skip<TPacket, T12>()
-			.Skip<TPacket, T13>()
-			.Skip<TPacket, T14>()
-			.Skip<TPacket, T15>()
-			.Skip<TPacket, T16>()
-			.Skip<TPacket, T17>()
-			.Skip<TPacket, T18>()
-			.Skip<TPacket, T19>()
-			.Skip<TPacket, T20>();
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
+		packet.Read<T16>();
+		packet.Read<T17>();
+		packet.Read<T18>();
+		packet.Read<T19>();
+	}
+	/// <summary>
+	/// Skips the specified value types.
+	/// </summary>
+	public static void Skip<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this IReadOnlyPacket packet)
+	{
+		packet.Read<T1>();
+		packet.Read<T2>();
+		packet.Read<T3>();
+		packet.Read<T4>();
+		packet.Read<T5>();
+		packet.Read<T6>();
+		packet.Read<T7>();
+		packet.Read<T8>();
+		packet.Read<T9>();
+		packet.Read<T10>();
+		packet.Read<T11>();
+		packet.Read<T12>();
+		packet.Read<T13>();
+		packet.Read<T14>();
+		packet.Read<T15>();
+		packet.Read<T16>();
+		packet.Read<T17>();
+		packet.Read<T18>();
+		packet.Read<T19>();
+		packet.Read<T20>();
 	}
 	#endregion
 }

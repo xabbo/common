@@ -84,6 +84,20 @@ public class PacketTests
         );
     }
 
+    [Fact]
+    public void Skip_Generic()
+    {
+        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
+
+        packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
+
+        packet.Position = 0;
+
+        packet.Skip<bool, bool, byte, short, int, float, long, string>();
+
+        Assert.Equal(packet.Length, packet.Position);
+    }
+
     [Theory]
     [InlineData("hello", "world")]
     [InlineData("hello", "universe")]

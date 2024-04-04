@@ -260,13 +260,4 @@ public static partial class PacketExtensions
         return p;
     }
     #endregion
-
-    #region Generic Skip
-    public static TPacket Skip<TPacket, TValue>(this TPacket p)
-        where TPacket : IReadOnlyPacket
-    {
-        p.Read<TValue>();
-        return p;
-    }
-    #endregion
 }
