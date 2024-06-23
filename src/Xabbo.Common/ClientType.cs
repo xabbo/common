@@ -21,7 +21,11 @@ public enum ClientType
     /// </summary>
     Unity = 1 << 1,
     /// <summary>
+    /// Represents the Shockwave client.
+    /// </summary>
+    Shockwave = 1 << 2,
+    /// <summary>
     /// Represents all client types.
     /// </summary>
-    All = Flash | Unity
+    All = Flash | Unity | Shockwave
 }
