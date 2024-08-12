@@ -14,14 +14,14 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     private static class Out
     {
         private static Identifier _([CallerMemberName] string? name = null)
-            => (Clients.Flash, Direction.Out, name ?? "");
+            => (ClientType.Flash, Direction.Out, name ?? "");
         public static Identifier MoveAvatar { get; } = _();
     }
 
     private static class In
     {
         private static Identifier _([CallerMemberName] string? name = null)
-            => (Clients.Flash, Direction.In, name ?? "");
+            => (ClientType.Flash, Direction.In, name ?? "");
 
         public static Identifier Chat { get; } = _();
         public static Identifier Shout { get; } = _();
@@ -76,12 +76,12 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         var registration = Ext.Intercept(Header.All, mockHandler.Object);
 
         for (int i = 0; i < expectedCount; i++)
-            Dispatcher.Dispatch(new(Ext, new Packet((Clients.Flash, Direction.In, (short)i))));
+            Dispatcher.Dispatch(new(Ext, new Packet((ClientType.Flash, Direction.In, (short)i))));
 
         registration.Dispose();
 
         for (int i = 0; i < expectedCount; i++)
-            Dispatcher.Dispatch(new(Ext, new Packet((Clients.Flash, Direction.In, (short)i))));
+            Dispatcher.Dispatch(new(Ext, new Packet((ClientType.Flash, Direction.In, (short)i))));
 
         // Verify that the handler was invoked only once, and not after the handler was removed.
         mockHandler.Verify(e => e.Invoke(It.IsAny<Intercept>()), Times.Exactly(expectedCount));

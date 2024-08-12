@@ -73,7 +73,7 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
                 }
 
                 item = item with { Direction = direction };
-                foreach (var client in new[] { Clients.Unity, Clients.Flash, Clients.Shockwave })
+                foreach (var client in new[] { ClientType.Unity, ClientType.Flash, ClientType.Shockwave })
                 {
                     string? name = item.GetName(client);
                     if (name is not null && !map._names.TryAdd((client, direction, name), item))
@@ -89,7 +89,7 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
     {
         item = new();
         result = ParseResult.Invalid;
-        var processed = Clients.None;
+        var processed = ClientType.None;
 
         var commentSplit = line.Split(';', 2);
         if (commentSplit.Length == 0)
@@ -108,7 +108,7 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
             foreach (char c in split[0])
             {
                 var client = GetClientFromChar(c);
-                if (client == Clients.None)
+                if (client == ClientType.None)
                     return false;
                 if ((processed & client) > 0)
                 {
@@ -120,18 +120,18 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
             }
         }
 
-        if (processed == Clients.None)
+        if (processed == ClientType.None)
             return false;
 
         result = ParseResult.Ok;
         return true;
     }
 
-    private static Clients GetClientFromChar(char c) => c switch
+    private static ClientType GetClientFromChar(char c) => c switch
     {
-        'u' => Clients.Unity,
-        'f' => Clients.Flash,
-        's' => Clients.Shockwave,
-        _ => Clients.None,
+        'u' => ClientType.Unity,
+        'f' => ClientType.Flash,
+        's' => ClientType.Shockwave,
+        _ => ClientType.None,
     };
 }

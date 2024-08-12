@@ -22,7 +22,7 @@ public sealed partial class Packet : IPacket
 
     public Header Header { get; set; } = Header.Unknown;
 
-    public Clients Client => Header.Client;
+    public ClientType Client => Header.Client;
 
     public Span<byte> Buffer
     {
@@ -173,27 +173,27 @@ public sealed partial class Packet : IPacket
             case TypeCode.Int16:
                 return Client switch
                 {
-                    Clients.Shockwave => (T)(object)(short)Read<B64>(ref pos),
+                    ClientType.Shockwave => (T)(object)(short)Read<B64>(ref pos),
                     _ => (T)(object)BinaryPrimitives.ReadInt16BigEndian(ReadSpan(2, ref pos)),
                 };
             case TypeCode.Int32:
                 return Client switch
                 {
-                    Clients.Shockwave => (T)(object)(int)Read<VL64>(ref pos),
+                    ClientType.Shockwave => (T)(object)(int)Read<VL64>(ref pos),
                     _ => (T)(object)BinaryPrimitives.ReadInt32BigEndian(ReadSpan(4, ref pos)),
                 };
             case TypeCode.Int64:
-                if (Client == Clients.Flash || Client == Clients.Shockwave)
+                if (Client == ClientType.Flash || Client == ClientType.Shockwave)
                     throw new Exception($"Cannot read long on a {Enum.GetName(Client)} session.");
                 return (T)(object)BinaryPrimitives.ReadInt64BigEndian(ReadSpan(8, ref pos));
             case TypeCode.Single:
                 return Client switch
                 {
-                    Clients.Unity => (T)(object)BinaryPrimitives.ReadSingleBigEndian(ReadSpan(4, ref pos)),
+                    ClientType.Unity => (T)(object)BinaryPrimitives.ReadSingleBigEndian(ReadSpan(4, ref pos)),
                     _ => (T)(object)float.Parse(Read<string>(ref pos)),
                 };
             case TypeCode.String:
-                if (Client == Clients.Shockwave)
+                if (Client == ClientType.Shockwave)
                 {
                     if (Header.Direction == Direction.In)
                     {
@@ -222,26 +222,26 @@ public sealed partial class Packet : IPacket
             default:
                 if (typeof(T) == typeof(B64))
                 {
-                    if (Client != Clients.Shockwave)
+                    if (Client != ClientType.Shockwave)
                         throw new Exception($"Cannot read B64 on session: {Client}.");
                     return (T)(object)B64.Decode(ReadSpan(2, ref pos));
                 }
                 if (typeof(T) == typeof(VL64))
                 {
-                    if (Client != Clients.Shockwave)
+                    if (Client != ClientType.Shockwave)
                         throw new Exception($"Cannot read B64 on session: {Client}.");
                     return (T)(object)VL64.Decode(ReadSpan(VL64.DecodeLength(_buf.Span[pos]), ref pos));
                 }
                 if (typeof(T) == typeof(Id)) return Client switch
                 {
-                    Clients.Unity => (T)(object)(Id)Read<long>(ref pos),
-                    Clients.Flash or Clients.Shockwave => (T)(object)(Id)Read<int>(ref pos),
+                    ClientType.Unity => (T)(object)(Id)Read<long>(ref pos),
+                    ClientType.Flash or ClientType.Shockwave => (T)(object)(Id)Read<int>(ref pos),
                     _ => throw new Exception($"Cannot read Id on session: {Client}."),
                 };
                 if (typeof(T) == typeof(Length)) return Client switch
                 {
-                    Clients.Unity => (T)(object)(Length)Read<short>(ref pos),
-                    Clients.Flash or Clients.Shockwave => (T)(object)(Length)Read<int>(ref pos),
+                    ClientType.Unity => (T)(object)(Length)Read<short>(ref pos),
+                    ClientType.Flash or ClientType.Shockwave => (T)(object)(Length)Read<int>(ref pos),
                     _ => throw new Exception($"Cannot read Length on session: {Client}."),
                 };
                 if (typeof(T) == typeof(FloatString))
@@ -296,31 +296,31 @@ public sealed partial class Packet : IPacket
                 Allocate(1, ref pos)[0] = v;
                 break;
             case short v:
-                if (Client == Clients.Shockwave)
+                if (Client == ClientType.Shockwave)
                     Write<B64>(v, ref pos);
                 else
                     BinaryPrimitives.WriteInt16BigEndian(Allocate(2, ref pos), v);
                 break;
             case int v:
-                if (Client == Clients.Shockwave)
+                if (Client == ClientType.Shockwave)
                     Write<VL64>(v, ref pos);
                 else
                     BinaryPrimitives.WriteInt32BigEndian(Allocate(4, ref pos), v);
                 break;
             case long v:
-                if (Client == Clients.Flash || Client == Clients.Shockwave)
+                if (Client == ClientType.Flash || Client == ClientType.Shockwave)
                     throw new Exception($"Cannot write long on session: {Client}.");
                 BinaryPrimitives.WriteInt64BigEndian(Allocate(8, ref pos), v);
                 break;
             case float v:
-                if (Client == Clients.Unity)
+                if (Client == ClientType.Unity)
                     BinaryPrimitives.WriteSingleBigEndian(Allocate(4, ref pos), v);
                 else
                     Write<string>(FormatFloat(v), ref pos);
                 break;
             case string v:
                 int len = Encoding.UTF8.GetByteCount(v);
-                if (Client == Clients.Shockwave)
+                if (Client == ClientType.Shockwave)
                 {
                     if (Header.Direction == Direction.In)
                     {
@@ -336,22 +336,22 @@ public sealed partial class Packet : IPacket
                 Encoding.UTF8.GetBytes(v, Allocate(len, ref pos));
                 break;
             case B64 v:
-                if (Client != Clients.Shockwave)
+                if (Client != ClientType.Shockwave)
                     throw new Exception($"Cannot write B64 on session: {Client}.");
                 B64.Encode(Allocate(2, ref pos), v);
                 break;
             case VL64 v:
-                if (Client != Clients.Shockwave)
+                if (Client != ClientType.Shockwave)
                     throw new Exception($"Cannot write VL64 on session: {Client}.");
                 VL64.Encode(Allocate(VL64.EncodeLength(v), ref pos), v);
                 break;
             case Id v:
                 switch (Client)
                 {
-                    case Clients.Unity:
+                    case ClientType.Unity:
                         Write<long>(v.Value, ref pos);
                         break;
-                    case Clients.Flash or Clients.Shockwave:
+                    case ClientType.Flash or ClientType.Shockwave:
                         Write((int)v.Value, ref pos);
                         break;
                     default:
@@ -361,10 +361,10 @@ public sealed partial class Packet : IPacket
             case Length v:
                 switch (Client)
                 {
-                    case Clients.Unity:
+                    case ClientType.Unity:
                         Write((short)v.Value, ref pos);
                         break;
-                    case Clients.Flash or Clients.Shockwave:
+                    case ClientType.Flash or ClientType.Shockwave:
                         Write<int>(v.Value, ref pos);
                         break;
                     default:
@@ -430,13 +430,13 @@ public sealed partial class Packet : IPacket
 
         switch (value)
         {
-            case int v when Client == Clients.Shockwave:
+            case int v when Client == ClientType.Shockwave:
                 Replace<VL64>(v, ref pos);
                 break;
-            case float v when Client == Clients.Flash || Client == Clients.Shockwave:
+            case float v when Client == ClientType.Flash || Client == ClientType.Shockwave:
                 Replace<string>(FormatFloat(v), ref pos);
                 break;
-            case string v when Client == Clients.Shockwave && Header.Direction == Direction.In:
+            case string v when Client == ClientType.Shockwave && Header.Direction == Direction.In:
                 {
                     int end = _buf.Span[pos..].IndexOf<byte>(2);
                     int newLen = Encoding.UTF8.GetByteCount(v);
@@ -459,10 +459,10 @@ public sealed partial class Packet : IPacket
             case VL64 v:
                 VL64.Encode(Stretch(VL64.DecodeLength(_buf.Span[pos]), VL64.EncodeLength(v), ref pos), v);
                 break;
-            case Id v when Client == Clients.Shockwave:
+            case Id v when Client == ClientType.Shockwave:
                 Replace<VL64>((int)v, ref pos);
                 break;
-            case Length v when Client == Clients.Shockwave:
+            case Length v when Client == ClientType.Shockwave:
                 Replace<VL64>((int)v, ref pos);
                 break;
             case IComposable:

@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Defines information about a client message.
 /// </summary>
-public readonly record struct ClientMessage(Clients Client, Direction Direction, short Header, string Name)
+public readonly record struct ClientMessage(ClientType Client, Direction Direction, short Header, string Name)
 {
     public override int GetHashCode() => (Client, Direction, Header, Name.ToUpperInvariant()).GetHashCode();
 
@@ -15,7 +15,7 @@ public readonly record struct ClientMessage(Clients Client, Direction Direction,
         Header == other.Header &&
         string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase);
 
-    public static implicit operator ClientMessage((Clients client, Direction dir, short header, string name) x)
+    public static implicit operator ClientMessage((ClientType client, Direction dir, short header, string name) x)
         => new(x.client, x.dir, x.header, x.name);
 }
 

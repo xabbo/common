@@ -39,12 +39,12 @@ public sealed class Identifiers : HashSet<Identifier>
     /// <summary>
     /// Adds a new identifier with the specified direction and name to this set.
     /// </summary>
-    public void Add(Clients client, Direction direction, string name) => Add(new Identifier(client, direction, name));
+    public void Add(ClientType client, Direction direction, string name) => Add(new Identifier(client, direction, name));
 
     /// <summary>
     /// Adds a range of new identifiers with the specified direction and names to this set.
     /// </summary>
-    public void Add(Clients client, Direction direction, params string[] names)
+    public void Add(ClientType client, Direction direction, params string[] names)
     {
         foreach (string name in names)
             Add(client, direction, name);

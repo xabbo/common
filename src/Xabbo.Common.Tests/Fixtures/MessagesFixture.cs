@@ -29,15 +29,15 @@ public class MessagesFixture : IAsyncLifetime
 
         Messages.LoadMessages([
             // u:AddItem f:ItemAdd s:Items_2
-            (Clients.Flash, Direction.In, ItemAdd, "ItemAdd"),
+            (ClientType.Flash, Direction.In, ItemAdd, "ItemAdd"),
             // us:move f:moveavatar
-            (Clients.Flash, Direction.Out, MoveAvatar, "MoveAvatar"),
+            (ClientType.Flash, Direction.Out, MoveAvatar, "MoveAvatar"),
             // chat messages
-            (Clients.Flash, Direction.In, Chat, "Chat"),
-            (Clients.Flash, Direction.In, Whisper, "Whisper"),
-            (Clients.Flash, Direction.In, Shout, "Shout"),
+            (ClientType.Flash, Direction.In, Chat, "Chat"),
+            (ClientType.Flash, Direction.In, Whisper, "Whisper"),
+            (ClientType.Flash, Direction.In, Shout, "Shout"),
             // client message not defined in the message map file
-            (Clients.Flash, Direction.Out, NonExistent, "NonExistent"),
+            (ClientType.Flash, Direction.Out, NonExistent, "NonExistent"),
         ]);
     }
 

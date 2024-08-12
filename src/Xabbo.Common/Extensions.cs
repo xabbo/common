@@ -24,15 +24,15 @@ public static class Extensions
     /// Returns a short string representation of the specified client.
     /// </summary>
     /// <returns><c>u</c>, <c>f</c>, <c>s</c> or a combination representing which client flags are set.</returns>
-    public static string Short(this Clients client) => client switch {
-        Clients.None => "",
-        Clients.Unity => "u",
-        Clients.Unity | Clients.Flash => "uf",
-        Clients.Flash => "f",
-        Clients.Flash | Clients.Shockwave => "fs",
-        Clients.Shockwave => "s",
-        Clients.Unity | Clients.Shockwave => "us",
-        Clients.All => "ufs",
+    public static string Short(this ClientType client) => client switch {
+        ClientType.None => "",
+        ClientType.Unity => "u",
+        ClientType.Unity | ClientType.Flash => "uf",
+        ClientType.Flash => "f",
+        ClientType.Flash | ClientType.Shockwave => "fs",
+        ClientType.Shockwave => "s",
+        ClientType.Unity | ClientType.Shockwave => "us",
+        ClientType.All => "ufs",
         _ => client.ToString(),
     };
 }

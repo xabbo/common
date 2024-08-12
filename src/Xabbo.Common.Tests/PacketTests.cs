@@ -10,9 +10,9 @@ namespace Xabbo.Common.Tests;
 public class PacketTests
 {
     public static readonly object[] ClientTypes = [
-        new object[] { Clients.Unity },
-        new object[] { Clients.Flash },
-        new object[] { Clients.Shockwave },
+        new object[] { ClientType.Unity },
+        new object[] { ClientType.Flash },
+        new object[] { ClientType.Shockwave },
     ];
 
     public PacketTests() { }
@@ -20,7 +20,7 @@ public class PacketTests
     [Fact]
     public void Clear()
     {
-        var packet = new Packet((Clients.Flash, Direction.Out, 0));
+        var packet = new Packet((ClientType.Flash, Direction.Out, 0));
 
         for (int i = 0; i < 3; i++)
         {
@@ -67,7 +67,7 @@ public class PacketTests
     [Fact]
     public void Read_Write_Generic()
     {
-        IPacket packet = new Packet((Clients.Unity, Direction.Out, 0));
+        IPacket packet = new Packet((ClientType.Unity, Direction.Out, 0));
 
         packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
 
@@ -88,7 +88,7 @@ public class PacketTests
         int valueByteCount = Encoding.UTF8.GetByteCount(value);
         int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
 
-        var packet = new Packet((Clients.Flash, Direction.In, 0));
+        var packet = new Packet((ClientType.Flash, Direction.In, 0));
 
         packet.Write(1234);
         packet.Write(value);
@@ -114,7 +114,7 @@ public class PacketTests
 
     [Theory]
     [MemberData(nameof(ClientTypes))]
-    public void TestWriteArray(Clients client)
+    public void TestWriteArray(ClientType client)
     {
         int[] array = Enumerable.Range(1, 10).ToArray();
 
@@ -130,15 +130,15 @@ public class PacketTests
 
     [Theory]
     [MemberData(nameof(ClientTypes))]
-    public void TestReadWriteLength(Clients client)
+    public void TestReadWriteLength(ClientType client)
     {
         var packet = new Packet(Header.Unknown with { Client = client });
         packet.Write<Length>(0);
 
         int expectedBytes = client switch {
-            Clients.Unity => 2, // short
-            Clients.Flash => 4, // int
-            Clients.Shockwave => 1, // VL64
+            ClientType.Unity => 2, // short
+            ClientType.Flash => 4, // int
+            ClientType.Shockwave => 1, // VL64
             _ => throw new Exception("Invalid client"),
         };
 
@@ -154,15 +154,15 @@ public class PacketTests
 
     [Theory]
     [MemberData(nameof(ClientTypes))]
-    public void TestReadWriteId(Clients client)
+    public void TestReadWriteId(ClientType client)
     {
         var packet = new Packet(Header.Unknown with { Client = client });
         packet.Write<Id>(0);
 
         int expectedBytes = client switch {
-            Clients.Unity => 8, // long
-            Clients.Flash => 4, // int
-            Clients.Shockwave => 1, // VL64
+            ClientType.Unity => 8, // long
+            ClientType.Flash => 4, // int
+            ClientType.Shockwave => 1, // VL64
             _ => throw new Exception("Invalid client"),
         };
 

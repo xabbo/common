@@ -17,7 +17,7 @@ public interface IReadOnlyPacket : IDisposable
     /// <summary>
     /// Gets the client type of the packet header.
     /// </summary>
-    Clients Client { get; }
+    ClientType Client { get; }
 
     /// <summary>
     /// Gets or sets the current position in the packet.

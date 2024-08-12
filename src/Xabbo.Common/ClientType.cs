@@ -6,7 +6,7 @@ namespace Xabbo;
 /// Represents a type of game client.
 /// </summary>
 [Flags]
-public enum Clients
+public enum ClientType
 {
     /// <summary>
     /// Represents no particular client.
