@@ -18,6 +18,6 @@ public class HotelTests
     {
         var hotel = Hotel.FromIdentifier(identifier);
         Assert.NotNull(hotel);
-        Assert.NotEqual(Hotel.Unknown, hotel);
+        Assert.NotEqual(Hotel.None, hotel);
     }
 }

@@ -7,10 +7,10 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a client type, direction and message name.
 /// </summary>
-public readonly record struct Identifier(Client Client, Direction Direction, string Name)
+public readonly record struct Identifier(Clients Client, Direction Direction, string Name)
 {
     public Identifier()
-        : this(Client.None, Direction.None, "")
+        : this(Clients.None, Direction.None, "")
     { }
 
     public override int GetHashCode() => (Client, Direction, Name.ToUpperInvariant()).GetHashCode();
@@ -25,13 +25,13 @@ public readonly record struct Identifier(Client Client, Direction Direction, str
         string result = "";
         if (includeDirection && Direction != Direction.None)
             result += Direction.Short() + ":";
-        if (Client != Client.None)
+        if (Client != Clients.None)
             result += Client.Short() + ":";
         return result + Name;
     }
 
     public override string ToString() => ToString(false);
 
-    public static implicit operator Identifier((Direction direction, string name) x) => new(Client.None, x.direction, x.name);
-    public static implicit operator Identifier((Client client, Direction direction, string name) x) => new(x.client, x.direction, x.name);
+    public static implicit operator Identifier((Direction direction, string name) x) => new(Clients.None, x.direction, x.name);
+    public static implicit operator Identifier((Clients client, Direction direction, string name) x) => new(x.client, x.direction, x.name);
 }

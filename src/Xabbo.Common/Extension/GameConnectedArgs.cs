@@ -23,7 +23,7 @@ public sealed class GameConnectedArgs
     /// <summary>
     /// Gets the client for the current game connection.
     /// </summary>
-    public ClientInfo Client { get; init; }
+    public Client Client { get; init; }
 
     /// <summary>
     /// Gets the path to the messages file, if it is available.

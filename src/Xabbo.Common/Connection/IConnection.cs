@@ -27,14 +27,9 @@ public interface IConnection
     CancellationToken DisconnectToken { get; }
 
     /// <summary>
-    /// Gets the client for the current session.
+    /// Gets the session information for the current connection.
     /// </summary>
-    ClientInfo Client { get; }
-
-    /// <summary>
-    /// Gets the hotel for the current session.
-    /// </summary>
-    Hotel Hotel { get; }
+    Session Session { get; }
 
     /// <summary>
     /// Sends a packet to the client or server, specified by the direction of the packet's header.

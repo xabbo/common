@@ -10,18 +10,14 @@ using System.Text.Json.Serialization;
 namespace Xabbo;
 
 /// <summary>
-/// Defines properties of a hotel.
+/// Represents a hotel region.
 /// </summary>
-public sealed record class Hotel
+public sealed record Hotel
 {
     /// <summary>
-    /// Represents an unknown hotel.
+    /// Represents no particular hotel.
     /// </summary>
-    public static readonly Hotel Unknown = new()
-    {
-        Name = "Unknown",
-        Identifier = "?",
-    };
+    public static readonly Hotel None = new();
 
     private static readonly Lazy<ImmutableDictionary<string, Hotel>> _hotels = new(LoadHotels);
 
@@ -144,17 +140,17 @@ public sealed record class Hotel
     /// Gets the hotel with the specified identifier, e.g. "us".
     /// </summary>
     /// <returns>
-    /// The matching Hotel, or <see cref="Unknown"/> if it was not found.
+    /// The matching Hotel, or <see cref="None"/> if it was not found.
     /// </returns>
     public static Hotel FromIdentifier(string identifier) =>
-        All.TryGetValue(identifier, out Hotel? hotel) ? hotel : Unknown;
+        All.TryGetValue(identifier, out Hotel? hotel) ? hotel : None;
 
     /// <summary>
     /// Gets the hotel with the specified game host, e.g. "game-us.habbo.com".
     /// </summary>
     /// <returns>
-    /// The matching Hotel, or <see cref="Unknown"/> if it was not found.
+    /// The matching Hotel, or <see cref="None"/> if it was not found.
     /// </returns>
     public static Hotel FromGameHost(string gameHost) =>
-        All.Values.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase)) ?? Unknown;
+        All.Values.FirstOrDefault(x => x.GameHost.Equals(gameHost, StringComparison.OrdinalIgnoreCase)) ?? None;
 }
