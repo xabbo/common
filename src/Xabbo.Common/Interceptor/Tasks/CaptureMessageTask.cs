@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 using Xabbo.Messages;
@@ -15,7 +13,7 @@ namespace Xabbo.Interceptor.Tasks;
 /// <param name="block">Whether to block the captured packet.</param>
 /// <param name="shouldCapture">A callback that may inspect an intercepted packet and return whether or not it should be captured.</param>
 public sealed class CaptureMessageTask(IInterceptor interceptor,
-    IEnumerable<Header> headers, bool block = false,
+    ReadOnlySpan<Header> headers, bool block = false,
     Func<IReadOnlyPacket, bool>? shouldCapture = null) : InterceptorTask<IPacket>(interceptor)
 {
     private readonly bool _block = block;
