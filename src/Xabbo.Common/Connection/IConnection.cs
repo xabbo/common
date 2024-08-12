@@ -12,6 +12,11 @@ namespace Xabbo.Connection;
 public interface IConnection
 {
     /// <summary>
+    /// Gets the message manager associated with this connection.
+    /// </summary>
+    IMessageManager Messages { get; }
+
+    /// <summary>
     /// Gets if the connection is established.
     /// </summary>
     bool IsConnected { get; }
@@ -22,34 +27,29 @@ public interface IConnection
     CancellationToken DisconnectToken { get; }
 
     /// <summary>
-    /// Gets the client type for this connnection.
+    /// Gets the client for the current session.
     /// </summary>
-    ClientType Client { get; }
+    ClientInfo Client { get; }
 
     /// <summary>
-    /// Gets the client identifier for this connection.
-    /// </summary>
-    string ClientIdentifier { get; }
-
-    /// <summary>
-    /// Gets the client version for this connection.
-    /// </summary>
-    string ClientVersion { get; }
-
-    /// <summary>
-    /// Gets the hotel this connection is associated with.
+    /// Gets the hotel for the current session.
     /// </summary>
     Hotel Hotel { get; }
 
     /// <summary>
-    /// Sends a packet to the client or server, specified by the destination of the packet's header.
+    /// Sends a packet to the client or server, specified by the direction of the packet's header.
     /// </summary>
     void Send(IReadOnlyPacket packet);
 
     /// <summary>
-    /// Asynchronously sends a packet to the client or server, specified by the destination of the packet's header.
+    /// Sends a packet to the client or server, specified by the direction of the header.
     /// </summary>
-    ValueTask SendAsync(IReadOnlyPacket packet);
+    void Send(Header header, params object[] values);
+
+    /// <summary>
+    /// Sends a packet to the client or server, specified by the direction of the identifier.
+    /// </summary>
+    void Send(Identifier identifier, params object[] values);
 
     /// <summary>
     /// Asynchronously captures the first packet sent or received with any of the specified headers.
@@ -57,19 +57,25 @@ public interface IConnection
     /// <param name="headers">Specifies which headers to listen for.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a packet to be captured. <c>-1</c> specifies no timeout.</param>
     /// <param name="block">Whether the captured packet should be blocked from its destination.</param>
+    /// <param name="shouldCapture">A callback that inspects intercepted packets and return whether the packet should be captured or not.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a packet has been captured, or the operation times out.</returns>
-    Task<IPacket> ReceiveAsync(HeaderSet headers, int timeout = -1, bool block = false, CancellationToken cancellationToken = default);
+    Task<IPacket> ReceiveAsync(ReadOnlySpan<Header> headers,
+        int timeout = -1, bool block = false,
+        Func<IReadOnlyPacket, bool>? shouldCapture = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Asynchronously captures the first packet sent or received with any of the specified headers,
-    /// where the provided callback <paramref name="shouldCapture"/> returns <see langword="true"/>.
+    /// Asynchronously captures the first packet sent or received with any of the specified headers.
     /// </summary>
-    /// <param name="headers">Specifies which headers to listen for.</param>
-    /// <param name="shouldCapture">A callback that may inspect packets with matching headers and return whether the packet should be captured or not.</param>
+    /// <param name="identifiers">Specifies which messages to listen for.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a packet to be captured. <c>-1</c> specifies no timeout.</param>
     /// <param name="block">Whether the captured packet should be blocked from its destination.</param>
+    /// <param name="shouldCapture">A callback that inspects intercepted packets and return whether the packet should be captured or not.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a packet has been captured, or the operation times out.</returns>
-    Task<IPacket> ReceiveAsync(HeaderSet headers, Func<IReadOnlyPacket, bool> shouldCapture, int timeout = -1, bool block = false, CancellationToken cancellationToken = default);
+    Task<IPacket> ReceiveAsync(ReadOnlySpan<Identifier> identifiers,
+        int timeout = -1, bool block = false,
+        Func<IReadOnlyPacket, bool>? shouldCapture = null,
+        CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,52 +17,35 @@ public interface IMessageManager
     Task InitializeAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Loads the specified client message information.
+    /// Loads the specified client messages.
     /// </summary>
-    void LoadMessages(IEnumerable<IClientMessageInfo> messages);
-
-    /// <summary>
-    /// Gets the incoming headers.
-    /// </summary>
-    Incoming In { get; }
-
-    /// <summary>
-    /// Gets the outgoing headers.
-    /// </summary>
-    Outgoing Out { get; }
-
-    /// <summary>
-    /// Gets the header with the specified identifier.
-    /// </summary>
-    Header this[Identifier identifier] { get; }
-
-    /// <summary>
-    /// Gets if a header with the specified identifier exists.
-    /// </summary>
-    bool IdentifierExists(Identifier identifier);
+    void LoadMessages(IEnumerable<ClientMessage> messages);
 
     /// <summary>
     /// Attempts to get a header by its identifier.
     /// </summary>
-    bool TryGetHeader(Identifier identifier, [NotNullWhen(true)] out Header? header);
+    bool TryGetHeader(Identifier identifier, out Header header);
 
     /// <summary>
-    /// Attempts to get a header by its direction and value.
+    /// Attempts to get the associated message names for the specified identifier.
     /// </summary>
-    bool TryGetHeaderByValue(Direction direction, ClientType clientType, short value, [NotNullWhen(true)] out Header? header);
+    bool TryGetNames(Identifier identifier, out MessageNames names);
 
     /// <summary>
-    /// Attempts to get a header by its direction and name.
+    /// Attempts to get the associated message names for the specified header.
     /// </summary>
-    bool TryGetHeaderByName(Direction direction, string name, [NotNullWhen(true)] out Header? header);
+    bool TryGetNames(Header header, out MessageNames names);
 
     /// <summary>
-    /// Attempts to get a message's info by its direction and header.
+    /// Resolves the specified identifier to a header.
     /// </summary>
-    bool TryGetInfoByHeader(Direction direction, ClientType clientType, short header, [NotNullWhen(true)] out MessageInfo? info);
+    /// <exception cref="UnresolvedIdentifiersException">If the identifier could not be resolved.</exception>
+    Header Resolve(Identifier identifier);
 
     /// <summary>
-    /// Attempts to get a message's info by its direction and name.
+    /// Resolves the specified identifiers to an array of headers.
     /// </summary>
-    bool TryGetInfoByName(Direction direction, string name, [NotNullWhen(true)] out MessageInfo? info);
+    /// <exception cref="ArgumentException">If no identifiers were specified.</exception>
+    /// <exception cref="UnresolvedIdentifiersException">If any of the identifiers could not be resolved.</exception>
+    Header[] Resolve(ReadOnlySpan<Identifier> identifiers);
 }

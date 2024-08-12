@@ -4,6 +4,7 @@ public class HotelTests
 {
     [Theory]
     [InlineData("us")]
+    [InlineData("ous")]
     [InlineData("es")]
     [InlineData("fi")]
     [InlineData("it")]
@@ -15,6 +16,8 @@ public class HotelTests
     [InlineData("s2")]
     public void IdentifierExists(string identifier)
     {
-        Assert.NotNull(Hotel.FromIdentifier(identifier));
+        var hotel = Hotel.FromIdentifier(identifier);
+        Assert.NotNull(hotel);
+        Assert.NotEqual(Hotel.Unknown, hotel);
     }
 }

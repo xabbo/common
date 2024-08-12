@@ -1,6 +1,6 @@
 ﻿using Xabbo.Connection;
+
 using Xabbo.Messages;
-using Xabbo.Messages.Dispatcher;
 
 namespace Xabbo.Interceptor;
 
@@ -9,11 +9,6 @@ namespace Xabbo.Interceptor;
 /// </summary>
 public interface IInterceptor : IConnection
 {
-    /// <summary>
-    /// Gets the message manager associated with this interceptor.
-    /// </summary>
-    IMessageManager Messages { get; }
-
     /// <summary>
     /// Gets the message dispatcher associated with this interceptor.
     /// </summary>

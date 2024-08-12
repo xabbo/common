@@ -10,64 +10,44 @@ namespace Xabbo.Messages;
 public sealed class Identifiers : HashSet<Identifier>
 {
     /// <summary>
-    /// Gets the identifiers in this set with an unknown destination.
+    /// Gets the unknown identifiers in this set.
     /// </summary>
-    public IEnumerable<Identifier> Unknown => this.Where(id => id.Direction == Direction.Unknown);
+    public IEnumerable<Identifier> Unknown => this.Where(id => id.Direction == Direction.None);
+
     /// <summary>
     /// Gets the incoming identifiers in this set.
     /// </summary>
-    public IEnumerable<Identifier> Incoming => this.Where(id => id.Direction == Direction.Incoming);
+    public IEnumerable<Identifier> Incoming => this.Where(id => id.Direction == Direction.In);
+
     /// <summary>
     /// Gets the outgoing identifiers in this set.
     /// </summary>
-    public IEnumerable<Identifier> Outgoing => this.Where(id => id.Direction == Direction.Outgoing);
+    public IEnumerable<Identifier> Outgoing => this.Where(id => id.Direction == Direction.Out);
 
     /// <summary>
-    /// Creates an empty identifier set.
+    /// Creates a new empty identifier set.
     /// </summary>
     public Identifiers() { }
 
     /// <summary>
-    /// Creates an identifier set from the specified identifiers.
+    /// Creates an identifier set with the specified identifiers.
     /// </summary>
     public Identifiers(IEnumerable<Identifier> identifiers)
         : base(identifiers)
     { }
 
     /// <summary>
-    /// Creates an identifier set from the specified incoming and outgoing names.
-    /// </summary>
-    /// <param name="incoming">The names of the incoming identifiers.</param>
-    /// <param name="outgoing">The names of the outgoing identifiers.</param>
-    public Identifiers(string[]? incoming = null, string[]? outgoing = null)
-    {
-        if (incoming != null)
-        {
-            foreach (string identifier in incoming)
-                Add(new Identifier(Direction.Incoming, identifier));
-        }
-
-        if (outgoing != null)
-        {
-            foreach (string identifier in outgoing)
-                Add(new Identifier(Direction.Outgoing, identifier));
-        }
-    }
-
-    /// <summary>
     /// Adds a new identifier with the specified direction and name to this set.
     /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="name"></param>
-    public void Add(Direction direction, string name) => Add(new Identifier(direction, name));
+    public void Add(Client client, Direction direction, string name) => Add(new Identifier(client, direction, name));
 
     /// <summary>
     /// Adds a range of new identifiers with the specified direction and names to this set.
     /// </summary>
-    public void Add(Direction direction, params string[] names)
+    public void Add(Client client, Direction direction, params string[] names)
     {
         foreach (string name in names)
-            Add(direction, name);
+            Add(client, direction, name);
     }
 
     /// <summary>

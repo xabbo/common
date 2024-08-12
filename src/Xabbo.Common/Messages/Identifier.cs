@@ -1,101 +1,37 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a message name and direction.
+/// Represents a client type, direction and message name.
 /// </summary>
-public readonly struct Identifier
+public readonly record struct Identifier(Client Client, Direction Direction, string Name)
 {
-    /// <summary>
-    /// Gets the direction of this message.
-    /// </summary>
-    public Direction Direction { get; }
+    public Identifier()
+        : this(Client.None, Direction.None, "")
+    { }
 
-    /// <summary>
-    /// Gets whether this is an outgoing message.
-    /// </summary>
-    public bool IsOutgoing => Direction == Direction.Outgoing;
+    public override int GetHashCode() => (Client, Direction, Name.ToUpperInvariant()).GetHashCode();
 
-    /// <summary>
-    /// Gets whether this is an incoming message.
-    /// </summary>
-    public bool IsIncoming => Direction == Direction.Incoming;
+    public bool Equals(Identifier other) =>
+        Client == other.Client &&
+        Direction == other.Direction &&
+        string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase);
 
-    /// <summary>
-    /// Gets the name of this message.
-    /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Constructs a new message <see cref="Identifier"/> with the specified name and destination.
-    /// </summary>
-    /// <param name="direction">The direction of the message.</param>
-    /// <param name="name">The name of the message.</param>
-    public Identifier(Direction direction, string name)
+    public string ToString(bool includeDirection)
     {
-        if (!Enum.IsDefined(direction))
-            throw new ArgumentException($"Unknown direction: {direction}.");
-        ArgumentException.ThrowIfNullOrEmpty(name);
-
-        for (int i = 0; i < name.Length; i++)
-            if (!char.IsAsciiLetterOrDigit(name[i]))
-                throw new ArgumentException($"Identifier name \"{name}\" must only consist of alphanumeric characters.", nameof(name));
-
-        Direction = direction;
-        Name = name;
+        string result = "";
+        if (includeDirection && Direction != Direction.None)
+            result += Direction.Short() + ":";
+        if (Client != Client.None)
+            result += Client.Short() + ":";
+        return result + Name;
     }
 
-    /// <summary>
-    /// Returns a new <see cref="Identifier"/> with the destination changed.
-    /// </summary>
-    /// <param name="direction">The new direction.</param>
-    public Identifier WithDirection(Direction direction) => new(direction, Name);
+    public override string ToString() => ToString(false);
 
-    public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
-
-    public override bool Equals(object? obj) => obj is Identifier other && Equals(other);
-
-    /// <summary>
-    /// Gets if this identifier is equal or compatible with the <paramref name="other"/>.
-    /// </summary>
-    /// <param name="other">The other identifier to compare to.</param>
-    /// <returns>
-    /// <see langword="true" /> if the names of the two identifiers are equal,
-    /// and their directions are equal or either of them is unknown.
-    /// </returns>
-    public bool Equals(Identifier other)
-    {
-        return
-            (Direction.Equals(other.Direction)
-            || Direction == Direction.Unknown
-            || other.Direction == Direction.Unknown)
-            && string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public override string ToString() => Name;
-
-    public static bool operator ==(Identifier a, Identifier b) => a.Equals(b);
-
-    public static bool operator !=(Identifier a, Identifier b) => !(a == b);
-
-    public static implicit operator Identifier(string name)
-    {
-        if (name.StartsWith("in:"))
-        {
-            return new(Direction.Incoming, name[3..]);
-        }
-        else if (name.StartsWith("out:"))
-        {
-            return new(Direction.Outgoing, name[4..]);
-        }
-        else if (name.StartsWith("both:"))
-        {
-            return new(Direction.Both, name[5..]);
-        }
-        else
-        {
-            return new(Direction.Unknown, name);
-        }
-    }
+    public static implicit operator Identifier((Direction direction, string name) x) => new(Client.None, x.direction, x.name);
+    public static implicit operator Identifier((Client client, Direction direction, string name) x) => new(x.client, x.direction, x.name);
 }

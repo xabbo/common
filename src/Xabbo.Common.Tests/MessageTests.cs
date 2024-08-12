@@ -1,44 +1,92 @@
-﻿using Xabbo.Messages;
+﻿using System;
+using System.Linq;
+
+using Xabbo.Messages;
+using Xabbo.Common.Tests.Fixtures;
 
 namespace Xabbo.Common.Tests;
 
-public class MessageTests : IClassFixture<MessagesFixture>
+public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixture>
 {
-    private readonly IMessageManager Messages;
+    private readonly IMessageManager Messages = fixture.Messages;
 
-    public MessageTests(MessagesFixture messagesFixture)
+    [Fact(DisplayName = "Identifier resolves to header with correct client type")]
+    public void TestResolveClient() => Assert.Equal(
+        Client.Flash, Messages.Resolve((Client.Unity, Direction.In, "AddItem")).Client
+    );
+
+    [Fact(DisplayName = "Unity identifier resolves to correct header value")]
+    public void TestResolveUnityIdentifier() => Assert.Equal(
+        MessagesFixture.ItemAdd, Messages.Resolve((Client.Unity, Direction.In, "AddItem")).Value
+    );
+
+    [Fact(DisplayName = "Flash identifier resolves to correct header value")]
+    public void TestResolveFlashIdentifier() => Assert.Equal(
+        MessagesFixture.ItemAdd, Messages.Resolve((Client.Flash, Direction.In, "ItemAdd")).Value
+    );
+
+    [Fact(DisplayName = "Shockwave identifier resolves to correct header value")]
+    public void TestResolveShockwaveIdentifier() => Assert.Equal(
+        MessagesFixture.ItemAdd, Messages.Resolve((Client.Shockwave, Direction.In, "Items_2")).Value
+    );
+
+    [Fact(DisplayName = "Message identifiers are associated correctly")]
+    public void TestMessageNameAssociation()
     {
-        Messages = messagesFixture.Messages;
+        Assert.True(Messages.TryGetNames((Client.Flash, Direction.In, "ItemAdd"), out var names));
+        Assert.Equal("AddItem", names.Unity, ignoreCase: true);
+        Assert.Equal("ItemAdd", names.Flash, ignoreCase: true);
+        Assert.Equal("Items_2", names.Shockwave, ignoreCase: true);
     }
 
-    [Fact(DisplayName = "Unity header value is read correctly")]
-    public void CheckUnityHeaderValue() => Assert.Equal(3, Messages.In["Ok"].GetValue(ClientType.Unity));
-
-    [Fact(DisplayName = "Flash header is merged correctly")]
-    public void CheckFlashHeaderValue() => Assert.Equal(3, Messages.Out.Move.GetValue(ClientType.Flash));
-
-    [Fact(DisplayName = "Property maps to correct header")]
-    public void CheckPropertyMapping() => Assert.Equal(3, Messages.In.Ok.GetValue(ClientType.Unity));
-
-    [Fact(DisplayName = "Property maps to same header as named indexer")]
-    public void CheckPropertyIndexerMapping() => Assert.Equal(Messages.In.Ok, Messages.In["Ok"]);
-
-    [Fact(DisplayName = "Flash / Unity names map to same header")]
-    public void CheckUnityFlashNameMapping() => Assert.Equal(Messages.In["Ok"], Messages.In["AuthenticationOK"]);
-
-    [Fact(DisplayName = "Named indexer is case insensitive")]
-    public void CheckNameIndexerCaseInsensitive() => Assert.Equal(Messages.In["ok"], Messages.In["OK"]);
-
-    [Fact(DisplayName = "Attempting to get value of unresolved header throws correct exception")]
-    public void CheckUnresolvedHeader() => Assert.Throws<UnresolvedHeaderException>(
-        () => Messages.In.DoorOut.GetValue(ClientType.Unity)
+    [Fact(DisplayName = "Associated identifiers resolve to same header")]
+    public void TestResolveAssociatedIdentifiers() => Assert.Collection(
+        Messages.Resolve([
+            (Client.Unity, Direction.In, "AddItem"),
+            (Client.Flash, Direction.In, "ItemAdd"),
+            (Client.Shockwave, Direction.In, "Items_2"),
+        ]),
+        header => {
+            Assert.Equal(Client.Flash, header.Client);
+            Assert.Equal(Direction.In, header.Direction);
+            Assert.Equal(MessagesFixture.ItemAdd, header.Value);
+        }
     );
 
-    [Fact(DisplayName = "Attempting to get unknown header throws correct exception")]
-    public void CheckUnknownHeader() => Assert.Throws<UnknownHeaderException>(
-        () => Messages.In["UnknownHeader"]
+    [Fact(DisplayName = "Multiple identifiers resolve to multiple headers")]
+    public void TestResolveMultipleIdentifiers() => Assert.Collection(
+        Messages.Resolve([
+            (Client.Flash, Direction.In, "ItemAdd"),
+            (Client.Flash, Direction.Out, "MoveAvatar"),
+        ]).OrderBy(x => x.Value),
+        header => Assert.Equal(header, (Client.Flash, Direction.In, MessagesFixture.ItemAdd)),
+        header => Assert.Equal(header, (Client.Flash, Direction.Out, MessagesFixture.MoveAvatar))
     );
 
-    [Fact(DisplayName = "Equivalent Unity/Flash messages access the same Header instance")]
-    public void CheckHeaderEquivalence() => Assert.True(ReferenceEquals(Messages.In.Ok, Messages.In.AuthenticationOK));
+    [Fact(DisplayName = "Identifier with incorrect client fails to resolve")]
+    public void TestWrongClientIdentifier() => Assert.Throws<UnresolvedIdentifiersException>(
+        () => Messages.Resolve((Client.Shockwave, Direction.In, "AddItem"))
+    );
+
+    [Fact(DisplayName = "Attempt to resolve identifier with multiple clients fails")]
+    public void TestResolveMultipleClientIdentifier() => Assert.ThrowsAny<Exception>(
+        () => Messages.Resolve((Client.Unity | Client.Flash, Direction.Out, "Move"))
+    );
+
+    [Fact(DisplayName = "Unresolved identifier throws correct exception")]
+    public void TestUnresolvedIdentifier() =>
+        Assert.Throws<UnresolvedIdentifiersException>(() => Messages.Resolve((Client.Flash, Direction.In, "DisconnectReason")));
+
+    [Fact(DisplayName = "Non-existent message in the message map file can still be resolved")]
+    public void TestResolveNonexistentMessage() =>
+        Assert.Equal(MessagesFixture.NonExistent, Messages.Resolve((Client.Flash, Direction.Out, "NonExistent")).Value);
+
+    [Fact(DisplayName = "Message names should still be available from the message map for unresolved identifiers")]
+    public void TestMessagesExistForUnresolvedIdentifier()
+    {
+        Assert.True(Messages.TryGetNames((Client.Flash, Direction.In, "DisconnectReason"), out MessageNames names));
+        Assert.Equal("DisconnectionReason", names.Unity);
+        Assert.Equal("DisconnectReason", names.Flash);
+        Assert.Null(names.Shockwave);
+    }
 }

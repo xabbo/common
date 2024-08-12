@@ -10,9 +10,9 @@ using System.Text.Json.Serialization;
 namespace Xabbo;
 
 /// <summary>
-/// Defines the basic information of a hotel.
+/// Defines properties of a hotel.
 /// </summary>
-public class Hotel
+public sealed record class Hotel
 {
     /// <summary>
     /// Represents an unknown hotel.
@@ -50,7 +50,8 @@ public class Hotel
             new("France", domain: "fr"),
             new("Brazil", identifier: "br", domain: "com.br"),
             new("Turkey", identifier: "tr", domain: "com.tr"),
-            new("Sandbox", "s2", subdomain: "sandbox")
+            new("Sandbox", "s2", subdomain: "sandbox"),
+            new("Origins (US)", "ous", subdomain: "origins")
         ];
 
         if (fileHotelsOverride.Exists)
@@ -99,7 +100,7 @@ public class Hotel
     /// <summary>
     /// Creates a new hotel instance.
     /// </summary>
-    protected Hotel() { }
+    private Hotel() { }
 
     /// <summary>
     /// Creates a new hotel instance.

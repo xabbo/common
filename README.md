@@ -1,16 +1,16 @@
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Xabbo.Common?style=for-the-badge) ![Nuget](https://img.shields.io/nuget/dt/Xabbo.Common?style=for-the-badge)
 
-# Xabbo.Common
-Provides common functionality for use with programs that interact with the Habbo game server.\
-See [Xabbo.GEarth](https://github.com/b7c/Xabbo.GEarth) for a [G-Earth](https://github.com/sirjonasxx/G-Earth) extension implementation.
+# xabbo/common
+Provides common functionality for xabbo based extensions.\
+See [xabbo/gearth](https://github.com/xabbo/gearth) for a [G-Earth](https://github.com/sirjonasxx/G-Earth) extension implementation.
 
 ### Building from source
-Requires the [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
 
 - Clone the repository.
 ```
-git clone https://github.com/b7c/Xabbo.Common
-cd Xabbo.Common
+git clone https://github.com/xabbo/common xabbo/common
+cd xabbo/common
 ```
 - Build with the .NET CLI.
 ```

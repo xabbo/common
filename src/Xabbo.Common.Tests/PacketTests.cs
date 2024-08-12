@@ -1,78 +1,73 @@
-using System.Text;
-using System.Linq;
+using System;
 using System.Collections.Generic;
-using System.Collections;
+using System.Linq;
+using System.Text;
 
 using Xabbo.Messages;
-using Xabbo.Connection;
 
 namespace Xabbo.Common.Tests;
 
 public class PacketTests
 {
-    public static readonly object[] ClientTypes = {
-        new object[] { ClientType.Flash },
-        new object[] { ClientType.Unity }
-    };
+    public static readonly object[] ClientTypes = [
+        new object[] { Client.Unity },
+        new object[] { Client.Flash },
+        new object[] { Client.Shockwave },
+    ];
 
     public PacketTests() { }
 
     [Fact]
     public void Clear()
     {
-        IPacket packet = new Packet(Header.Unknown);
-        packet.WriteInt(123);
+        var packet = new Packet((Client.Flash, Direction.Out, 0));
 
-        Assert.Equal(4, packet.Length);
-        Assert.Equal(4, packet.Buffer.Length);
-        Assert.Equal(4, packet.Position);
+        for (int i = 0; i < 3; i++)
+        {
+            packet.Write(1, 2, 3, 4, 5, 6);
 
-        packet.Clear();
+            Assert.Equal(24, packet.Length);
+            Assert.Equal(24, packet.Buffer.Length);
+            Assert.Equal(24, packet.Position);
 
-        Assert.Equal(0, packet.Length);
-        Assert.Equal(0, packet.Buffer.Length);
-        Assert.Equal(0, packet.Position);
+            packet.Clear();
 
-        packet.WriteInt(456);
-        packet.WriteInt(789);
-
-        Assert.Equal(8, packet.Length);
-        Assert.Equal(8, packet.Buffer.Length);
-        Assert.Equal(8, packet.Position);
-        Assert.Equal(456, packet.ReadInt(0));
-        Assert.Equal(789, packet.ReadInt(4));
+            Assert.Equal(0, packet.Length);
+            Assert.Equal(0, packet.Buffer.Length);
+            Assert.Equal(0, packet.Position);
+        }
     }
 
     [Fact]
-    public void Read_Write()
+    public void TestReadWrite()
     {
-        IPacket packet = new Packet(Header.Unknown);
+        var packet = new Packet(Header.Unknown);
 
-        packet.WriteBool(true);
-        packet.WriteBool(false);
-        packet.WriteByte(254);
-        packet.WriteShort(31337);
-        packet.WriteInt(-123456789);
-        packet.WriteFloat(3.14f);
-        packet.WriteLong(9876543210);
-        packet.WriteString("hello, world");
+        packet.Write(true);
+        packet.Write(false);
+        packet.Write<byte>(254);
+        packet.Write<short>(31337);
+        packet.Write<int>(-123456789);
+        packet.Write<float>(3.14f);
+        packet.Write<long>(9876543210L);
+        packet.Write<string>("hello, world");
 
         packet.Position = 0;
 
-        Assert.True(packet.ReadBool());
-        Assert.False(packet.ReadBool());
-        Assert.Equal(254, packet.ReadByte());
-        Assert.Equal(31337, packet.ReadShort());
-        Assert.Equal(-123456789, packet.ReadInt());
-        Assert.Equal(3.14f, packet.ReadFloat());
-        Assert.Equal(9876543210, packet.ReadLong());
-        Assert.Equal("hello, world", packet.ReadString());
+        Assert.True(packet.Read<bool>());
+        Assert.False(packet.Read<bool>());
+        Assert.Equal(254, packet.Read<byte>());
+        Assert.Equal(31337, packet.Read<short>());
+        Assert.Equal(-123456789, packet.Read<int>());
+        Assert.Equal(3.14f, packet.Read<float>());
+        Assert.Equal(9876543210, packet.Read<long>());
+        Assert.Equal("hello, world", packet.Read<string>());
     }
 
     [Fact]
     public void Read_Write_Generic()
     {
-        IPacket packet = new Packet(Header.Unknown, ClientType.Unity);
+        IPacket packet = new Packet((Client.Unity, Direction.Out, 0));
 
         packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
 
@@ -84,20 +79,6 @@ public class PacketTests
         );
     }
 
-    [Fact]
-    public void Skip_Generic()
-    {
-        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
-
-        packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
-
-        packet.Position = 0;
-
-        packet.Skip<bool, bool, byte, short, int, float, long, string>();
-
-        Assert.Equal(packet.Length, packet.Position);
-    }
-
     [Theory]
     [InlineData("hello", "world")]
     [InlineData("hello", "universe")]
@@ -107,59 +88,65 @@ public class PacketTests
         int valueByteCount = Encoding.UTF8.GetByteCount(value);
         int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
 
-        IPacket packet = new Packet(Header.Unknown);
+        var packet = new Packet((Client.Flash, Direction.In, 0));
 
-        packet.WriteInt(1234);
-        packet.WriteString(value);
-        packet.WriteInt(5678);
+        packet.Write(1234);
+        packet.Write(value);
+        packet.Write(5678);
 
         int previousLength = packet.Length;
 
         packet.Position = 4;
-        packet.ReplaceString(replacement);
+        packet.Replace(replacement);
 
         // The packet length has been adjusted
         Assert.Equal(previousLength + (replacementByteCount - valueByteCount), packet.Length);
 
         // The values read back from the packet are correct
         packet.Position = 0;
-        Assert.Equal(1234, packet.ReadInt());
-        Assert.Equal(replacement, packet.ReadString());
-        Assert.Equal(5678, packet.ReadInt());
+        Assert.Equal(1234, packet.Read<int>());
+        Assert.Equal(replacement, packet.Read<string>());
+        Assert.Equal(5678, packet.Read<int>());
 
         // There is no more data in the packet
         Assert.Equal(0, packet.Available);
     }
 
-    [Fact]
-    public void Write_Array()
+    [Theory]
+    [MemberData(nameof(ClientTypes))]
+    public void TestWriteArray(Client client)
     {
         int[] array = Enumerable.Range(1, 10).ToArray();
 
-        IPacket packet = new Packet(Header.Unknown, ClientType.Flash);
+        var packet = new Packet(Header.Unknown with { Client = client });
 
         packet.Write(array);
 
         packet.Position = 0;
-        Assert.Equal(array.Length, packet.ReadInt());
+        Assert.Equal(array.Length, (int)packet.Read<Length>());
         for (int i = 0; i < array.Length; i++)
-            Assert.Equal(array[i], packet.ReadInt());
+            Assert.Equal(array[i], packet.Read<int>());
     }
 
     [Theory]
     [MemberData(nameof(ClientTypes))]
-    public void Read_Write_LegacyShort(ClientType client)
+    public void TestReadWriteLength(Client client)
     {
-        IPacket packet = new Packet(Header.Unknown, client);
-        packet.WriteLegacyShort(0);
+        var packet = new Packet(Header.Unknown with { Client = client });
+        packet.Write<Length>(0);
 
-        int expectedBytes = client == ClientType.Flash ? 4 : 2;
+        int expectedBytes = client switch {
+            Client.Unity => 2, // short
+            Client.Flash => 4, // int
+            Client.Shockwave => 1, // VL64
+            _ => throw new Exception("Invalid client"),
+        };
 
         // Wrote the correct number of bytes.
         Assert.Equal(expectedBytes, packet.Length);
 
         packet.Position = 0;
-        packet.ReadLegacyShort();
+        packet.Read<Length>();
 
         // Read the correct number of bytes.
         Assert.Equal(expectedBytes, packet.Position);
@@ -167,50 +154,25 @@ public class PacketTests
 
     [Theory]
     [MemberData(nameof(ClientTypes))]
-    public void Read_Write_LegacyLong(ClientType client)
+    public void TestReadWriteId(Client client)
     {
-        IPacket packet = new Packet(Header.Unknown, client);
-        packet.WriteLegacyLong(0);
+        var packet = new Packet(Header.Unknown with { Client = client });
+        packet.Write<Id>(0);
 
-        int expectedBytes = client == ClientType.Flash ? 4 : 8;
+        int expectedBytes = client switch {
+            Client.Unity => 8, // long
+            Client.Flash => 4, // int
+            Client.Shockwave => 1, // VL64
+            _ => throw new Exception("Invalid client"),
+        };
 
         // Wrote the correct number of bytes.
         Assert.Equal(expectedBytes, packet.Length);
 
         packet.Position = 0;
-        packet.ReadLegacyLong();
+        packet.Read<Id>();
 
         // Read the correct number of bytes.
         Assert.Equal(expectedBytes, packet.Position);
-    }
-
-    [Theory(DisplayName = "Packet.Write(IEnumerable<int>)")]
-    [MemberData(nameof(ClientTypes))]
-    public void Read_Write_Enumerable(ClientType client)
-    {
-        IEnumerable<int> e = Enumerable.Range(1, 10);
-
-        IPacket packet = new Packet(Header.Unknown, client);
-        packet.Write((IEnumerable)e);
-
-        packet.Position = 0;
-        Assert.Equal(e.Count(), packet.ReadLegacyShort());
-        foreach (int n in e)
-            Assert.Equal(n, packet.ReadInt());
-    }
-
-    [Theory]
-    [MemberData(nameof(ClientTypes))]
-    public void Read_Write_Collection(ClientType client)
-    {
-        List<int> source = new() { 2, 4, 6, 8 };
-
-        IPacket packet = new Packet(Header.Unknown, client);
-        packet.WriteCollection(source);
-
-        packet.Position = 0;
-        List<int> list = packet.ReadList<int>();
-
-        Assert.Equal(source, list);
     }
 }

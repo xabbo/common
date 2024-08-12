@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,39 +11,23 @@ namespace Xabbo.Interceptor.Tasks;
 /// A base class used to implement a task that can intercept packets and asynchronously return a result.
 /// </summary>
 /// <typeparam name="TResult">The result type of the task.</typeparam>
-public abstract class InterceptorTask<TResult> : IMessageHandler
+/// <remarks>
+/// Creates a new interceptor task bound to the specified interceptor.
+/// </remarks>
+/// <param name="interceptor">The interceptor to bind to.</param>
+public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
 {
-    private readonly SemaphoreSlim _executionSemaphore = new(1);
-    private readonly TaskCompletionSource<TResult> _completion;
+    private IDisposable? _attachment;
+    private readonly SemaphoreSlim _executeOnce = new(1);
+    private readonly TaskCompletionSource<TResult> _completion
+        = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private CancellationTokenRegistration? _disconnectRegistration;
 
     /// <summary>
     /// The interceptor that this task is bound to.
     /// </summary>
-    protected IInterceptor Interceptor { get; }
-
-    /// <summary>
-    /// The incoming messages provided by the interceptor's message manager.
-    /// </summary>
-    protected Incoming In => Interceptor.Messages.In;
-
-    /// <summary>
-    /// The outgoing messages provided by the interceptor's message manager.
-    /// </summary>
-    protected Outgoing Out => Interceptor.Messages.Out;
-
-    /// <summary>
-    /// Creates a new interceptor task bound to the specified interceptor.
-    /// </summary>
-    /// <param name="interceptor">The interceptor to bind to.</param>
-    protected InterceptorTask(IInterceptor interceptor)
-    {
-        Interceptor = interceptor;
-        _completion = new TaskCompletionSource<TResult>(
-            TaskCreationOptions.RunContinuationsAsynchronously
-        );
-    }
+    protected IInterceptor Interceptor { get; } = interceptor;
 
     /// <summary>
     /// Executes the task synchronously and returns the result.
@@ -59,10 +44,10 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
     /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
     public async Task<TResult> ExecuteAsync(int timeout, CancellationToken cancellationToken)
     {
-        if (!_executionSemaphore.Wait(0, cancellationToken))
+        if (!_executeOnce.Wait(0, cancellationToken))
             throw new InvalidOperationException("The interceptor task has already been executed.");
 
-        CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.Token.Register(() => SetCanceled());
         if (timeout > 0) cts.CancelAfter(timeout);
 
@@ -70,8 +55,7 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
 
         try
         {
-            OnBind();
-
+            OnAttach();
             await OnExecuteAsync().ConfigureAwait(false);
             return await _completion.Task;
         }
@@ -83,23 +67,27 @@ public abstract class InterceptorTask<TResult> : IMessageHandler
         finally
         {
             OnRelease();
-
             cts?.Dispose();
             _disconnectRegistration?.Unregister();
-
-            _executionSemaphore.Dispose();
+            _executeOnce.Dispose();
         }
     }
 
-    /// <summary>
-    /// Binds this task to the interceptor's dispatcher.
-    /// </summary>
-    protected virtual void OnBind() => Interceptor.Bind(this);
+    public virtual void Attach(IMessageDispatcher dispatcher) { }
 
     /// <summary>
-    /// Releases this task from the interceptor's dispatcher.
+    /// Attaches this task to the interceptor's dispatcher.
     /// </summary>
-    protected virtual void OnRelease() => Interceptor.Release(this);
+    protected virtual void OnAttach()
+    {
+        if (this is IMessageHandler handler)
+            _attachment = handler.Attach(Interceptor);
+    }
+
+    /// <summary>
+    /// Detaches this task from the interceptor's dispatcher.
+    /// </summary>
+    protected virtual void OnRelease() => _attachment?.Dispose();
 
     /// <summary>
     /// Invoked when the connection ends while the interceptor task is in progress.

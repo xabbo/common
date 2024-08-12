@@ -15,28 +15,28 @@ public static partial class ConnectionExtensions
     #region Generic Send
     {{~ for n in 1..max_params ~}}
     /// <summary>
-    /// Sends a packet with the specified header and values to either the client or server, depending on the header destination.
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
     /// </summary>
-    public static void Send<{{gtypes 1..n}}>(this IConnection connection, Header header, {{gargs 1..n}})
+    public static void Send<{{gtypes 1..n}}>(this IConnection connection, Identifier identifier, {{gargs 1..n}})
     {
-        using Packet packet = new Packet(header, connection.Client)
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
         {{~ for i in 1..n ~}}
-            .Write<Packet, T{{i}}>(arg{{i}}){{for.last?';':''}}
+        packet.Write<T{{i}}>(arg{{i}});
         {{~ end ~}}
         connection.Send(packet);
     }
-    
+
     /// <summary>
-    /// Sends a packet with the specified header and values to either the client or server, depending on the header destination.
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
     /// </summary>
-    public static async ValueTask SendAsync<{{gtypes 1..n}}>(this IConnection connection, Header header, {{gargs 1..n}})
+    public static void Send<{{gtypes 1..n}}>(this IConnection connection, Header header, {{gargs 1..n}})
     {
-        using Packet packet = new Packet(header, connection.Client)
+        using Packet packet = new Packet(header);
         {{~ for i in 1..n ~}}
-            .Write<Packet, T{{i}}>(arg{{i}}){{for.last?';':''}}
+        packet.Write<T{{i}}>(arg{{i}});
         {{~ end ~}}
-        await connection.SendAsync(packet);
-    }{{ n < max_params ? '\n' : '' }}
+        connection.Send(packet);
+    }
     {{~ end ~}}
     #endregion
 }

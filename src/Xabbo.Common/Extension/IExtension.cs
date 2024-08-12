@@ -6,29 +6,29 @@ using Xabbo.Interceptor;
 namespace Xabbo.Extension;
 
 /// <summary>
-/// Represents an extension interface provided by a packet interceptor service.
+/// Represents an extension interface provided by an interceptor service.
 /// </summary>
 public interface IExtension : IInterceptor
 {
     /// <summary>
     /// Invoked when the extension has been initialized by the interceptor.
     /// </summary>
-    event EventHandler<ExtensionInitializedEventArgs>? Initialized;
+    event EventHandler<InitializedArgs>? Initialized;
 
     /// <summary>
     /// Invoked when a connection to the game is established.
     /// </summary>
-    event EventHandler<GameConnectedEventArgs>? Connected;
+    event EventHandler<GameConnectedArgs>? Connected;
 
     /// <summary>
-    /// Invoked when the extension is selected in the interceptor UI.
+    /// Invoked when the extension is activated by the user.
     /// </summary>
-    event EventHandler? Clicked;
+    event EventHandler? Activated;
 
     /// <summary>
     /// Invoked when a packet has been intercepted.
     /// </summary>
-    event EventHandler<InterceptArgs>? Intercepted;
+    event EventHandler<Intercept>? Intercepted;
 
     /// <summary>
     /// Invoked when the connection to the game ends.
