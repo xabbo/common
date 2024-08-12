@@ -40,14 +40,4 @@ public interface IConnection
     /// Sends a packet to the client or server, specified by the direction of the packet's header.
     /// </summary>
     void Send(IReadOnlyPacket packet);
-
-    /// <summary>
-    /// Sends a packet to the client or server, specified by the direction of the header.
-    /// </summary>
-    void Send(Header header, params object[] values);
-
-    /// <summary>
-    /// Sends a packet to the client or server, specified by the direction of the identifier.
-    /// </summary>
-    void Send(Identifier identifier, params object[] values);
 }
