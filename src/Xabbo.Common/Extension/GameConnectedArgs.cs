@@ -21,9 +21,9 @@ public sealed class GameConnectedArgs
     public int Port { get; init; }
 
     /// <summary>
-    /// Gets the client for the current game connection.
+    /// Gets the session information for the current game connection.
     /// </summary>
-    public Client Client { get; init; }
+    public Session Session { get; init; } = Session.None;
 
     /// <summary>
     /// Gets the path to the messages file, if it is available.
