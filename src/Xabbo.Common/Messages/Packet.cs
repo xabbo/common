@@ -264,7 +264,9 @@ public sealed partial class Packet : IPacket
     #endregion
 
     #region Write
-    private Span<byte> WriteSpan(int n, ref int pos)
+    public Span<byte> Allocate(int n) => Allocate(n, ref _position);
+    public Span<byte> Allocate(int n, int pos) => Allocate(n, ref pos);
+    public Span<byte> Allocate(int n, scoped ref int pos)
     {
         EnsureLength(pos + n);
         Span<byte> span = _buf.Span[pos..(pos + n)];
@@ -274,7 +276,7 @@ public sealed partial class Packet : IPacket
 
     public void Write(ReadOnlySpan<byte> buffer) => Write(buffer, ref _position);
     public void Write(ReadOnlySpan<byte> buffer, int position) => Write(buffer, ref position);
-    public void Write(ReadOnlySpan<byte> buffer, ref int pos) => buffer.CopyTo(WriteSpan(buffer.Length, ref pos));
+    public void Write(ReadOnlySpan<byte> buffer, ref int pos) => buffer.CopyTo(Allocate(buffer.Length, ref pos));
 
     public void Write<T>(T value) => Write(value, ref _position);
     public void Write<T>(T value, int position) => Write(value, ref position);
@@ -288,31 +290,31 @@ public sealed partial class Packet : IPacket
                 v.Compose(this, ref pos);
                 break;
             case bool v:
-                WriteSpan(1, ref pos)[0] = (byte)(v ? 1 : 0);
+                Allocate(1, ref pos)[0] = (byte)(v ? 1 : 0);
                 break;
             case byte v:
-                WriteSpan(1, ref pos)[0] = v;
+                Allocate(1, ref pos)[0] = v;
                 break;
             case short v:
                 if (Client == Client.Shockwave)
                     Write<B64>(v, ref pos);
                 else
-                    BinaryPrimitives.WriteInt16BigEndian(WriteSpan(2, ref pos), v);
+                    BinaryPrimitives.WriteInt16BigEndian(Allocate(2, ref pos), v);
                 break;
             case int v:
                 if (Client == Client.Shockwave)
                     Write<VL64>(v, ref pos);
                 else
-                    BinaryPrimitives.WriteInt32BigEndian(WriteSpan(4, ref pos), v);
+                    BinaryPrimitives.WriteInt32BigEndian(Allocate(4, ref pos), v);
                 break;
             case long v:
                 if (Client == Client.Flash || Client == Client.Shockwave)
                     throw new Exception($"Cannot write long on session: {Client}.");
-                BinaryPrimitives.WriteInt64BigEndian(WriteSpan(8, ref pos), v);
+                BinaryPrimitives.WriteInt64BigEndian(Allocate(8, ref pos), v);
                 break;
             case float v:
                 if (Client == Client.Unity)
-                    BinaryPrimitives.WriteSingleBigEndian(WriteSpan(4, ref pos), v);
+                    BinaryPrimitives.WriteSingleBigEndian(Allocate(4, ref pos), v);
                 else
                     Write<string>(FormatFloat(v), ref pos);
                 break;
@@ -322,7 +324,7 @@ public sealed partial class Packet : IPacket
                 {
                     if (Header.Direction == Direction.In)
                     {
-                        Span<byte> span = WriteSpan(len, ref pos);
+                        Span<byte> span = Allocate(len, ref pos);
                         Encoding.UTF8.GetBytes(v, span);
                         span[^1] = 2;
                         break;
@@ -331,17 +333,17 @@ public sealed partial class Packet : IPacket
                         throw new Exception("Unknown direction when writing string on Shockwave.");
                 }
                 Write((short)len, ref pos);
-                Encoding.UTF8.GetBytes(v, WriteSpan(len, ref pos));
+                Encoding.UTF8.GetBytes(v, Allocate(len, ref pos));
                 break;
             case B64 v:
                 if (Client != Client.Shockwave)
                     throw new Exception($"Cannot write B64 on session: {Client}.");
-                B64.Encode(WriteSpan(2, ref pos), v);
+                B64.Encode(Allocate(2, ref pos), v);
                 break;
             case VL64 v:
                 if (Client != Client.Shockwave)
                     throw new Exception($"Cannot write VL64 on session: {Client}.");
-                VL64.Encode(WriteSpan(VL64.EncodeLength(v), ref pos), v);
+                VL64.Encode(Allocate(VL64.EncodeLength(v), ref pos), v);
                 break;
             case Id v:
                 switch (Client)

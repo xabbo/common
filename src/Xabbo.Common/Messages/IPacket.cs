@@ -23,6 +23,26 @@ public interface IPacket : IReadOnlyPacket
     new Memory<byte> GetMemory();
 
     /// <summary>
+    /// Allocates a byte <see cref="Span{T}" /> of the specified length from the current position in the packet.
+    /// </summary>
+    /// <param name="n">The number of bytes to allocate.</param>
+    Span<byte> Allocate(int n);
+    /// <summary>
+    /// Allocates a byte <see cref="Span{T}" /> of the specified length
+    /// from the specified position in the packet.
+    /// </summary>
+    /// <param name="n">The number of bytes to allocate.</param>
+    /// <param name="pos">The position from which to allocate from.</param>
+    Span<byte> Allocate(int n, int pos);
+    /// <summary>
+    /// Allocates a byte <see cref="Span{T}" /> of the specified length
+    /// from the specified position in the packet and advances the position.
+    /// </summary>
+    /// <param name="n">The number of bytes to allocate.</param>
+    /// <param name="pos">The position from which to allocate from.</param>
+    Span<byte> Allocate(int n, ref int pos);
+
+    /// <summary>
     /// Writes a value at the current position in the packet.
     /// </summary>
     void Write<T>(T value);
