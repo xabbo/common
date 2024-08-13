@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Xabbo.Messages;
 
@@ -34,4 +32,6 @@ public readonly record struct Identifier(ClientType Client, Direction Direction,
 
     public static implicit operator Identifier((Direction direction, string name) x) => new(ClientType.None, x.direction, x.name);
     public static implicit operator Identifier((ClientType client, Direction direction, string name) x) => new(x.client, x.direction, x.name);
+
+    public static implicit operator ReadOnlySpan<Identifier>(in Identifier identifier) => new(in identifier);
 }

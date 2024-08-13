@@ -1,4 +1,6 @@
-﻿namespace Xabbo.Messages;
+﻿using System;
+
+namespace Xabbo.Messages;
 
 /// <summary>
 /// Specifies a client, direction and header value.
@@ -19,4 +21,6 @@ public readonly record struct Header(ClientType Client, Direction Direction, sho
 
     public static implicit operator Header((ClientType client, Direction direction, short value) x) => new(x.client, x.direction, x.value);
     public static implicit operator Header((Direction direction, short value) x) => new(x.direction, x.value);
+
+    public static implicit operator ReadOnlySpan<Header>(in Header header) => new(in header);
 }
