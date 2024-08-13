@@ -229,7 +229,7 @@ public sealed partial class Packet : IPacket
                 if (typeof(T) == typeof(VL64))
                 {
                     if (Client != ClientType.Shockwave)
-                        throw new Exception($"Cannot read B64 on session: {Client}.");
+                        throw new Exception($"Cannot read VL64 on session: {Client}.");
                     return (T)(object)VL64.Decode(ReadSpan(VL64.DecodeLength(_buf.Span[pos]), ref pos));
                 }
                 if (typeof(T) == typeof(Id)) return Client switch
