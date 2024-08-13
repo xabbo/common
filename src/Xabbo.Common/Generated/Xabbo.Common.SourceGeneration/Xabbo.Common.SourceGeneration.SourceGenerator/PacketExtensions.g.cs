@@ -2,7 +2,9 @@
 
 namespace Xabbo;
 
+#pragma warning disable CS1591
 public static partial class PacketExtensions
+#pragma warning restore CS1591
 {
 	#region Generic Read
 	/// <summary>

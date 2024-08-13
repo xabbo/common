@@ -1,4 +1,6 @@
-﻿using Xabbo.Messages;
+﻿using System.ComponentModel;
+
+using Xabbo.Messages;
 
 namespace Xabbo;
 
@@ -7,6 +9,7 @@ namespace Xabbo;
     func gargs; ret array.join $[0] ', ' @(do(x); ret 'T'+x+' arg'+x; end); end
 -}}
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static partial class PacketExtensions
 {
 	#region Generic Read
