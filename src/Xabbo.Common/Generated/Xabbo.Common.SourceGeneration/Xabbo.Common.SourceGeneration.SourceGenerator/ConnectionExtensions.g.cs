@@ -337,5 +337,287 @@ public static partial class ConnectionExtensions
         connection.Send(packet);
     }
 
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        packet.Write<T15>(arg15);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        packet.Write<T15>(arg15);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this IConnection connection, Identifier identifier,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16)
+    {
+        using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        packet.Write<T15>(arg15);
+        packet.Write<T16>(arg16);
+        connection.Send(packet);
+    }
+
+    /// <summary>
+    /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
+    /// </summary>
+    public static void Send<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this IConnection connection, Header header,
+        T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16)
+    {
+        using Packet packet = new Packet(header);
+        packet.Write<T1>(arg1);
+        packet.Write<T2>(arg2);
+        packet.Write<T3>(arg3);
+        packet.Write<T4>(arg4);
+        packet.Write<T5>(arg5);
+        packet.Write<T6>(arg6);
+        packet.Write<T7>(arg7);
+        packet.Write<T8>(arg8);
+        packet.Write<T9>(arg9);
+        packet.Write<T10>(arg10);
+        packet.Write<T11>(arg11);
+        packet.Write<T12>(arg12);
+        packet.Write<T13>(arg13);
+        packet.Write<T14>(arg14);
+        packet.Write<T15>(arg15);
+        packet.Write<T16>(arg16);
+        connection.Send(packet);
+    }
+
     #endregion
 }
