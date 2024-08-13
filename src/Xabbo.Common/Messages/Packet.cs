@@ -241,8 +241,7 @@ public sealed partial class Packet : IPacket
                 if (typeof(T) == typeof(Length)) return Client switch
                 {
                     ClientType.Unity => (T)(object)(Length)Read<short>(ref pos),
-                    ClientType.Flash or ClientType.Shockwave => (T)(object)(Length)Read<int>(ref pos),
-                    _ => throw new Exception($"Cannot read Length on session: {Client}."),
+                    _ => (T)(object)(Length)Read<int>(ref pos),
                 };
                 if (typeof(T) == typeof(FloatString))
                 {
@@ -364,11 +363,9 @@ public sealed partial class Packet : IPacket
                     case ClientType.Unity:
                         Write((short)v.Value, ref pos);
                         break;
-                    case ClientType.Flash or ClientType.Shockwave:
+                    default:
                         Write<int>(v.Value, ref pos);
                         break;
-                    default:
-                        throw new Exception($"Cannot write Id on session: {Client}.");
                 }
                 break;
             case FloatString v:

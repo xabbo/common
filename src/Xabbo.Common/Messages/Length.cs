@@ -4,7 +4,7 @@
 /// Represents a collection length with client-specific serialization:
 /// <list type="bullet">
 /// <item>On Unity: as a <see cref="short"/>.</item>
-/// <item>On Flash/Shockwave: as an <see cref="int"/>.</item>
+/// <item>Otherwise as an <see cref="int"/>.</item>
 /// </list>
 /// </summary>
 public readonly struct Length(int value)
