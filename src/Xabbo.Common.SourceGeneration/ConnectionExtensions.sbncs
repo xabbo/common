@@ -12,16 +12,20 @@ namespace Xabbo;
 
 public static partial class ConnectionExtensions
 {
+
     #region Generic Send
-    {{~ for n in 1..max_params ~}}
+    {{~ for n in 0..max_params ~}}
     /// <summary>
     /// Sends a packet with the specified identifier and values to the client or server, depending on the identifier's direction.
     /// </summary>
-    public static void Send<{{gtypes 1..n}}>(this IConnection connection, Identifier identifier, {{gargs 1..n}})
+    public static void Send{{if n > 0}}<{{gtypes 1..n}}>{{end}}(this IConnection connection, Identifier identifier{{if n > 0}},
+        {{gargs 1..n}}{{end}})
     {
         using Packet packet = new Packet(connection.Messages.Resolve(identifier));
+        {{~ if n > 0 ~}}
         {{~ for i in 1..n ~}}
         packet.Write<T{{i}}>(arg{{i}});
+        {{~ end ~}}
         {{~ end ~}}
         connection.Send(packet);
     }
@@ -29,14 +33,18 @@ public static partial class ConnectionExtensions
     /// <summary>
     /// Sends a packet with the specified header and values to the client or server, depending on the header's direction.
     /// </summary>
-    public static void Send<{{gtypes 1..n}}>(this IConnection connection, Header header, {{gargs 1..n}})
+    public static void Send{{if n > 0}}<{{gtypes 1..n}}>{{end}}(this IConnection connection, Header header{{if n > 0}},
+        {{gargs 1..n}}{{end}})
     {
         using Packet packet = new Packet(header);
+        {{~ if n > 0 ~}}
         {{~ for i in 1..n ~}}
         packet.Write<T{{i}}>(arg{{i}});
         {{~ end ~}}
+        {{~ end ~}}
         connection.Send(packet);
     }
+
     {{~ end ~}}
     #endregion
 }

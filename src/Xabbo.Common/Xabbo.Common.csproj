@@ -21,13 +21,13 @@
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
 
-  <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)">
-    <RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)" />
+  <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild;Clean" DependsOnTargets="$(BeforeBuildDependsOn)">
+    <RemoveDir Directories="Generated" />
   </Target>
 
   <ItemGroup Label="Exclude generated source files">
-    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**" />
+    <Content Include="$(CompilerGeneratedFilesOutputPath)/**" />
   </ItemGroup>
 
   <ItemGroup Label="Include package icon">
