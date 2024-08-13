@@ -323,7 +323,7 @@ public sealed partial class Packet : IPacket
                 {
                     if (Header.Direction == Direction.In)
                     {
-                        Span<byte> span = Allocate(len, ref pos);
+                        Span<byte> span = Allocate(len+1, ref pos);
                         Encoding.UTF8.GetBytes(v, span);
                         span[^1] = 2;
                         break;
