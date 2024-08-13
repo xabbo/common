@@ -14,7 +14,7 @@ namespace Xabbo.Common.SourceGeneration;
 [Generator]
 public class SourceGenerator : ISourceGenerator
 {
-    const int MaxParams = 10;
+    const int MaxParams = 16;
 
     private static Stream GetResourceStream(string resourceName)
     {
