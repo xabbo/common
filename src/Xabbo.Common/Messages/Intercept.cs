@@ -55,6 +55,11 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
         !Packet.Buffer.SequenceEqual(OriginalPacket.Buffer);
 
     /// <summary>
+    /// Gets whether the intercepted packet's header matches any of the specified identifiers.
+    /// </summary>
+    public bool Is(ReadOnlySpan<Identifier> identifiers) => Interceptor.Messages.Is(OriginalPacket.Header, identifiers);
+
+    /// <summary>
     /// Flags the packet to be blocked from its destination by the interceptor.
     /// </summary>
     public void Block() => IsBlocked = true;

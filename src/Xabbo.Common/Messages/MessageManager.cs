@@ -162,4 +162,14 @@ public sealed class MessageManager(string filePath) : IMessageManager
         try { return _headerNames.TryGetValue(header, out identifiers); }
         finally { _lock.ExitReadLock(); }
     }
+
+    public bool Is(Header header, ReadOnlySpan<Identifier> identifiers)
+    {
+        foreach (var identifier in identifiers)
+        {
+            if (TryGetHeader(identifier, out Header h) && h.Equals(header))
+                return true;
+        }
+        return false;
+    }
 }

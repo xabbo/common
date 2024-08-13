@@ -48,4 +48,9 @@ public interface IMessageManager
     /// <exception cref="ArgumentException">If no identifiers were specified.</exception>
     /// <exception cref="UnresolvedIdentifiersException">If any of the identifiers could not be resolved.</exception>
     Header[] Resolve(ReadOnlySpan<Identifier> identifiers);
+
+    /// <summary>
+    /// Gets whether the header matches any of the specified identifiers.
+    /// </summary>
+    bool Is(Header header, ReadOnlySpan<Identifier> identifiers);
 }
