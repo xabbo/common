@@ -51,9 +51,20 @@ public sealed record Hotel
         ];
 
         if (fileHotelsOverride.Exists)
-            hotels = JsonSerializer.Deserialize<List<Hotel>>(File.ReadAllText(fileHotelsOverride.FullName)) ?? [];
+        {
+            hotels = JsonSerializer.Deserialize(
+                File.ReadAllText(fileHotelsOverride.FullName),
+                SourceGenerationContext.Default.ListHotel
+            ) ?? [];
+        }
+
         if (fileHotels.Exists)
-            hotels.AddRange(JsonSerializer.Deserialize<List<Hotel>>(File.ReadAllText(fileHotelsOverride.FullName)) ?? []);
+        {
+            hotels.AddRange(JsonSerializer.Deserialize(
+                File.ReadAllText(fileHotelsOverride.FullName),
+                SourceGenerationContext.Default.ListHotel
+            ) ?? []);
+        }
 
         return hotels.ToImmutableDictionary(x => x.Identifier, StringComparer.InvariantCultureIgnoreCase);
     }
