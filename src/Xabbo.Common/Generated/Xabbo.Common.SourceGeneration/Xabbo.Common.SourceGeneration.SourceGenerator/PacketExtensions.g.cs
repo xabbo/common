@@ -1,8 +1,11 @@
-﻿using Xabbo.Messages;
+﻿using System.ComponentModel;
+
+using Xabbo.Messages;
 
 namespace Xabbo;
 
 #pragma warning disable CS1591
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static partial class PacketExtensions
 #pragma warning restore CS1591
 {

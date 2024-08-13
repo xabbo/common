@@ -21,7 +21,7 @@
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
 
-  <Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild;Clean" DependsOnTargets="$(BeforeBuildDependsOn)">
+  <Target Name="CleanSourceGeneratedFiles" BeforeTargets="Clean" DependsOnTargets="$(BeforeBuildDependsOn)">
     <RemoveDir Directories="Generated" />
   </Target>
 

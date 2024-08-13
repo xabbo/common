@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Threading.Tasks;
 
 using Xabbo.Messages;
 using Xabbo.Connection;
@@ -6,6 +7,7 @@ using Xabbo.Connection;
 namespace Xabbo;
 
 #pragma warning disable CS1591
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static partial class ConnectionExtensions
 #pragma warning restore CS1591
 {

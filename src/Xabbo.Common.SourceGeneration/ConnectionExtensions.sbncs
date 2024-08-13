@@ -11,8 +11,10 @@ namespace Xabbo;
     func gargs; ret array.join $[0] ', ' @(do(x); ret 'T'+x+' arg'+x; end); end
 -}}
 
+#pragma warning disable CS1591
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static partial class ConnectionExtensions
+#pragma warning restore CS1591
 {
 
     #region Generic Send
