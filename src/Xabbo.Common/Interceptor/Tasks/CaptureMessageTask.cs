@@ -21,8 +21,9 @@ public sealed class CaptureMessageTask(IInterceptor interceptor,
     private readonly Func<IReadOnlyPacket, bool>? _shouldCapture = shouldCapture;
     private IDisposable? _registration;
 
-    protected override void OnAttach()
-        => _registration ??= Interceptor.Intercept(_headers, OnIntercept);
+    protected override void OnAttach() => _registration ??= Interceptor.Dispatcher.Register(
+        new InterceptGroup([ new(_headers, OnIntercept) ]) { Transient = true }
+    );
 
     protected override void OnRelease()
         => _registration?.Dispose();

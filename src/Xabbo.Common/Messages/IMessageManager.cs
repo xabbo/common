@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,9 +16,19 @@ public interface IMessageManager
     Task InitializeAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets whether message information is available.
+    /// </summary>
+    bool Available { get; }
+
+    /// <summary>
     /// Loads the specified client messages.
     /// </summary>
     void LoadMessages(IEnumerable<ClientMessage> messages);
+
+    /// <summary>
+    /// Notifies listeners when messages have been loaded.
+    /// </summary>
+    event EventHandler? Loaded;
 
     /// <summary>
     /// Attempts to get a header by its identifier.

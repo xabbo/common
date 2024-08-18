@@ -16,7 +16,7 @@ public static class InterceptorExtensions
         => interceptor.Dispatcher.Register([ new(headers, callback) ]);
 
     public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback)
-        => interceptor.Dispatcher.Register([ new(interceptor.Messages.Resolve(identifiers), callback) ]);
+        => interceptor.Dispatcher.Register([ new(identifiers, callback) ]);
 
     /// <summary>
     /// Asynchronously captures the first intercepted packet matching any of the specified headers.

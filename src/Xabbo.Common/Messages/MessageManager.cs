@@ -31,6 +31,9 @@ public sealed class MessageManager(string filePath) : IMessageManager
     /// </summary>
     public bool Fetch { get; set; } = true;
 
+    public bool Available { get; private set; }
+    public event EventHandler? Loaded;
+
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (!_init.Wait(0, CancellationToken.None))
@@ -72,7 +75,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
     public Header[] Resolve(ReadOnlySpan<Identifier> identifiers)
     {
         if (identifiers.Length == 0)
-            throw new ArgumentException("Length of identifiers cannot be zero.", nameof(identifiers));
+            throw new ArgumentException("At least one identifier must be specified.", nameof(identifiers));
 
         var headers = new HashSet<Header>();
         var unresolved = new Identifiers();
@@ -86,6 +89,21 @@ public sealed class MessageManager(string filePath) : IMessageManager
         if (unresolved.Count > 0)
             throw new UnresolvedIdentifiersException(unresolved);
         return [.. headers];
+
+    }
+
+    public void Clear()
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            Reset();
+        }
+        finally
+        {
+            Available = false;
+            _lock.ExitWriteLock();
+        }
     }
 
     private void Reset()
@@ -124,7 +142,10 @@ public sealed class MessageManager(string filePath) : IMessageManager
         }
         finally
         {
+            Available = true;
             _lock.ExitWriteLock();
+
+            Loaded?.Invoke(this, EventArgs.Empty);
         }
     }
 

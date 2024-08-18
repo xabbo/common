@@ -28,12 +28,14 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         public static Identifier Whisper { get; } = _();
     }
 
+    private readonly MessagesFixture _fixture;
     private IMessageManager Messages { get; }
     private IMessageDispatcher Dispatcher { get; }
     private IExtension Ext { get; }
 
     public DispatcherTests(MessagesFixture fixture)
     {
+        _fixture = fixture;
         Messages = fixture.Messages;
         Dispatcher = new MessageDispatcher(Messages);
 
@@ -144,28 +146,61 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         Assert.Equal("I like oranges", pkt.Read<string>());
     }
 
-    /// <summary>
-    /// Asserts that messages are correctly routed to message handlers.
-    /// </summary>
-    [Fact]
-    public void Bind()
+    [Fact(DisplayName = "Dispatcher.Reset should clear intercept handleres")]
+    public void TestDispatcherReset()
     {
-        // var mockHandler = new Mock<TestHandler>();
-        // mockHandler.Setup(x => x.OnMove(It.IsAny<Intercept>()));
-        //
-        // var packet = new Packet(Messages.Out.Move, ClientType.Flash);
-        // var interceptArgs = new Intercept(Mock.Of<IInterceptor>(), Direction.Outgoing, packet);
-        //
-        // Dispatcher.Attach(mockHandler.Object, ClientType.Flash);
-        //
-        // Dispatcher.DispatchIntercept(interceptArgs);
-        //
-        // Dispatcher.Detach(mockHandler.Object);
-        //
-        // Dispatcher.DispatchIntercept(interceptArgs);
-        // Dispatcher.DispatchIntercept(interceptArgs);
-        //
-        // // Verify that the handler was invoked only once, and not after the handler was released.
-        // mockHandler.Verify(e => e.OnMove(It.IsAny<Intercept>()), Times.Once);
+        var mockHandler = new Mock<Action<Intercept>>();
+        mockHandler.Setup(x => x.Invoke(It.IsAny<Intercept>()));
+
+        Ext.Intercept(Out.MoveAvatar, mockHandler.Object);
+
+        var pkt = new Packet(Messages.Resolve(Out.MoveAvatar));
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        Dispatcher.Reset();
+
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        mockHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(1));
+    }
+
+    [Fact(DisplayName = "Persistent intercept should be reattached on reload of messages")]
+    public void TestPersistentIntercept()
+    {
+        var mockHandler = new Mock<Action<Intercept>>();
+        mockHandler.Setup(x => x.Invoke(It.IsAny<Intercept>()));
+
+        Ext.Intercept(Out.MoveAvatar, mockHandler.Object);
+
+        var pkt = new Packet(Messages.Resolve(Out.MoveAvatar));
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        Dispatcher.Reset();
+        _fixture.LoadMessages();
+
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        mockHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(2));
+    }
+
+    [Fact(DisplayName = "Transient intercept should not persist after reload of messages")]
+    public void TestTransientIntercept()
+    {
+        var mockHandler = new Mock<Action<Intercept>>();
+        mockHandler.Setup(x => x.Invoke(It.IsAny<Intercept>()));
+
+        Dispatcher.Register(new InterceptGroup([
+            new InterceptHandler(Out.MoveAvatar, mockHandler.Object)
+        ]) { Transient = true });
+
+        var pkt = new Packet(Messages.Resolve(Out.MoveAvatar));
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        Dispatcher.Reset();
+        _fixture.LoadMessages();
+
+        Dispatcher.Dispatch(new Intercept(Ext, pkt));
+
+        mockHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(1));
     }
 }

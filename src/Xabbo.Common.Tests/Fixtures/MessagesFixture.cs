@@ -26,7 +26,11 @@ public class MessagesFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await Messages.InitializeAsync(CancellationToken.None);
+        LoadMessages();
+    }
 
+    public void LoadMessages()
+    {
         Messages.LoadMessages([
             // u:AddItem f:ItemAdd s:Items_2
             (ClientType.Flash, Direction.In, ItemAdd, "ItemAdd"),

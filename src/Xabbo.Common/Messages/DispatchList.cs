@@ -36,6 +36,7 @@ internal sealed class DispatchList
 
     private void TryRemove(Registration reg)
     {
+        // If not removed now, it should be pruned on next dispatch.
         if (!Monitor.IsEntered(_lock))
         {
             lock (_lock) _registrations.Remove(reg);
