@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -56,7 +57,15 @@ public interface IMessageManager
     /// </summary>
     /// <exception cref="ArgumentException">If no identifiers were specified.</exception>
     /// <exception cref="UnresolvedIdentifiersException">If any of the identifiers could not be resolved.</exception>
-    Header[] Resolve(ReadOnlySpan<Identifier> identifiers);
+    Headers Resolve(ReadOnlySpan<Identifier> identifiers);
+
+    /// <summary>
+    /// Attempts to resolve the specified identifiers to an array of headers.
+    /// </summary>
+    /// <exception cref="ArgumentException">If no identifiers were specified.</exception>
+    bool TryResolve(ReadOnlySpan<Identifier> identifiers,
+        [NotNullWhen(true)] out Headers? headers,
+        [NotNullWhen(false)] out Identifiers? unresolved);
 
     /// <summary>
     /// Gets whether the header matches any of the specified identifiers.

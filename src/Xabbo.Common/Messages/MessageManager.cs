@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Numerics;
@@ -65,31 +66,38 @@ public sealed class MessageManager(string filePath) : IMessageManager
         finally { _lock.ExitWriteLock(); }
     }
 
+    public bool TryResolve(ReadOnlySpan<Identifier> identifiers,
+        [NotNullWhen(true)] out Headers? headers,
+        [NotNullWhen(false)] out Identifiers? unresolved)
+    {
+        if (identifiers.Length == 0)
+            throw new ArgumentException("At least one identifier must be specified.", nameof(identifiers));
+
+        headers = null;
+        unresolved = null;
+
+        foreach (var identifier in identifiers)
+        {
+            if (TryGetHeader(identifier, out Header header)) (headers ??= []).Add(header);
+            else (unresolved ??= []).Add(identifier);
+        }
+
+        return unresolved is null;
+    }
+
+    public Headers Resolve(ReadOnlySpan<Identifier> identifiers)
+    {
+         if (TryResolve(identifiers, out Headers? headers, out Identifiers? unresolved))
+            return headers;
+         else
+            throw new UnresolvedIdentifiersException(unresolved);
+    }
+
     public Header Resolve(Identifier identifier)
     {
         if (!TryGetHeader(identifier, out Header header))
             throw new UnresolvedIdentifiersException([identifier]);
         return header;
-    }
-
-    public Header[] Resolve(ReadOnlySpan<Identifier> identifiers)
-    {
-        if (identifiers.Length == 0)
-            throw new ArgumentException("At least one identifier must be specified.", nameof(identifiers));
-
-        var headers = new HashSet<Header>();
-        var unresolved = new Identifiers();
-        foreach (var identifier in identifiers)
-        {
-            if (TryGetHeader(identifier, out Header header))
-                headers.Add(header);
-            else
-                unresolved.Add(identifier);
-        }
-        if (unresolved.Count > 0)
-            throw new UnresolvedIdentifiersException(unresolved);
-        return [.. headers];
-
     }
 
     public void Clear()

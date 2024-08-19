@@ -11,24 +11,28 @@ public sealed class UnresolvedIdentifiersException(Identifiers identifiers)
 
     private static string ConstructMessage(Identifiers identifiers)
     {
-        var sb = new StringBuilder();
-        sb.Append("Unresolved identifiers (");
+        var sb = new StringBuilder("Unresolved identifiers");
 
-        if (identifiers.Incoming.Any())
+        if (identifiers.Count > 0)
         {
-            sb.Append("Incoming: ");
-            sb.Append(string.Join(", ", identifiers.Incoming));
-        }
+            sb.Append(" (");
 
-        if (identifiers.Outgoing.Any())
-        {
             if (identifiers.Incoming.Any())
-                sb.Append("; ");
-            sb.Append("Outgoing: ");
-            sb.Append(string.Join(", ", identifiers.Outgoing));
-        }
+            {
+                sb.Append("Incoming: ");
+                sb.Append(string.Join(", ", identifiers.Incoming));
+            }
 
-        sb.Append(')');
+            if (identifiers.Outgoing.Any())
+            {
+                if (identifiers.Incoming.Any())
+                    sb.Append("; ");
+                sb.Append("Outgoing: ");
+                sb.Append(string.Join(", ", identifiers.Outgoing));
+            }
+
+            sb.Append(')');
+        }
 
         return sb.ToString();
     }

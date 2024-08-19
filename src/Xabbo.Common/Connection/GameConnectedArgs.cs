@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Xabbo.Messages;
 
-namespace Xabbo.Extension;
+namespace Xabbo.Connection;
 
 /// <summary>
-/// Provides data for the <see cref="IExtension.Connected"/> event.
+/// Provides data for the <see cref="IConnection.Connected"/> event.
 /// </summary>
 public sealed class GameConnectedArgs
 {

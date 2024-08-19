@@ -16,11 +16,6 @@ public interface IExtension : IInterceptor
     event EventHandler<InitializedArgs>? Initialized;
 
     /// <summary>
-    /// Invoked when a connection to the game is established.
-    /// </summary>
-    event EventHandler<GameConnectedArgs>? Connected;
-
-    /// <summary>
     /// Invoked when the extension is activated by the user.
     /// </summary>
     event EventHandler? Activated;
@@ -29,9 +24,4 @@ public interface IExtension : IInterceptor
     /// Invoked when a packet has been intercepted.
     /// </summary>
     event EventHandler<Intercept>? Intercepted;
-
-    /// <summary>
-    /// Invoked when the connection to the game ends.
-    /// </summary>
-    event EventHandler? Disconnected;
 }

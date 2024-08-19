@@ -32,6 +32,16 @@ public interface IConnection
     Session Session { get; }
 
     /// <summary>
+    /// Invoked when a connection to the game is established.
+    /// </summary>
+    event EventHandler<GameConnectedArgs>? Connected;
+
+    /// <summary>
+    /// Invoked when the connection to the game ends.
+    /// </summary>
+    event EventHandler? Disconnected;
+
+    /// <summary>
     /// Sends a packet to the client or server, specified by the direction of the packet's header.
     /// </summary>
     void Send(IReadOnlyPacket packet);

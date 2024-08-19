@@ -49,6 +49,6 @@ public static class InterceptorExtensions
         int timeout = -1, bool block = false, Func<IReadOnlyPacket, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default)
     {
-        return new CaptureMessageTask(interceptor, interceptor.Messages.Resolve(identifiers), block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
+        return new CaptureMessageTask(interceptor, [..interceptor.Messages.Resolve(identifiers)], block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
     }
 }

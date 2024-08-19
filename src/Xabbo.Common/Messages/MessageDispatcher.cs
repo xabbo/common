@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
+using Xabbo.Connection;
+using Xabbo.Interceptor;
+
 namespace Xabbo.Messages;
 
 /// <summary>
@@ -28,30 +31,31 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly ConcurrentDictionary<Header, DispatchList> _handlers = [];
     private readonly Dictionary<Persistent, Transient?> _persistents = [];
+    private ClientType _currentClient = ClientType.None;
+
+    /// <summary>
+    /// Gets the interceptor associated with this dispatcher.
+    /// </summary>
+    public IInterceptor Interceptor { get; }
 
     /// <summary>
     /// Gets the message manager used by this dispatcher.
     /// </summary>
-    public IMessageManager Messages { get; }
+    public IMessageManager Messages => Interceptor.Messages;
 
-    public MessageDispatcher(IMessageManager messages)
+    public MessageDispatcher(IInterceptor interceptor)
     {
-        Messages = messages;
-        Messages.Loaded += OnMessagesLoaded;
+        Interceptor = interceptor;
+        Interceptor.Connected += OnGameConnected;
+        Interceptor.Disconnected += OnGameDisconnected;
     }
 
-    public void Dispose()
-    {
-        Messages.Loaded -= OnMessagesLoaded;
-    }
-
-    private DispatchList GetDispatchList(Header header) => _handlers.GetOrAdd(header, _ => new DispatchList());
-
-    private void OnMessagesLoaded(object? sender, EventArgs e)
+    private void OnGameConnected(object? sender, GameConnectedArgs e)
     {
         _lock.Wait();
         try
         {
+            _currentClient = e.Session.Client.Type;
             foreach (var (persistent, transient) in _persistents)
             {
                 transient?.Dispose();
@@ -64,13 +68,34 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         }
     }
 
+    private void OnGameDisconnected(object? sender, EventArgs e)
+    {
+        _lock.Wait();
+        try
+        {
+            _currentClient = ClientType.None;
+            _handlers.Clear();
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public void Dispose()
+    {
+        Interceptor.Connected -= OnGameConnected;
+    }
+
+    private DispatchList GetDispatchList(Header header) => _handlers.GetOrAdd(header, _ => new DispatchList());
+
     public IDisposable Register(InterceptGroup group)
     {
         _lock.Wait();
         try
         {
             Transient? transient = null;
-            if (Messages.Available || group.Transient)
+            if (_currentClient != ClientType.None || group.Transient)
                 transient = Attach(group);
 
             if (group.Transient)
@@ -112,20 +137,40 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         var transients = new List<IDisposable>(group.Count);
         var headerMap = new Dictionary<InterceptHandler, HashSet<Header>>();
 
-        // First pass ensures all identifiers are resolved to prevent partially attached intercept groups.
+        // First pass makes sure identifiers are resolved where required.
         foreach (var handler in group)
         {
-            var set = new HashSet<Header>([.. handler.Headers ]);
+            // Skip if the current client is not targeted.
+            if ((handler.Target & _currentClient) == ClientType.None)
+                continue;
+            var set = new Headers([.. handler.Headers ]);
             if (handler.Identifiers.Length > 0)
-                set.UnionWith(Messages.Resolve(handler.Identifiers));
+            {
+                if (Messages.TryResolve(handler.Identifiers, out Headers? headers, out Identifiers? unresolved))
+                {
+                    set.UnionWith(Messages.Resolve(handler.Identifiers));
+                }
+                else
+                {
+                    // Skip if the handler is not required for this client.
+                    if ((handler.Required & _currentClient) != 0)
+                        throw new UnresolvedIdentifiersException(unresolved);
+                    continue;
+                }
+            }
             headerMap[handler] = set;
         }
 
         foreach (var handler in group)
         {
-            foreach (var header in headerMap[handler])
+            // If the handler does not exist here, it was either not included in the target clients,
+            // or some of its identifiers failed to resolve and it is marked as not required.
+            if (headerMap.TryGetValue(handler, out var headers))
             {
-                transients.Add(GetDispatchList(header).Register(handler));
+                foreach (var header in headers)
+                {
+                    transients.Add(GetDispatchList(header).Register(handler));
+                }
             }
         }
 
