@@ -12,12 +12,14 @@
 
   <PropertyGroup Label="Package">
     <PackageId>Xabbo.Common</PackageId>
-    <Description>Common library for interfacing with Habbo packet interceptors.</Description>
+    <PackageProjectUrl>https://xabbo.b7c.io/common</PackageProjectUrl>
+    <Description>Provides common functionality for interfacing with Habbo packet interceptors.</Description>
     <RepositoryUrl>https://github.com/xabbo/common.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
-    <Authors>b7</Authors>
+    <Authors>xabbo</Authors>
+    <Copyright>Copyright (c) xabbo 2024</Copyright>
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
 
@@ -49,10 +51,6 @@
     <ProjectReference Include="..\Xabbo.Common.Generators\Xabbo.Common.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Events/" />
   </ItemGroup>
 
 </Project>
