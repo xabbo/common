@@ -13,7 +13,7 @@
   <PropertyGroup Label="Package">
     <PackageId>Xabbo.Common</PackageId>
     <Description>Common library for interfacing with Habbo packet interceptors.</Description>
-    <RepositoryUrl>https://github.com/b7c/Xabbo.Common.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/xabbo/common.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
