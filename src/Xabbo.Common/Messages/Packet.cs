@@ -41,16 +41,7 @@ public sealed partial class Packet : IPacket
     }
     ReadOnlyMemory<byte> IReadOnlyPacket.GetMemory() => GetMemory();
 
-    public int Position
-    {
-        get => _position;
-        set
-        {
-            if (value < 0 || value > Length)
-                throw new IndexOutOfRangeException();
-            _position = value;
-        }
-    }
+    public ref int Position => ref _position;
 
     public int Length => _buf.Length;
 

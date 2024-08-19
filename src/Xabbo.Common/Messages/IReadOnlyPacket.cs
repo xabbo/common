@@ -20,9 +20,9 @@ public interface IReadOnlyPacket : IDisposable
     ClientType Client { get; }
 
     /// <summary>
-    /// Gets or sets the current position in the packet.
+    /// Gets a reference to the current position in the packet.
     /// </summary>
-    int Position { get; set; }
+    ref int Position { get; }
 
     /// <summary>
     /// Gets the length of the data in the packet.
