@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 
 using Scriban;
 
-namespace Xabbo.Common.SourceGeneration;
+namespace Xabbo.Common.Internal.Generators;
 
 [Generator]
 public class SourceGenerator : ISourceGenerator
@@ -18,7 +18,7 @@ public class SourceGenerator : ISourceGenerator
 
     private static Stream GetResourceStream(string resourceName)
     {
-        resourceName = "Xabbo.Common.SourceGeneration." + resourceName;
+        resourceName = "Xabbo.Common.Internal.Generators." + resourceName;
         return Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
             ?? throw new Exception($"Failed to load resource: '{resourceName}'.");
     }

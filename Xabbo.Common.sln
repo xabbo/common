@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.SourceGeneration", "src\Xabbo.Common.SourceGeneration\Xabbo.Common.SourceGeneration.csproj", "{F40903E3-C10A-486B-8674-071E7D0566D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.Internal.Generators", "src\Xabbo.Common.Internal.Generators\Xabbo.Common.Internal.Generators.csproj", "{F40903E3-C10A-486B-8674-071E7D0566D3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.Tests", "src\Xabbo.Common.Tests\Xabbo.Common.Tests.csproj", "{8276DB2D-BFBB-433E-BA17-73E0828A029F}"
 EndProject
