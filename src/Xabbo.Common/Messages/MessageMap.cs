@@ -91,11 +91,11 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
         result = ParseResult.Invalid;
         var processed = ClientType.None;
 
-        var commentSplit = line.Split(';', 2);
+        var commentSplit = line.Split(';', 2, StringSplitOptions.TrimEntries);
         if (commentSplit.Length == 0)
             return false;
 
-        var fieldSplit = commentSplit[0].Split();
+        var fieldSplit = commentSplit[0].Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         foreach (var field in fieldSplit)
         {
             var split = field.Split(':');
