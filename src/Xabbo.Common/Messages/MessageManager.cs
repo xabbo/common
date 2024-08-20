@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Threading;
@@ -22,7 +23,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
 
     private MessageMap? _messageMap;
 
-    private readonly Dictionary<Identifier, MessageNames> _identifierNames = [];
+    private readonly Dictionary<Identifier, HashSet<MessageNames>> _identifierNames = [];
     private readonly Dictionary<MessageNames, Header> _headers = [];
     private readonly Dictionary<Header, MessageNames> _headerNames = [];
 
@@ -131,21 +132,37 @@ public sealed class MessageManager(string filePath) : IMessageManager
 
             Reset();
 
-            foreach (var (identifier, identifiers) in _messageMap)
-                _identifierNames.Add(identifier, identifiers);
+            foreach (var (identifier, names) in _messageMap)
+            {
+                _identifierNames.Add(identifier, [names]);
+                if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existing))
+                    existing.Add(names);
+                else
+                    _identifierNames.Add(identifier with { Client = ClientType.None }, [names]);
+            }
 
             foreach (var message in messages)
             {
                 Identifier identifier = (message.Client, message.Direction, message.Name);
                 Header header = new(message.Client, message.Direction, message.Header);
-                if (!_identifierNames.TryGetValue(identifier, out MessageNames identifiers))
+                if (!_identifierNames.TryGetValue(identifier, out var nameSet))
                 {
-                    identifiers = new MessageNames(message.Direction).WithName(message.Client, message.Name);
-                    if (!_identifierNames.TryAdd(identifier, identifiers))
+                    nameSet = [new MessageNames(message.Direction).WithName(message.Client, message.Name)];
+                    if (!_identifierNames.TryAdd(identifier, nameSet))
                         throw new Exception("Failed to add client identifiers.");
                 }
-                _headers[identifiers] = header;
-                _headerNames[header] = identifiers;
+
+                if (nameSet.Count > 1)
+                    throw new Exception("Multiple message names conflict");
+
+                var name = nameSet.Single();
+                _headers[name] = header;
+                _headerNames[header] = name;
+
+                if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existing))
+                    existing.Add(name);
+                else
+                    _identifierNames.Add(identifier with { Client = ClientType.None }, [name]);
             }
         }
         finally
@@ -160,17 +177,19 @@ public sealed class MessageManager(string filePath) : IMessageManager
     public bool TryGetHeader(Identifier identifier, out Header header)
     {
         if (BitOperations.PopCount((uint)identifier.Client) > 1)
-            throw new ArgumentException($"Identifier may only specify a single client. ({identifier.Client})", nameof(identifier));
+            throw new ArgumentException($"Identifier may only specify a single client. ({identifier})", nameof(identifier));
 
         _lock.EnterReadLock();
         try
         {
-            if (!_identifierNames.TryGetValue(identifier, out MessageNames key))
+            if (!_identifierNames.TryGetValue(identifier, out var sets))
             {
                 header = Header.Unknown;
                 return false;
             }
-            return _headers.TryGetValue(key, out header);
+            if (sets.Count > 1)
+                throw new AmbiguousIdentifierException(identifier, sets);
+            return _headers.TryGetValue(sets.Single(), out header);
         }
         finally
         {
@@ -178,10 +197,27 @@ public sealed class MessageManager(string filePath) : IMessageManager
         }
     }
 
-    public bool TryGetNames(Identifier identifier, out MessageNames identifiers)
+    public bool TryGetNames(Identifier identifier, out MessageNames names)
     {
+        if (BitOperations.PopCount((uint)identifier.Client) > 1)
+            throw new ArgumentException($"Identifier may only specify a single client. ({identifier})", nameof(identifier));
+
         _lock.EnterReadLock();
-        try { return _identifierNames.TryGetValue(identifier, out identifiers); }
+        try
+        {
+            if (_identifierNames.TryGetValue(identifier, out var set))
+            {
+                if (set.Count > 1)
+                    throw new AmbiguousIdentifierException(identifier, set);
+                names = set.Single();
+                return true;
+            }
+            else
+            {
+                names = default;
+                return false;
+            }
+        }
         finally { _lock.ExitReadLock(); }
     }
 

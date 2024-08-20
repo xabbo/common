@@ -89,4 +89,29 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
         Assert.Equal("DisconnectReason", names.Flash);
         Assert.Null(names.Shockwave);
     }
+
+    [Fact(DisplayName = "Nonspecific identifier should resolve correctly")]
+    public void TestNonspecificIdentifier()
+    {
+        Header header = Messages.Resolve(new Identifier(ClientType.None, Direction.In, "Chat"));
+        Assert.Equal(MessagesFixture.Chat, header.Value);
+    }
+
+    [Fact(DisplayName = "Ambiguous identifier should throw AmbiguousIdentifierException")]
+    public void TestAmbiguousIdentifier()
+    {
+        // Flash:Objects should resolve
+        Header header = Messages.Resolve((ClientType.Flash, Direction.In, "Objects"));
+        Assert.Equal(MessagesFixture.FlashObjects, header.Value);
+
+        // Shockwave:Objects should not resolve
+        Assert.Throws<UnresolvedIdentifiersException>(() => {
+            Messages.Resolve((ClientType.Shockwave, Direction.In, "Objects"));
+        });
+
+        // None:Objects should throw
+        Assert.Throws<AmbiguousIdentifierException>(() => {
+            Messages.Resolve((Direction.In, "Objects"));
+        });
+    }
 }

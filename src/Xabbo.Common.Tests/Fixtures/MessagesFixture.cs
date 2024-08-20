@@ -18,6 +18,8 @@ public class MessagesFixture : IAsyncLifetime
 
     public const short NonExistent = -1;
 
+    public const short FlashObjects = 100;
+
     public MessagesFixture()
     {
         Messages = new MessageManager(@"Resources/test_messages.ini") { Fetch = false };
@@ -42,6 +44,8 @@ public class MessagesFixture : IAsyncLifetime
             (ClientType.Flash, Direction.In, Shout, "Shout"),
             // client message not defined in the message map file
             (ClientType.Flash, Direction.Out, NonExistent, "NonExistent"),
+            // test identifier conflicts between f:Objects and s:Objects
+            (ClientType.Flash, Direction.In, FlashObjects, "Objects"),
         ]);
     }
 
