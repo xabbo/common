@@ -15,9 +15,9 @@ public sealed class InterceptGroup : IReadOnlyList<InterceptHandler>
     public int Count => _handlers.Count;
 
     public InterceptGroup() { }
-    public InterceptGroup(IEnumerable<InterceptHandler> handlers)
+    public InterceptGroup(ReadOnlySpan<InterceptHandler> handlers)
     {
-        _handlers.AddRange(handlers);
+        _handlers = [.. handlers];
     }
 
     public bool Transient { get; set; }
