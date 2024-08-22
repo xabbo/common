@@ -23,6 +23,10 @@
     <PackageTags>xabbo;habbo</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup Label="Package source generator">
+    <None Include="..\Xabbo.Common.Generator\bin\$(Configuration)\netstandard2.0\Xabbo.Common.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
   <Target Name="CleanSourceGeneratedFiles" BeforeTargets="Clean" DependsOnTargets="$(BeforeBuildDependsOn)">
     <RemoveDir Directories="Generated" />
   </Target>
@@ -48,7 +52,7 @@
   <ItemGroup Label="References">
     <PackageReference Include="GitVersion.MsBuild" Version="6.0.2" PrivateAssets="all" />
     <ProjectReference Include="..\Xabbo.Common.Internal.Generators\Xabbo.Common.Internal.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Xabbo.Common.Generators\Xabbo.Common.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Xabbo.Common.Generator\Xabbo.Common.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
   </ItemGroup>

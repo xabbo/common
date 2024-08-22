@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.Internal.Gener
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xabbo.Common.Tests", "src\Xabbo.Common.Tests\Xabbo.Common.Tests.csproj", "{8276DB2D-BFBB-433E-BA17-73E0828A029F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xabbo.Common.Generators", "src\Xabbo.Common.Generators\Xabbo.Common.Generators.csproj", "{653281D4-157E-45E2-96C8-D6B6AC1CBBA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xabbo.Common.Generator", "src\Xabbo.Common.Generator\Xabbo.Common.Generator.csproj", "{653281D4-157E-45E2-96C8-D6B6AC1CBBA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
