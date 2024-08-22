@@ -1,7 +1,5 @@
 using System.ComponentModel;
 
-using Xabbo.Messages;
-
 namespace Xabbo;
 
 [EditorBrowsable(EditorBrowsableState.Never)]

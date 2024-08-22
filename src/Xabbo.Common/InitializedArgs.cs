@@ -1,7 +1,7 @@
-﻿namespace Xabbo.Extension;
+﻿namespace Xabbo;
 
 /// <summary>
-/// Provides data for the <see cref="IExtension.Initialized"/> event.
+/// Provides data for the <see cref="Extension.IExtension.Initialized"/> event.
 /// </summary>
 /// <param name="IsGameConnected">
 /// Gets whether the game is already connected at the time of extension initialization.

@@ -2,10 +2,10 @@
 
 using Xabbo.Messages;
 
-namespace Xabbo.Connection;
+namespace Xabbo;
 
 /// <summary>
-/// Provides data for the <see cref="IConnection.Connected"/> event.
+/// Provides data for the <see cref="Connection.IConnection.Connected"/> event.
 /// </summary>
 public sealed class GameConnectedArgs
 {

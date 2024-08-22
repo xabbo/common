@@ -1,4 +1,4 @@
-﻿namespace Xabbo.Messages;
+﻿namespace Xabbo;
 
 /// <summary>
 /// Represents a float that is serialized as a string.

@@ -1,6 +1,6 @@
 using System;
 
-namespace Xabbo.Extension;
+namespace Xabbo;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ExtensionAttribute : Attribute

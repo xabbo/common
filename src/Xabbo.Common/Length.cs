@@ -1,4 +1,4 @@
-﻿namespace Xabbo.Messages;
+﻿namespace Xabbo;
 
 /// <summary>
 /// Represents a collection length with client-specific serialization:

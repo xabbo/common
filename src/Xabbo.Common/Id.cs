@@ -1,4 +1,4 @@
-﻿namespace Xabbo.Messages;
+﻿namespace Xabbo;
 
 /// <summary>
 /// Represents a numeric identifier with client-specific serialization:

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xabbo.Messages;
+namespace Xabbo;
 
 /// <summary>
 /// Represents the direction of a message.
