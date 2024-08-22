@@ -15,8 +15,8 @@ internal static partial class Extractor
     {
         static Direction GetDirectionForInterceptAttribute(string name) => name switch
         {
-            "Xabbo.InterceptInAttribute" => Direction.In,
-            "Xabbo.InterceptOutAttribute" => Direction.Out,
+            Constants.InterceptInAttributeMetadataName => Direction.In,
+            Constants.InterceptOutAttributeMetadataName => Direction.Out,
             _ => Direction.None,
         };
 
