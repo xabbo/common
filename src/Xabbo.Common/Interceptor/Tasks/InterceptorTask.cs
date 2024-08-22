@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,13 +7,9 @@ using Xabbo.Messages;
 namespace Xabbo.Interceptor.Tasks;
 
 /// <summary>
-/// A base class used to implement a task that can intercept packets and asynchronously return a result.
+/// A base class used to implement an asynchronous task that intercepts packets returns a result.
 /// </summary>
 /// <typeparam name="TResult">The result type of the task.</typeparam>
-/// <remarks>
-/// Creates a new interceptor task bound to the specified interceptor.
-/// </remarks>
-/// <param name="interceptor">The interceptor to bind to.</param>
 public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
 {
     private IDisposable? _attachment;
@@ -25,37 +20,52 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     private CancellationTokenRegistration? _disconnectRegistration;
 
     /// <summary>
-    /// The interceptor that this task is bound to.
+    /// The interceptor that this task is attached to.
     /// </summary>
     protected IInterceptor Interceptor { get; } = interceptor;
 
     /// <summary>
     /// Executes the task synchronously and returns the result.
     /// </summary>
-    /// <param name="timeout">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
+    /// <param name="timeoutMs">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
-    public TResult Execute(int timeout, CancellationToken cancellationToken) => ExecuteAsync(timeout, cancellationToken).GetAwaiter().GetResult();
+    public TResult Execute(int timeoutMs, CancellationToken cancellationToken) => ExecuteAsync(timeoutMs, cancellationToken).GetAwaiter().GetResult();
+
+    /// <summary>
+    /// Executes the task synchronously and returns the result.
+    /// </summary>
+    /// <param name="timeout">The maximum time to wait for a result. Use <see cref="TimeSpan.Zero"/> for no timeout.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
+    public TResult Execute(TimeSpan timeout, CancellationToken cancellationToken) => ExecuteAsync(timeout, cancellationToken).GetAwaiter().GetResult();
 
     /// <summary>
     /// Executes the task asynchronously and returns the result.
     /// </summary>
-    /// <param name="timeout">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
+    /// <param name="timeoutMs">The maximum time to wait for a result in milliseconds. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
     /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
-    public async Task<TResult> ExecuteAsync(int timeout, CancellationToken cancellationToken)
+    public Task<TResult> ExecuteAsync(int timeoutMs, CancellationToken cancellationToken) => ExecuteAsync(TimeSpan.FromMilliseconds(timeoutMs), cancellationToken);
+
+    /// <summary>
+    /// Executes the task asynchronously and returns the result.
+    /// </summary>
+    /// <param name="timeout">The maximum time to wait for a result. Use <see cref="TimeSpan.Zero"/>  for no timeout.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
+    /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
+    public async Task<TResult> ExecuteAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         if (!_executeOnce.Wait(0, cancellationToken))
             throw new InvalidOperationException("The interceptor task has already been executed.");
 
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.Token.Register(() => SetCanceled());
-        if (timeout > 0) cts.CancelAfter(timeout);
+        if (timeout > TimeSpan.Zero) cts.CancelAfter(timeout);
 
-        _disconnectRegistration ??= Interceptor.DisconnectToken.Register(OnDisconnected);
+        _disconnectRegistration = Interceptor.DisconnectToken.Register(OnDisconnected);
 
         try
         {
-            OnAttach();
+            _attachment = OnAttach();
             await OnExecuteAsync().ConfigureAwait(false);
             return await _completion.Task;
         }
@@ -67,42 +77,48 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
         finally
         {
             OnRelease();
-            cts?.Dispose();
             _disconnectRegistration?.Unregister();
             _executeOnce.Dispose();
         }
     }
 
-    public virtual void Attach(IMessageDispatcher dispatcher) { }
-
     /// <summary>
     /// Attaches this task to the interceptor's dispatcher.
+    /// The default implementation calls <see cref="IMessageHandler.Attach(IInterceptor)"/> if this task implements <see cref="IMessageHandler"/> .
     /// </summary>
-    protected virtual void OnAttach()
+    protected virtual IDisposable? OnAttach()
     {
         if (this is IMessageHandler handler)
-            _attachment = handler.Attach(Interceptor);
+            return handler.Attach(Interceptor);
+        else
+            return null;
     }
 
     /// <summary>
     /// Detaches this task from the interceptor's dispatcher.
+    /// The default implementation calls <see cref="IDisposable.Dispose"/> on the <see cref="IDisposable"/> returned by <see cref="OnAttach"/> .
     /// </summary>
     protected virtual void OnRelease() => _attachment?.Dispose();
 
     /// <summary>
     /// Invoked when the connection ends while the interceptor task is in progress.
     /// </summary>
-    protected virtual void OnDisconnected()
+    protected virtual void OnDisconnected() => SetException(new Exception($"Disconnected while executing interceptor task '{GetType().FullName}'."));
+
+    /// <summary>
+    /// Invoked when the task is executed.
+    /// The default implementation synchronously calls <see cref="OnExecute"/>.
+    /// </summary>
+    protected virtual ValueTask OnExecuteAsync()
     {
-        _completion.TrySetException(
-            new Exception($"Disconnected while executing interceptor task '{GetType().FullName}'.")
-        );
+        OnExecute();
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
     /// Invoked when the task is executed.
     /// </summary>
-    protected abstract ValueTask OnExecuteAsync();
+    protected virtual void OnExecute() { }
 
     /// <summary>
     /// Attempts to set the result of this task to the specified value.

@@ -19,14 +19,10 @@ public sealed class CaptureMessageTask(IInterceptor interceptor,
     private readonly bool _block = block;
     private readonly Header[] _headers = headers.ToArray();
     private readonly Func<IReadOnlyPacket, bool>? _shouldCapture = shouldCapture;
-    private IDisposable? _registration;
 
-    protected override void OnAttach() => _registration ??= Interceptor.Dispatcher.Register(
+    protected override IDisposable? OnAttach() => Interceptor.Dispatcher.Register(
         new InterceptGroup([ new(_headers, OnIntercept) ]) { Transient = true }
     );
-
-    protected override void OnRelease()
-        => _registration?.Dispose();
 
     protected override ValueTask OnExecuteAsync() => ValueTask.CompletedTask;
 
