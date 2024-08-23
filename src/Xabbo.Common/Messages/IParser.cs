@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents an object that can be deserialized from a packet.
 /// </summary>
-public interface IParsable<T> where T : IParsable<T>
+public interface IParser<T> where T : IParser<T>
 {
-    static abstract T Parse(IReadOnlyPacket packet, ref int pos);
+    static abstract T Parse(in PacketReader p);
 }

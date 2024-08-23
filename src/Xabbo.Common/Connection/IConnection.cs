@@ -43,5 +43,5 @@ public interface IConnection
     /// <summary>
     /// Sends a packet to the client or server, specified by the direction of the packet's header.
     /// </summary>
-    void Send(IReadOnlyPacket packet);
+    void Send(IPacket packet);
 }

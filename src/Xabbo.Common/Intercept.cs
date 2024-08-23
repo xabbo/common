@@ -40,7 +40,7 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// <summary>
     /// Gets the original, unmodified packet that was intercepted.
     /// </summary>
-    public IReadOnlyPacket OriginalPacket { get; } = new Packet(packet.Header, packet.Buffer);
+    public IPacket OriginalPacket { get; } = new Packet(packet.Header, packet.Buffer.Copy());
 
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
@@ -52,8 +52,8 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// </summary>
     public bool IsModified =>
         Packet.Header != OriginalPacket.Header ||
-        Packet.Length != OriginalPacket.Length ||
-        !Packet.Buffer.SequenceEqual(OriginalPacket.Buffer);
+        Packet.Buffer.Length != OriginalPacket.Buffer.Length ||
+        !Packet.Buffer.Span.SequenceEqual(OriginalPacket.Buffer.Span);
 
     /// <summary>
     /// Gets whether the intercepted packet's header matches any of the specified identifiers.
@@ -72,8 +72,9 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
 
         if (disposing)
         {
-            Packet.Dispose();
-            OriginalPacket.Dispose();
+            // TODO
+            // Packet.Dispose();
+            // OriginalPacket.Dispose();
         }
     }
 

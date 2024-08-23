@@ -3,86 +3,107 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a writable packet of binary data with a message header.
+/// Represents a packet of binary data with a message header.
 /// </summary>
-public interface IPacket : IReadOnlyPacket
+public interface IPacket
 {
     /// <summary>
     /// Gets or sets the message header of the packet.
     /// </summary>
-    new Header Header { get; set; }
+    Header Header { get; set; }
 
     /// <summary>
-    /// Gets the underlying buffer of the packet's data as a <see cref="Span{T}"/>.
+    /// Gets the packet's buffer.
     /// </summary>
-    new Span<byte> Buffer { get; }
+    PacketBuffer Buffer { get; }
 
     /// <summary>
-    /// Gets the underlying buffer of the packet's data as <see cref="Memory{T}"/>.
+    /// Gets a reference to the current position in the packet.
     /// </summary>
-    new Memory<byte> GetMemory();
+    ref int Position { get; }
 
     /// <summary>
-    /// Allocates a byte <see cref="Span{T}" /> of the specified length from the current position in the packet.
+    /// Gets the length of the packet.
     /// </summary>
-    /// <param name="n">The number of bytes to allocate.</param>
-    Span<byte> Allocate(int n);
+    int Length { get; }
+
     /// <summary>
-    /// Allocates a byte <see cref="Span{T}" /> of the specified length
-    /// from the specified position in the packet.
+    /// Reads a value from the current position in the packet.
     /// </summary>
-    /// <param name="n">The number of bytes to allocate.</param>
-    /// <param name="pos">The position from which to allocate from.</param>
-    Span<byte> Allocate(int n, int pos);
+    T Read<T>();
+
     /// <summary>
-    /// Allocates a byte <see cref="Span{T}" /> of the specified length
-    /// from the specified position in the packet and advances the position.
+    /// Reads a value from the specified position in the packet.
     /// </summary>
-    /// <param name="n">The number of bytes to allocate.</param>
-    /// <param name="pos">The position from which to allocate from.</param>
-    Span<byte> Allocate(int n, ref int pos);
+    T ReadAt<T>(int pos);
+
+    /// <summary>
+    /// Reads an array of values from the current position in the packet.
+    /// </summary>
+    T[] ReadArray<T>();
+
+    /// <summary>
+    /// Reads an array of values from the specified position in the packet.
+    /// </summary>
+    T[] ReadArrayAt<T>(int pos);
+
+    /// <summary>
+    /// Parses an object from the current position in the packet.
+    /// </summary>
+    T Parse<T>() where T : IParser<T>;
+
+    /// <summary>
+    /// Parses an object from the specified position in the packet.
+    /// </summary>
+    T ParseAt<T>(int pos) where T : IParser<T>;
+
+    /// <summary>
+    /// Parses an array of objects from the current position in the packet.
+    /// </summary>
+    T[] ParseAll<T>() where T : IParser<T>, IManyParser<T>;
+
+    /// <summary>
+    /// Parses an array of objects from the specified position in the packet.
+    /// </summary>
+    T[] ParseAllAt<T>(int pos) where T : IParser<T>, IManyParser<T>;
 
     /// <summary>
     /// Writes a value at the current position in the packet.
     /// </summary>
     void Write<T>(T value);
+
     /// <summary>
     /// Writes a value at the specified position in the packet.
     /// </summary>
-    void Write<T>(T value, int pos);
-    /// <summary>
-    /// Writes a value at the specified position in the packet and advances the position.
-    /// </summary>
-    void Write<T>(T value, ref int pos);
+    void WriteAt<T>(int pos, T value);
 
     /// <summary>
     /// Replaces a value at the current position in the packet.
     /// </summary>
     void Replace<T>(T value);
+
     /// <summary>
     /// Replaces a value at the specified position in the packet.
     /// </summary>
-    void Replace<T>(T value, int pos);
-    /// <summary>
-    /// Replaces a value at the specified position in the packet and advances the position.
-    /// </summary>
-    void Replace<T>(T value, ref int pos);
+    void ReplaceAt<T>(int pos, T value);
 
     /// <summary>
     /// Modifies a value at the current position in the packet.
     /// </summary>
     void Modify<T>(Func<T, T> transform);
+
     /// <summary>
     /// Modifies a value at the specified position in the packet.
     /// </summary>
-    void Modify<T>(Func<T, T> transform, int pos);
-    /// <summary>
-    /// Modifies a value at the specified position in the packet and advances the position.
-    /// </summary>
-    void Modify<T>(Func<T, T> transform, ref int pos);
+    void ModifyAt<T>(int pos, Func<T, T> transform);
 
     /// <summary>
     /// Clears the packet's buffer and resets its position.
     /// </summary>
     void Clear();
+
+    /// <summary>
+    /// Creates a copy of this packet.
+    /// </summary>
+    IPacket Copy();
 }

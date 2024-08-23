@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a collection that can be deserialized from a packet.
 /// </summary>
-public interface IManyParsable<T> where T : IParsable<T>
+public interface IManyParser<T> where T : IParser<T>
 {
-    static abstract IEnumerable<T> Parse(IReadOnlyPacket packet);
+    static abstract IEnumerable<T> Parse(in PacketReader p);
 }

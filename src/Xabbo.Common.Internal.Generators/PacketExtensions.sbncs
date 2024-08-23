@@ -19,7 +19,7 @@ public static partial class PacketExtensions
 	/// <summary>
 	/// Reads the specified generically typed values from the packet into a tuple.
 	/// </summary>
-	public static ({{gtypes 1..n}}) Read<{{gtypes 1..n}}>(this IReadOnlyPacket packet) => (
+	public static ({{gtypes 1..n}}) Read<{{gtypes 1..n}}>(this IPacket packet) => (
 		{{~ for i in 1..n ~}}
 		packet.Read<T{{i}}>(){{ for.last ? '' : ',' }}
 		{{~ end ~}}

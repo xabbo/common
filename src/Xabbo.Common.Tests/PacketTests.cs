@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 using Xabbo.Messages;
+using Xunit.Abstractions;
 
 namespace Xabbo.Common.Tests;
 
-public class PacketTests
+public class PacketTests(ITestOutputHelper testOutputHelper)
 {
     public static readonly object[] ClientTypes = [
         new object[] { ClientType.Unity },
@@ -15,7 +17,7 @@ public class PacketTests
         new object[] { ClientType.Shockwave },
     ];
 
-    public PacketTests() { }
+    private readonly ITestOutputHelper _logger = testOutputHelper;
 
     [Fact]
     public void Clear()
@@ -33,7 +35,6 @@ public class PacketTests
             packet.Clear();
 
             Assert.Equal(0, packet.Length);
-            Assert.Equal(0, packet.Buffer.Length);
             Assert.Equal(0, packet.Position);
         }
     }
@@ -85,14 +86,21 @@ public class PacketTests
     [InlineData("hello", "bye")]
     public void String_Replacement(string value, string replacement)
     {
+        _logger.WriteLine($"Replacing \"{value}\" -> \"{replacement}\"");
+
         int valueByteCount = Encoding.UTF8.GetByteCount(value);
         int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
 
         var packet = new Packet((ClientType.Flash, Direction.In, 0));
 
-        packet.Write(1234);
+        packet.Write(0x01020304);
         packet.Write(value);
-        packet.Write(5678);
+        packet.Write(0x05060708);
+
+        string hex = "";
+        for (int i = 0; i < packet.Buffer.Length; i++)
+            hex += $"{packet.Buffer.Span[i]:x02} ";
+        _logger.WriteLine(hex);
 
         int previousLength = packet.Length;
 
@@ -102,14 +110,19 @@ public class PacketTests
         // The packet length has been adjusted
         Assert.Equal(previousLength + (replacementByteCount - valueByteCount), packet.Length);
 
+        hex = "";
+        for (int i = 0; i < packet.Buffer.Length; i++)
+            hex += $"{packet.Buffer.Span[i]:x02} ";
+        _logger.WriteLine(hex);
+
         // The values read back from the packet are correct
         packet.Position = 0;
-        Assert.Equal(1234, packet.Read<int>());
+        Assert.Equal(0x01020304, packet.Read<int>());
         Assert.Equal(replacement, packet.Read<string>());
-        Assert.Equal(5678, packet.Read<int>());
+        Assert.Equal(0x05060708, packet.Read<int>());
 
         // There is no more data in the packet
-        Assert.Equal(0, packet.Available);
+        Assert.Equal(packet.Length, packet.Position);
     }
 
     [Theory]
