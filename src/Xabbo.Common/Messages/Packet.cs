@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 
 namespace Xabbo.Messages;
 
@@ -11,14 +12,29 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     private int _position;
     public ref int Position => ref _position;
     public int Length => Buffer.Length;
+    public int Available => Buffer.Length - Position;
 
     /// <summary>
-    /// Constructs a new packet with the specified protocol and message header.
+    /// Constructs a new packet with the specified header and initial capacity.
     /// </summary>
     /// <param name="header">The message header.</param>
     /// <param name="capacity">The initial capacity in bytes.</param>
     public Packet(Header header, int capacity)
         : this(header, new PacketBuffer(capacity))
+    { }
+
+    /// <summary>
+    /// Constructs a new packet with the specified header and data.
+    /// </summary>
+    public Packet(Header header, ReadOnlySpan<byte> data)
+        : this(header, new PacketBuffer(data))
+    { }
+
+    /// <summary>
+    /// Constructs a new packet with the specified header and data.
+    /// </summary>
+    public Packet(Header header, in ReadOnlySequence<byte> data)
+        : this(header, new PacketBuffer(in data))
     { }
 
     /// <summary>
@@ -29,7 +45,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
         : this(header, new PacketBuffer())
     { }
 
-    public Packet Copy() => new(Header, Buffer); // TODO Copy buffer
+    public Packet Copy() => new(Header, Buffer.Copy());
     IPacket IPacket.Copy() => Copy();
 
     public void Clear()
@@ -52,6 +68,9 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public T[] ReadArray<T>() => Reader(ref _position).ReadArray<T>();
     public T[] ReadArrayAt<T>(int pos) => Reader(ref pos).ReadArray<T>();
 
+    public Span<byte> Allocate(int n) => Writer(ref _position).Alloc(n);
+
+    public void Write(ReadOnlySpan<byte> span) => Writer(ref _position).Write(span);
     public void Write<T>(T value) => Writer(ref _position).Write(value);
     public void WriteAt<T>(int pos, T value) => Writer(ref pos).Write(value);
 
@@ -66,9 +85,4 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
 
     public T[] ParseAll<T>() where T : IParser<T>, IManyParser<T> => Reader(ref _position).ParseAll<T>();
     public T[] ParseAllAt<T>(int pos) where T : IParser<T>, IManyParser<T> => Reader(ref pos).ParseAll<T>();
-
-    #region Compose
-    public void Compose(IComposer value) => value.Compose(Writer(ref _position));
-    public void ComposeAt(int pos, IComposer value) => value.Compose(Writer(ref pos));
-    #endregion
 }

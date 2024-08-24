@@ -39,6 +39,8 @@ public readonly ref struct PacketWriter
         return resized;
     }
 
+    public void Write(ReadOnlySpan<byte> span) => span.CopyTo(Alloc(span.Length));
+
     public void Write<T>(T value)
     {
         ArgumentNullException.ThrowIfNull(value);
