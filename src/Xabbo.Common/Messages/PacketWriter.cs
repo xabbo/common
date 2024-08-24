@@ -14,9 +14,10 @@ public readonly ref struct PacketWriter
 
     private readonly IPacket Packet;
     private readonly ref int Pos;
-    private readonly Header Header => Packet.Header;
-    private readonly ClientType Client => Packet.Header.Client;
-    private readonly Span<byte> Span => Packet.Buffer.Span;
+    public Header Header => Packet.Header;
+    public ClientType Client => Packet.Header.Client;
+    private Span<byte> Span => Packet.Buffer.Span;
+    public int Length => Packet.Length;
 
     public PacketWriter(IPacket packet, ref int pos)
     {
@@ -24,7 +25,7 @@ public readonly ref struct PacketWriter
         Pos = ref pos;
     }
 
-    public readonly Span<byte> Alloc(int n)
+    public Span<byte> Alloc(int n)
     {
         Span<byte> buf = Packet.Buffer.Alloc(Pos, n);
         Pos += n;
@@ -155,7 +156,7 @@ public readonly ref struct PacketWriter
         }
     }
 
-    public readonly void Replace<T>(T value)
+    public void Replace<T>(T value)
     {
         ArgumentNullException.ThrowIfNull(value);
 
@@ -204,5 +205,5 @@ public readonly ref struct PacketWriter
         }
     }
 
-    public readonly void Modify<T>(Func<T, T> transform) => Replace(transform(Packet.ReadAt<T>(Pos)));
+    public void Modify<T>(Func<T, T> transform) => Replace(transform(Packet.ReadAt<T>(Pos)));
 }

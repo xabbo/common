@@ -13,6 +13,11 @@ public interface IPacket
     Header Header { get; set; }
 
     /// <summary>
+    /// Gets the client type of the packet's header.
+    /// </summary>
+    ClientType Client { get; }
+
+    /// <summary>
     /// Gets the packet's buffer.
     /// </summary>
     PacketBuffer Buffer { get; }

@@ -7,5 +7,5 @@ namespace Xabbo.Messages;
 /// </summary>
 public interface IManyParser<T> where T : IParser<T>
 {
-    static abstract IEnumerable<T> Parse(in PacketReader p);
+    static abstract IEnumerable<T> ParseAll(in PacketReader p);
 }

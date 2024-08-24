@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using System.Collections;
 using System.Text;
 
 namespace Xabbo.Messages;
@@ -8,9 +9,11 @@ public readonly ref struct PacketReader
 {
     private readonly IPacket Packet;
     private readonly ref int Pos;
-    private readonly Header Header => Packet.Header;
-    private readonly ClientType Client => Packet.Header.Client;
-    private readonly Span<byte> Span => Packet.Buffer.Span;
+    public Header Header => Packet.Header;
+    public ClientType Client => Packet.Header.Client;
+    private Span<byte> Span => Packet.Buffer.Span;
+    public int Length => Packet.Length;
+    public int Available => Packet.Length - Pos;
 
     public PacketReader(IPacket packet, ref int pos)
     {
@@ -18,7 +21,7 @@ public readonly ref struct PacketReader
         Pos = ref pos;
     }
 
-    public readonly ReadOnlySpan<byte> ReadSpan(int n)
+    public ReadOnlySpan<byte> ReadSpan(int n)
     {
         if (Pos + n > Span.Length)
             throw new Exception("Not enough bytes to read value.");
@@ -26,7 +29,7 @@ public readonly ref struct PacketReader
         return Span[(Pos - n)..Pos];
     }
 
-    public readonly T Read<T>()
+    public T Read<T>()
     {
         if (typeof(T) == typeof(bool))
         {
@@ -135,9 +138,9 @@ public readonly ref struct PacketReader
         return array;
     }
 
-    public readonly T Parse<T>() where T : IParser<T> => T.Parse(in this);
+    public T Parse<T>() where T : IParser<T> => T.Parse(in this);
 
-    public readonly T[] ParseAll<T>() where T : IParser<T>
+    public T[] ParseAll<T>() where T : IParser<T>
     {
         T[] array = new T[Read<Length>()];
         for (int i = 0; i < array.Length; i++)

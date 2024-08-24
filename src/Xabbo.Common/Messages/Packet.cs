@@ -6,6 +6,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
 {
     public Header Header { get; set; } = header;
     public PacketBuffer Buffer { get; } = buffer;
+    public ClientType Client => Header.Client;
 
     private int _position;
     public ref int Position => ref _position;
