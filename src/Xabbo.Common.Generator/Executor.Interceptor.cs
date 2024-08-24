@@ -49,7 +49,7 @@ internal static partial class Executor
                 w.Write(interceptor.Name);
                 w.Write('.');
                 w.Write(intercept.HandlerMethodName);
-                w.WriteLine("(Xabbo.Messages.Intercept)\")]");
+                w.WriteLine("(Xabbo.Intercept)\")]");
             }
             w.WriteLine();
 
