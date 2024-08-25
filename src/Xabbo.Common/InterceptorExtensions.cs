@@ -13,10 +13,10 @@ namespace Xabbo;
 public static class InterceptorExtensions
 {
     public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Header> headers, Action<Intercept> callback)
-        => interceptor.Dispatcher.Register([ new(headers, callback) ]);
+        => interceptor.Dispatcher.Register(new([ new(headers, callback) ]) { Persistent = true });
 
     public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback)
-        => interceptor.Dispatcher.Register([ new(identifiers, callback) ]);
+        => interceptor.Dispatcher.Register(new([ new(identifiers, callback) ]) { Persistent = true });
 
     /// <summary>
     /// Asynchronously captures the first intercepted packet matching any of the specified headers.

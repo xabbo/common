@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
@@ -235,7 +235,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         Dispatcher.Register(new InterceptGroup([
             new InterceptHandler(In.Chat, handler.Object)
-        ]) { Transient = true });
+        ]));
 
         DispatchN(In.Chat, 1);
 
@@ -293,7 +293,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
             new InterceptHandler(In.Chat, targetedHandler.Object) { Target = ClientType.Flash },
             new InterceptHandler(In.Shout, targetedHandler.Object) { Target = ClientType.Flash | ClientType.Shockwave },
             new InterceptHandler(In.Whisper, untargetedHandler.Object) { Target = ClientType.Unity },
-        ]));
+        ]) { Persistent = true });
 
         Dispatch(In.Chat);
         Dispatch(In.Shout);
@@ -301,5 +301,19 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         targetedHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(2));
         untargetedHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Never);
+    }
+
+    [Fact(DisplayName = "Transient intercepts should throw when registered while disconnected")]
+    public void TestTransientInterceptWhileDisonnected()
+    {
+        SimulateConnect(ClientType.Flash);
+
+        Dispatcher.Register([ new(In.Chat, _ => { }) ]);
+
+        SimulateDisconnect();
+
+        Assert.Throws<InvalidOperationException>(() => {
+            Dispatcher.Register([ new(In.Chat, _ => { }) ]);
+        });
     }
 }

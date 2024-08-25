@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -94,10 +94,10 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         try
         {
             Transient? transient = null;
-            if (_currentClient != ClientType.None || group.Transient)
+            if (_currentClient != ClientType.None || !group.Persistent)
                 transient = Attach(group);
 
-            if (group.Transient)
+            if (!group.Persistent)
             {
                 // Attach should throw an unresolved identifiers exception before we get here.
                 if (transient is null)
@@ -133,6 +133,9 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
 
     private Transient Attach(InterceptGroup group)
     {
+        if (_currentClient == ClientType.None)
+            throw new InvalidOperationException("The game is not connected.");
+
         var transients = new List<IDisposable>(group.Count);
         var headerMap = new Dictionary<InterceptHandler, HashSet<Header>>();
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;

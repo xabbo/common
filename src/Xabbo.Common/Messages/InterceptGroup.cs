@@ -20,7 +20,7 @@ public sealed class InterceptGroup : IReadOnlyList<InterceptHandler>
         _handlers = [.. handlers];
     }
 
-    public bool Transient { get; set; }
+    public bool Persistent { get; set; }
     public void Add(InterceptHandler handler) => _handlers.Add(handler);
     public void Add(ReadOnlySpan<Header> headers, Action<Intercept> callback) => Add(new(headers, callback));
 
