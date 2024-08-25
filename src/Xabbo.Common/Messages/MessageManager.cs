@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -34,7 +34,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
     public bool Fetch { get; set; } = true;
 
     public bool Available { get; private set; }
-    public event EventHandler? Loaded;
+    public event Action? Loaded;
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -170,7 +170,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
             Available = true;
             _lock.ExitWriteLock();
 
-            Loaded?.Invoke(this, EventArgs.Empty);
+            Loaded?.Invoke();
         }
     }
 

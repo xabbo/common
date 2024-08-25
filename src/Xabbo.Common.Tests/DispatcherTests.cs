@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
 using Xabbo.Messages;
@@ -57,14 +57,14 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
     private void SimulateDisconnect()
     {
-        ExtMock.Raise(x => x.Disconnected += null, null, EventArgs.Empty); // disconnect
+        ExtMock.Raise(x => x.Disconnected += null); // disconnect
     }
 
     private void SimulateConnect(ClientType client = ClientType.Flash)
     {
         Session session = new(Hotel.None, new Client(client, "", ""));
         ExtMock.Setup(x => x.Session).Returns(session);
-        ExtMock.Raise(x => x.Connected += null, null, new GameConnectedArgs { Session = session });
+        ExtMock.Raise(x => x.Connected += null, new GameConnectedArgs { Session = session });
     }
 
     private void SimulateReconnect(ClientType client = ClientType.Flash)

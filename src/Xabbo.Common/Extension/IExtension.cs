@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Xabbo.Messages;
 using Xabbo.Interceptor;
@@ -13,15 +13,15 @@ public interface IExtension : IInterceptor
     /// <summary>
     /// Invoked when the extension has been initialized by the interceptor.
     /// </summary>
-    event EventHandler<InitializedArgs>? Initialized;
+    event Action<InitializedArgs>? Initialized;
 
     /// <summary>
     /// Invoked when the extension is activated by the user.
     /// </summary>
-    event EventHandler? Activated;
+    event Action? Activated;
 
     /// <summary>
     /// Invoked when a packet has been intercepted.
     /// </summary>
-    event EventHandler<Intercept>? Intercepted;
+    event Action<Intercept>? Intercepted;
 }

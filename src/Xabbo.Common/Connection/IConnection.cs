@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 
 using Xabbo.Messages;
@@ -33,12 +33,12 @@ public interface IConnection
     /// <summary>
     /// Invoked when a connection to the game is established.
     /// </summary>
-    event EventHandler<GameConnectedArgs>? Connected;
+    event Action<GameConnectedArgs>? Connected;
 
     /// <summary>
     /// Invoked when the connection to the game ends.
     /// </summary>
-    event EventHandler? Disconnected;
+    event Action? Disconnected;
 
     /// <summary>
     /// Sends a packet to the client or server, specified by the direction of the packet's header.

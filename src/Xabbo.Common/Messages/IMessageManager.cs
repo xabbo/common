@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -29,7 +29,7 @@ public interface IMessageManager
     /// <summary>
     /// Notifies listeners when messages have been loaded.
     /// </summary>
-    event EventHandler? Loaded;
+    event Action? Loaded;
 
     /// <summary>
     /// Attempts to get a header by its identifier.

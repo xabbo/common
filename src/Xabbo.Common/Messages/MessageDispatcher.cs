@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-using Xabbo.Connection;
 using Xabbo.Interceptor;
 
 namespace Xabbo.Messages;
@@ -50,7 +49,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         Interceptor.Disconnected += OnGameDisconnected;
     }
 
-    private void OnGameConnected(object? sender, GameConnectedArgs e)
+    private void OnGameConnected(GameConnectedArgs e)
     {
         _lock.Wait();
         try
@@ -68,7 +67,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         }
     }
 
-    private void OnGameDisconnected(object? sender, EventArgs e)
+    private void OnGameDisconnected()
     {
         _lock.Wait();
         try
