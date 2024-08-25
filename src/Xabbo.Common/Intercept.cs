@@ -10,8 +10,6 @@ namespace Xabbo;
 /// </summary>
 public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventArgs, IDisposable
 {
-    private bool _disposed;
-
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
     /// </summary>
@@ -65,25 +63,12 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// </summary>
     public void Block() => IsBlocked = true;
 
-    private void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-        _disposed = true;
-
-        if (disposing)
-        {
-            // TODO
-            // Packet.Dispose();
-            // OriginalPacket.Dispose();
-        }
-    }
-
     /// <summary>
-    /// Disposes this Intercept instance.
+    /// Disposes of this Intercept instance and its packet.
     /// </summary>
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        Packet.Dispose();
+        OriginalPacket.Dispose();
     }
 }

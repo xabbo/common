@@ -5,7 +5,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a packet of binary data with a message header.
 /// </summary>
-public interface IPacket
+public interface IPacket : IDisposable
 {
     /// <summary>
     /// Gets or sets the message header of the packet.

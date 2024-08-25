@@ -55,7 +55,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     }
 
     /// <summary>
-    /// Disposes of this packet and its memory.
+    /// Disposes of this packet's buffer.
     /// </summary>
     public void Dispose() => Buffer.Dispose();
 
