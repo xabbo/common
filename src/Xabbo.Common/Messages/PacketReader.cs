@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections;
+using System.Linq;
 using System.Text;
 
 namespace Xabbo.Messages;
@@ -124,6 +125,14 @@ public readonly ref struct PacketReader
         {
             return (T)(object)(FloatString)float.Parse(Read<string>());
         }
+        /*
+         * if we could do this we wouldn't need a separate Parse<T>
+         *
+        else if (typeof(T) == typeof(IParser<T>)
+        {
+            return (T)(object)T.Parse(in this);
+        }
+        */
         else
         {
             throw new Exception($"Cannot read {typeof(T)} from packet.");
@@ -140,11 +149,13 @@ public readonly ref struct PacketReader
 
     public T Parse<T>() where T : IParser<T> => T.Parse(in this);
 
-    public T[] ParseAll<T>() where T : IParser<T>
+    public T[] ParseArray<T>() where T : IParser<T>
     {
         T[] array = new T[Read<Length>()];
         for (int i = 0; i < array.Length; i++)
             array[i] = Parse<T>();
         return array;
     }
+
+    public T[] ParseAll<T>() where T : IParser<T>, IManyParser<T> => T.ParseAll(in this).ToArray();
 }

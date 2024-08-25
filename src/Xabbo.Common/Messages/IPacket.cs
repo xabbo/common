@@ -63,12 +63,22 @@ public interface IPacket : IDisposable
     T ParseAt<T>(int pos) where T : IParser<T>;
 
     /// <summary>
-    /// Parses an array of objects from the current position in the packet.
+    /// Parses an array of objects implementing <see cref="IParser{T}"/> from the current position in the packet.
+    /// </summary>
+    T[] ParseArray<T>() where T : IParser<T>;
+
+    /// <summary>
+    /// Parses an array of objects implementing <see cref="IParser{T}"/> from the specified position in the packet.
+    /// </summary>
+    T[] ParseArrayAt<T>(int pos) where T : IParser<T>;
+
+    /// <summary>
+    /// Parses an array of objects implementing <see cref="IManyParser{T}"/> from the current position in the packet.
     /// </summary>
     T[] ParseAll<T>() where T : IParser<T>, IManyParser<T>;
 
     /// <summary>
-    /// Parses an array of objects from the specified position in the packet.
+    /// Parses an array of objects implementing <see cref="IManyParser{T}"/> from the specified position in the packet.
     /// </summary>
     T[] ParseAllAt<T>(int pos) where T : IParser<T>, IManyParser<T>;
 

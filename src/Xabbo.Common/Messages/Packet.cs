@@ -83,6 +83,9 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public T Parse<T>() where T : IParser<T> => Reader(ref _position).Parse<T>();
     public T ParseAt<T>(int pos) where T : IParser<T> => Reader(ref pos).Parse<T>();
 
+    public T[] ParseArray<T>() where T : IParser<T> => Reader(ref _position).ParseArray<T>();
+    public T[] ParseArrayAt<T>(int pos) where T : IParser<T> => Reader(ref pos).ParseArray<T>();
+
     public T[] ParseAll<T>() where T : IParser<T>, IManyParser<T> => Reader(ref _position).ParseAll<T>();
     public T[] ParseAllAt<T>(int pos) where T : IParser<T>, IManyParser<T> => Reader(ref pos).ParseAll<T>();
 }
