@@ -147,6 +147,8 @@ public sealed record Hotel
         GameHost = gameHost;
     }
 
+    public override string ToString() => Name;
+
     /// <summary>
     /// Gets the hotel with the specified identifier, e.g. "us".
     /// </summary>
