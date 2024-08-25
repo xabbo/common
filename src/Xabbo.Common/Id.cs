@@ -13,4 +13,6 @@ public readonly struct Id(long value)
 
     public static implicit operator Id(long value) => new(value);
     public static implicit operator long(Id id) => id.Value;
+
+    public override string ToString() => Value.ToString();
 }

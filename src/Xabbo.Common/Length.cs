@@ -13,4 +13,6 @@ public readonly struct Length(int value)
 
     public static implicit operator Length(int value) => new(value);
     public static implicit operator int(Length legacyShort) => legacyShort.Value;
+
+    public override string ToString() => Value.ToString();
 }
