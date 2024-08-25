@@ -10,6 +10,10 @@ namespace Xabbo;
 /// </summary>
 public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventArgs, IDisposable
 {
+    private readonly IPacket _originalPacket = packet;
+    private readonly Header _originalHeader = packet.Header;
+    private IPacket _packet = packet;
+
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
     /// </summary>
@@ -33,12 +37,11 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// <summary>
     /// Gets or replaces the intercepted packet.
     /// </summary>
-    public IPacket Packet { get; set; } = packet;
-
-    /// <summary>
-    /// Gets the original, unmodified packet that was intercepted.
-    /// </summary>
-    public IPacket OriginalPacket { get; } = new Packet(packet.Header, packet.Buffer.Copy());
+    public IPacket Packet
+    {
+        get => _packet;
+        set => _packet = value ?? throw new ArgumentNullException(nameof(Packet));
+    }
 
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
@@ -46,17 +49,9 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     public bool IsBlocked { get; private set; }
 
     /// <summary>
-    /// Gets if the packet has been modified from its original state.
+    /// Gets whether the intercepted packet's unmodified header matches any of the specified identifiers.
     /// </summary>
-    public bool IsModified =>
-        Packet.Header != OriginalPacket.Header ||
-        Packet.Buffer.Length != OriginalPacket.Buffer.Length ||
-        !Packet.Buffer.Span.SequenceEqual(OriginalPacket.Buffer.Span);
-
-    /// <summary>
-    /// Gets whether the intercepted packet's header matches any of the specified identifiers.
-    /// </summary>
-    public bool Is(ReadOnlySpan<Identifier> identifiers) => Interceptor.Messages.Is(OriginalPacket.Header, identifiers);
+    public bool Is(ReadOnlySpan<Identifier> identifiers) => Interceptor.Messages.Is(_originalHeader, identifiers);
 
     /// <summary>
     /// Flags the packet to be blocked from its destination by the interceptor.
@@ -68,7 +63,7 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// </summary>
     public void Dispose()
     {
+        _originalPacket.Dispose();
         Packet.Dispose();
-        OriginalPacket.Dispose();
     }
 }
