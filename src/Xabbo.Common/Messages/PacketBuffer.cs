@@ -56,7 +56,7 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     /// the buffer is grown to support the new length.
     /// `<paramref name="start"/>` may not be greater than the current packet length.
     /// </summary>
-    public Span<byte> Alloc(int start, int length)
+    public Span<byte> Allocate(int start, int length)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentOutOfRangeException.ThrowIfNegative(start);

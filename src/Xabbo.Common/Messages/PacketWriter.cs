@@ -25,9 +25,9 @@ public readonly ref struct PacketWriter
         Pos = ref pos;
     }
 
-    public Span<byte> Alloc(int n)
+    public Span<byte> Allocate(int n)
     {
-        Span<byte> buf = Packet.Buffer.Alloc(Pos, n);
+        Span<byte> buf = Packet.Buffer.Allocate(Pos, n);
         Pos += n;
         return buf;
     }
@@ -39,7 +39,7 @@ public readonly ref struct PacketWriter
         return resized;
     }
 
-    public void Write(ReadOnlySpan<byte> span) => span.CopyTo(Alloc(span.Length));
+    public void Write(ReadOnlySpan<byte> span) => span.CopyTo(Allocate(span.Length));
 
     public void Write<T>(T value)
     {
@@ -51,31 +51,31 @@ public readonly ref struct PacketWriter
                 v.Compose(in this);
                 break;
             case bool v:
-                Alloc(1)[0] = (byte)(v ? 1 : 0);
+                Allocate(1)[0] = (byte)(v ? 1 : 0);
                 break;
             case byte v:
-                Alloc(1)[0] = v;
+                Allocate(1)[0] = v;
                 break;
             case short v:
                 if (Client == ClientType.Shockwave)
                     Write<B64>(v);
                 else
-                    BinaryPrimitives.WriteInt16BigEndian(Alloc(2), v);
+                    BinaryPrimitives.WriteInt16BigEndian(Allocate(2), v);
                 break;
             case int v:
                 if (Client == ClientType.Shockwave)
                     Write<VL64>(v);
                 else
-                    BinaryPrimitives.WriteInt32BigEndian(Alloc(4), v);
+                    BinaryPrimitives.WriteInt32BigEndian(Allocate(4), v);
                 break;
             case long v:
                 if (Client == ClientType.Flash || Client == ClientType.Shockwave)
                     throw new Exception($"Cannot write long on session: {Client}.");
-                BinaryPrimitives.WriteInt64BigEndian(Alloc(8), v);
+                BinaryPrimitives.WriteInt64BigEndian(Allocate(8), v);
                 break;
             case float v:
                 if (Client == ClientType.Unity)
-                    BinaryPrimitives.WriteSingleBigEndian(Alloc(4), v);
+                    BinaryPrimitives.WriteSingleBigEndian(Allocate(4), v);
                 else
                     Write(FormatFloatToString(v));
                 break;
@@ -85,7 +85,7 @@ public readonly ref struct PacketWriter
                 {
                     if (Header.Direction == Direction.In)
                     {
-                        Span<byte> span = Alloc(len+1);
+                        Span<byte> span = Allocate(len+1);
                         Encoding.UTF8.GetBytes(v, span);
                         span[^1] = 0x02;
                         break;
@@ -94,17 +94,17 @@ public readonly ref struct PacketWriter
                         throw new Exception("Unknown direction when writing string on Shockwave.");
                 }
                 Write((short)len);
-                Encoding.UTF8.GetBytes(v, Alloc(len));
+                Encoding.UTF8.GetBytes(v, Allocate(len));
                 break;
             case B64 v:
                 if (Client != ClientType.Shockwave)
                     throw new Exception($"Cannot write B64 on session: {Client}.");
-                B64.Encode(Alloc(2), v);
+                B64.Encode(Allocate(2), v);
                 break;
             case VL64 v:
                 if (Client != ClientType.Shockwave)
                     throw new Exception($"Cannot write VL64 on session: {Client}.");
-                VL64.Encode(Alloc(VL64.EncodeLength(v)), v);
+                VL64.Encode(Allocate(VL64.EncodeLength(v)), v);
                 break;
             case Id v:
                 switch (Client)

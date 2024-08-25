@@ -68,7 +68,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public T[] ReadArray<T>() => Reader(ref _position).ReadArray<T>();
     public T[] ReadArrayAt<T>(int pos) => Reader(ref pos).ReadArray<T>();
 
-    public Span<byte> Allocate(int n) => Writer(ref _position).Alloc(n);
+    public Span<byte> Allocate(int n) => Writer(ref _position).Allocate(n);
 
     public void Write(ReadOnlySpan<byte> span) => Writer(ref _position).Write(span);
     public void Write<T>(T value) => Writer(ref _position).Write(value);
