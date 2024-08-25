@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 
 namespace Xabbo.Messages;
 
@@ -7,6 +8,10 @@ namespace Xabbo.Messages;
 /// </summary>
 public readonly record struct MessageNames(Direction Direction, string? Unity = null, string? Flash = null, string? Shockwave = null)
 {
+    private static readonly ImmutableArray<ClientType> ClientTypes = [
+        ClientType.Unity, ClientType.Flash, ClientType.Shockwave
+    ];
+
     public string? GetName(ClientType client) => client switch
     {
         ClientType.Unity => Unity,
@@ -38,31 +43,36 @@ public readonly record struct MessageNames(Direction Direction, string? Unity = 
 
     public override string ToString()
     {
-        bool
-            u = Unity is not null && Unity != "-",
-            f = Flash is not null && Flash != "-",
-            s = Shockwave is not null && Shockwave != "-",
-            uf = u && Unity!.Equals(Flash, StringComparison.OrdinalIgnoreCase),
-            us = u && Unity!.Equals(Shockwave, StringComparison.OrdinalIgnoreCase),
-            fs = f && Flash!.Equals(Shockwave, StringComparison.OrdinalIgnoreCase);
+        ClientType processed = ClientType.None;
 
-        // ufs uf-s u-fs u-f-s uf us fs u f s
+        string result = "";
+        for (int i = 0; i < ClientTypes.Length; i++)
+        {
+            ClientType current = ClientTypes[i];
+            if ((processed & current) != 0)
+                continue;
 
-        if (uf && fs)
-            return $"ufs:{Unity}";
-        else if (uf)
-            return s ? $"uf:{Unity} s:{Shockwave}" : $"uf:{Unity}";
-        else if (fs)
-            return u ? $"u:{Unity} fs:{Flash}" : $"fs:{Flash}";
-        else if (us)
-            return f ? $"us:{Unity} f:{Flash}" : $"us:Unity";
-        else if (u)
-            return $"u:{Unity}";
-        else if (f)
-            return $"f:{Flash}";
-        else if (s)
-            return $"s:{Shockwave}";
-        else
-            return "";
+            string? name = GetName(ClientTypes[i]);
+            if (name is null) continue;
+
+            for (int j = i+1; j < ClientTypes.Length; j++)
+            {
+                ClientType other = ClientTypes[j];
+                if ((processed & other) != 0)
+                    continue;
+
+                if (name.Equals(GetName(other)))
+                {
+                    processed |= other;
+                    current |= other;
+                }
+            }
+
+            if (result.Length > 0)
+                result += " ";
+            result += $"{current.Short()}:{name}";
+        }
+
+        return result;
     }
 }
