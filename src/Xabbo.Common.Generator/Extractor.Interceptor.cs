@@ -61,7 +61,7 @@ internal static partial class Extractor
                 if (targetClients == Client.None)
                 {
                     diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.EmptyTargetClient,
+                        DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
                         interceptsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                     ));
                 }
@@ -93,6 +93,9 @@ internal static partial class Extractor
 
         static InterceptInfo? ExtractInterceptInfo(Client targetClients, ISymbol member, List<DiagnosticInfo> diagnostics)
         {
+            if (member is not IMethodSymbol method)
+                return null;
+
             List<Identifier> identifiers = [];
             Client interceptsOn = targetClients;
 
@@ -108,7 +111,7 @@ internal static partial class Extractor
                     if (attr.ConstructorArguments.Length == 0)
                     {
                         diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.NoTargetClientsSpecified,
+                            DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
                             attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                         ));
                     }
@@ -120,7 +123,7 @@ internal static partial class Extractor
                             if (interceptsOn == Client.None && targetClients != Client.None)
                             {
                                 diagnostics.Add(new DiagnosticInfo(
-                                    DiagnosticDescriptors.EmptyTargetClient,
+                                    DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
                                     attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                                 ));
                             }
@@ -198,6 +201,26 @@ internal static partial class Extractor
                 diagnostics.Add(new DiagnosticInfo(
                     DiagnosticDescriptors.InterceptHandlerMustNotBeStatic,
                     member.Locations[0]
+                ));
+            }
+
+            if (method is not {
+                ReturnsVoid: true,
+                Parameters: [{
+                    RefKind: RefKind.None,
+                    Type: {
+                        ContainingNamespace: {
+                            ContainingNamespace.IsGlobalNamespace: true,
+                            Name: "Xabbo"
+                        },
+                        Name: "Intercept"
+                    }
+                }]
+            })
+            {
+                diagnostics.Add(new DiagnosticInfo(
+                    DiagnosticDescriptors.InvalidInterceptMethodSignature,
+                    method.Locations.FirstOrDefault()
                 ));
             }
 

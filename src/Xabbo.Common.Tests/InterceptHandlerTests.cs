@@ -1,8 +1,5 @@
 using System;
 
-using Xabbo.Extension;
-using Xabbo.Messages;
-
 namespace Xabbo.Common.Tests;
 
 public class GeneratorTests { }
@@ -29,7 +26,7 @@ public partial class SampleInterceptor
     [InterceptIn("f:Objects")]
     void OnObjects(Intercept e) { }
 
-    [InterceptsOn(ClientType.Shockwave)]
+    [Intercepts(ClientType.Shockwave)]
     [InterceptIn("s:Objects")]
     void OnToken(Intercept e) { }
 }

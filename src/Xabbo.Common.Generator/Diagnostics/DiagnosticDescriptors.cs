@@ -49,21 +49,30 @@ internal static class DiagnosticDescriptors
         isEnabledByDefault: true
     );
 
-    internal static readonly DiagnosticDescriptor NoTargetClientsSpecified = new(
+    internal static readonly DiagnosticDescriptor NoTargetClientsOnInterceptsAttribute = new(
         id: "XABBO006",
-        title: "No target clients specified",
-        messageFormat: "No target clients were specified, and this interceptor will have no effect",
+        title: "The Intercepts attribute does not specify a target client",
+        messageFormat: "This attribute will have no effect because no target clients were specified",
         category: "Xabbo",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true
     );
 
-    internal static readonly DiagnosticDescriptor EmptyTargetClient = new(
+    internal static readonly DiagnosticDescriptor EmptyTargetClientOnInterceptsAttribute = new(
         id: "XABBO007",
-        title: "Empty target client",
-        messageFormat: "The specified target client results in ClientType.None, and this interceptor will never be registered",
+        title: "The Intercepts attribute's target client is None",
+        messageFormat: "This interceptor will never be registered because the specified target client results in ClientType.None",
         category: "Xabbo",
         DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor InvalidInterceptMethodSignature = new(
+        id: "XABBO008",
+        title: "Invalid intercept method signature",
+        messageFormat: "Intercept method signature must be void(Xabbo.Intercept)",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
 }

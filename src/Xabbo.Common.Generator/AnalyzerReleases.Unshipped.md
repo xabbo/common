@@ -12,3 +12,4 @@ XABBO004 | Xabbo | Error | DiagnosticDescriptors
 XABBO005 | Xabbo | Error | DiagnosticDescriptors
 XABBO006 | Xabbo | Warning | DiagnosticDescriptors
 XABBO007 | Xabbo | Warning | DiagnosticDescriptors
+XABBO008 | Xabbo | Error | DiagnosticDescriptors
