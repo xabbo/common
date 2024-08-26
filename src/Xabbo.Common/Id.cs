@@ -22,7 +22,6 @@ public readonly struct Id(long value)
             throw new Exception($"Invalid ID: {s}");
         return new Id(value);
     }
-    public static implicit operator string(Id id) => id.Value.ToString();
 
     public override string ToString() => Value.ToString();
 }
