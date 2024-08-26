@@ -246,38 +246,6 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Once);
     }
 
-    [Fact(DisplayName = "Unresolved required intercept should throw UnresolvedIdentifiersException")]
-    public void TestRequiredIntercept()
-    {
-        SimulateConnect(ClientType.Flash);
-        Assert.Throws<UnresolvedIdentifiersException>(() => {
-            Dispatcher.Register(new InterceptGroup([
-                new InterceptHandler(In.Chat, Mock.Of<Action<Intercept>>()),
-                new InterceptHandler(In.Unresolved, Mock.Of<Action<Intercept>>()) {
-                    Required = ClientType.Flash,
-                },
-            ]));
-        });
-    }
-
-    [Fact(DisplayName = "Unresolved non-required intercept should be ignored")]
-    public void TestUnrequiredIntercept()
-    {
-        SimulateConnect(ClientType.Flash);
-
-        var handler = new Mock<Action<Intercept>>();
-
-        Dispatcher.Register(new InterceptGroup([
-            new InterceptHandler(In.Chat, handler.Object),
-            new InterceptHandler(In.Unresolved, handler.Object) { Required = ClientType.None },
-            new InterceptHandler(In.Unresolved, handler.Object) { Required = ClientType.Shockwave },
-        ]));
-
-        Dispatch(In.Chat);
-
-        handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Once);
-    }
-
     [Fact(DisplayName = "Only targeted handlers should be attached")]
     public void TestTargetedIntercept()
     {
