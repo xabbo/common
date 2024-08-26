@@ -115,6 +115,7 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
                     result = ParseResult.DuplicateClient;
                     return false;
                 }
+                if (split[1] == "-") continue;
                 item = item.WithName(client, split[1]);
                 processed |= client;
             }
