@@ -4,18 +4,14 @@ using System.Collections.Immutable;
 namespace Xabbo;
 
 /// <summary>
-/// Indicates that this class intercepts messages.
+/// Indicates that this class or method intercepts messages for the specified clients.
+/// If no clients are specified, all clients are targeted.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
-public sealed class InterceptsAttribute : Attribute;
-
-/// <summary>
-/// Indicates that this method intercepts on the specified clients.
-/// </summary>
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class InterceptsOnAttribute(ClientType clients) : Attribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public sealed class InterceptsAttribute(ClientType client) : Attribute
 {
-    public ClientType Clients { get; } = clients;
+    public ClientType Client { get; } = client;
+    public InterceptsAttribute() : this(ClientType.All) { }
 }
 
 /// <summary>

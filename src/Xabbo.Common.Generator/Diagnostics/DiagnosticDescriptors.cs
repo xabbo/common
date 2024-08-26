@@ -48,4 +48,22 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
+
+    internal static readonly DiagnosticDescriptor NoTargetClientsSpecified = new(
+        id: "XABBO006",
+        title: "No target clients specified",
+        messageFormat: "No target clients were specified, and this interceptor will have no effect",
+        category: "Xabbo",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor EmptyTargetClient = new(
+        id: "XABBO007",
+        title: "Empty target client",
+        messageFormat: "The specified target client results in ClientType.None, and this interceptor will never be registered",
+        category: "Xabbo",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
 }

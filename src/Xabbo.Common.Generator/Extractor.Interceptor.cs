@@ -32,6 +32,7 @@ internal static partial class Extractor
             List<InterceptInfo> intercepts = [];
             List<DiagnosticInfo> diagnostics = [];
 
+            // Add diagnostic if not partial.
             bool isPartial = @class
                 .DeclaringSyntaxReferences
                 .Any(syntax =>
@@ -46,13 +47,35 @@ internal static partial class Extractor
                 ));
             }
 
-            foreach (ISymbol member in members)
+            // Extract target clients.
+            Client targetClients = Client.All;
+
+            var interceptsAttribute = @class.GetAttributes().FirstOrDefault(
+                x => x.AttributeClass?.ToDisplayString() == Constants.InterceptsAttributeMetadataName);
+
+            if (interceptsAttribute is not null &&
+                interceptsAttribute.ConstructorArguments.Length > 0 &&
+                interceptsAttribute.ConstructorArguments[0].Value is int targetClientValue)
             {
-                InterceptInfo? interceptInfo = ExtractInterceptInfo(member, diagnostics);
-                if (interceptInfo is { } value)
-                    intercepts.Add(value);
+                targetClients = ((Client)targetClientValue) & Client.All;
+                if (targetClients == Client.None)
+                {
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.EmptyTargetClient,
+                        interceptsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    ));
+                }
             }
 
+
+            // Extract intercept info.
+            foreach (ISymbol member in members)
+            {
+                if (ExtractInterceptInfo(targetClients, member, diagnostics) is { } interceptInfo)
+                    intercepts.Add(interceptInfo);
+            }
+
+            // Extract namespace.
             string namespaceName = "";
             if (@class.ContainingNamespace.CanBeReferencedByName)
                 namespaceName = @class.ContainingNamespace.ToDisplayString();
@@ -61,16 +84,17 @@ internal static partial class Extractor
                 new InterceptorInfo(
                     namespaceName,
                     @class.Name,
+                    targetClients,
                     intercepts.ToArray()
                 ),
                 diagnostics.ToArray()
             );
         }
 
-        static InterceptInfo? ExtractInterceptInfo(ISymbol member, List<DiagnosticInfo> diagnostics)
+        static InterceptInfo? ExtractInterceptInfo(Client targetClients, ISymbol member, List<DiagnosticInfo> diagnostics)
         {
             List<Identifier> identifiers = [];
-            Client interceptsOn = Client.All;
+            Client interceptsOn = targetClients;
 
             bool hasInterceptAttribute = false;
 
@@ -79,11 +103,28 @@ internal static partial class Extractor
                 if (attr.AttributeClass is null) continue;
                 string attributeName = attr.AttributeClass.ToDisplayString();
 
-                if (attributeName == Constants.InterceptsOnAttributeMetadataName)
+                if (attributeName == Constants.InterceptsAttributeMetadataName)
                 {
-                    if (attr.ConstructorArguments[0].Value is int clientTypeValue)
+                    if (attr.ConstructorArguments.Length == 0)
                     {
-                        interceptsOn = ((Client)clientTypeValue) & Client.All;
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.NoTargetClientsSpecified,
+                            attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                        ));
+                    }
+                    else
+                    {
+                        if (attr.ConstructorArguments[0].Value is int clientTypeValue)
+                        {
+                            interceptsOn &= (Client)clientTypeValue;
+                            if (interceptsOn == Client.None && targetClients != Client.None)
+                            {
+                                diagnostics.Add(new DiagnosticInfo(
+                                    DiagnosticDescriptors.EmptyTargetClient,
+                                    attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                                ));
+                            }
+                        }
                     }
                     continue;
                 }
