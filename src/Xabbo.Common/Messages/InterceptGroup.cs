@@ -42,14 +42,6 @@ public sealed class InterceptHandler(ReadOnlySpan<Header> headers, ReadOnlySpan<
     /// </summary>
     public ClientType Target { get; init; } = ClientType.All;
 
-    /// <summary>
-    /// Specifies which clients this handler is required for.
-    /// An <see cref="UnresolvedIdentifiersException"/> will be thrown at attach time if
-    /// this handler is required for the current client session and any of the identifiers fail to resolve.
-    /// If this handler is not required and there are any unresolved identifiers, it will not be attached and silently ignored.
-    /// </summary>
-    public ClientType Required { get; init; } = ClientType.All;
-
     private readonly Header[] _headers = headers.ToArray();
     private readonly Identifier[] _identifiers = identifiers.ToArray();
     public ReadOnlySpan<Header> Headers => _headers;
