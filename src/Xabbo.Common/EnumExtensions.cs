@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace Xabbo;
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class Extensions
+public static class EnumExtensions
 {
     /// <summary>
     /// Returns a short string representation of the specified direction.
