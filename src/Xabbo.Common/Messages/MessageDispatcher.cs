@@ -139,6 +139,8 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         var transients = new List<IDisposable>(group.Count);
         var headerMap = new Dictionary<InterceptHandler, HashSet<Header>>();
 
+        Identifiers? allUnresolved = null;
+
         // First pass makes sure identifiers are resolved where required.
         foreach (var handler in group)
         {
@@ -154,14 +156,15 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
                 }
                 else
                 {
-                    // Skip if the handler is not required for this client.
-                    if ((handler.Required & _currentClient) != 0)
-                        throw new UnresolvedIdentifiersException(unresolved);
+                    (allUnresolved ??= []).UnionWith(unresolved);
                     continue;
                 }
             }
             headerMap[handler] = set;
         }
+
+        if (allUnresolved is not null)
+            throw new UnresolvedIdentifiersException(allUnresolved);
 
         foreach (var handler in group)
         {
