@@ -83,7 +83,7 @@ internal static partial class Extractor
                 {
                     if (attr.ConstructorArguments[0].Value is int clientTypeValue)
                     {
-                        interceptsOn = (Client)clientTypeValue;
+                        interceptsOn = ((Client)clientTypeValue) & Client.All;
                     }
                     continue;
                 }
