@@ -1,6 +1,5 @@
 ﻿using System;
 
-using Xabbo.Messages;
 using Xabbo.Interceptor;
 
 namespace Xabbo.Extension;

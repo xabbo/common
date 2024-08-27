@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+
 using Xabbo.Messages;
 
 namespace Xabbo.Common.Tests;

@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-using Xabbo.Messages;
 using Xunit.Abstractions;
+
+using Xabbo.Messages;
 
 namespace Xabbo.Common.Tests;
 
