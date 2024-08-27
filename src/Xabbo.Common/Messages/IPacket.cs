@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Xabbo.Messages;
 
@@ -91,6 +92,23 @@ public interface IPacket : IDisposable
     /// Writes a value at the specified position in the packet.
     /// </summary>
     void WriteAt<T>(int pos, T value);
+
+    /// <summary>
+    /// Composes a value at the current position in the packet.
+    /// </summary>
+    public void Compose<T>(T value) where T : IComposer;
+    /// <summary>
+    /// Composes a value at the specified position in the packet.
+    /// </summary>
+    public void ComposeAt<T>(int pos, T value) where T : IComposer;
+    /// <summary>
+    /// Composes the values at the current position in the packet.
+    /// </summary>
+    public void ComposeAll<T>(IEnumerable<T> values) where T : IComposer, IManyComposer<T>;
+    /// <summary>
+    /// Composes the values at the specified position in the packet.
+    /// </summary>
+    public void ComposeAllAt<T>(int pos, IEnumerable<T> values) where T : IComposer, IManyComposer<T>;
 
     /// <summary>
     /// Replaces a value at the current position in the packet.

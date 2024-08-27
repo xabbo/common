@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 
 namespace Xabbo.Messages;
 
@@ -73,6 +74,11 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public void Write(ReadOnlySpan<byte> span) => Writer(ref _position).Write(span);
     public void Write<T>(T value) => Writer(ref _position).Write(value);
     public void WriteAt<T>(int pos, T value) => Writer(ref pos).Write(value);
+
+    public void Compose<T>(T value) where T : IComposer => Writer(ref _position).Compose(value);
+    public void ComposeAt<T>(int pos, T value) where T : IComposer => Writer(ref pos).Compose(value);
+    public void ComposeAll<T>(IEnumerable<T> values) where T : IComposer, IManyComposer<T> => Writer(ref _position).ComposeAll(values);
+    public void ComposeAllAt<T>(int pos, IEnumerable<T> values) where T : IComposer, IManyComposer<T> => Writer(ref pos).ComposeAll(values);
 
     public void Replace<T>(T value) => Writer(ref _position).Replace(value);
     public void ReplaceAt<T>(int pos, T value) => Writer(ref pos).Replace(value);

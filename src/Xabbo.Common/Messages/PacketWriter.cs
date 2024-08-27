@@ -158,6 +158,9 @@ public readonly ref struct PacketWriter
         }
     }
 
+    public void Compose<T>(T value) where T : IComposer => value.Compose(in this);
+    public void ComposeAll<T>(IEnumerable<T> values) where T : IComposer, IManyComposer<T> => T.ComposeAll(in this, values);
+
     public void Replace<T>(T value)
     {
         ArgumentNullException.ThrowIfNull(value);
