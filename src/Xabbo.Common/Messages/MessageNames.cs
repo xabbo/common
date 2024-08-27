@@ -6,7 +6,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Defines an association of message names between clients.
 /// </summary>
-public readonly record struct MessageNames(Direction Direction, string? Unity = null, string? Flash = null, string? Shockwave = null)
+public readonly record struct MessageNames(string? Unity = null, string? Flash = null, string? Shockwave = null)
 {
     private static readonly ImmutableArray<ClientType> ClientTypes = [
         ClientType.Unity, ClientType.Flash, ClientType.Shockwave
@@ -29,14 +29,12 @@ public readonly record struct MessageNames(Direction Direction, string? Unity = 
     };
 
     public override int GetHashCode() => (
-        Direction,
         Unity?.ToUpperInvariant(),
         Flash?.ToUpperInvariant(),
         Shockwave?.ToUpperInvariant()
     ).GetHashCode();
 
     public bool Equals(MessageNames other) =>
-        Direction == other.Direction &&
         string.Equals(Unity, other.Unity, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(Flash, other.Flash, StringComparison.OrdinalIgnoreCase) &&
         string.Equals(Shockwave, other.Shockwave, StringComparison.OrdinalIgnoreCase);

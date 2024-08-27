@@ -72,7 +72,6 @@ public sealed partial class MessageMap : IReadOnlyDictionary<Identifier, Message
                     };
                 }
 
-                item = item with { Direction = direction };
                 foreach (var client in new[] { ClientType.Unity, ClientType.Flash, ClientType.Shockwave })
                 {
                     string? name = item.GetName(client);

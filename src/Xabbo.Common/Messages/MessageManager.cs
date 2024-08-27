@@ -24,7 +24,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
     private MessageMap? _messageMap;
 
     private readonly Dictionary<Identifier, HashSet<MessageNames>> _identifierNames = [];
-    private readonly Dictionary<MessageNames, Header> _headers = [];
+    private readonly Dictionary<(Direction Direction, MessageNames Names), Header> _headers = [];
     private readonly Dictionary<Header, MessageNames> _headerNames = [];
 
     /// <summary>
@@ -147,7 +147,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
                 Header header = new(message.Client, message.Direction, message.Header);
                 if (!_identifierNames.TryGetValue(identifier, out var nameSet))
                 {
-                    nameSet = [new MessageNames(message.Direction).WithName(message.Client, message.Name)];
+                    nameSet = [new MessageNames().WithName(message.Client, message.Name)];
                     if (!_identifierNames.TryAdd(identifier, nameSet))
                         throw new Exception("Failed to add client identifiers.");
                 }
@@ -155,14 +155,14 @@ public sealed class MessageManager(string filePath) : IMessageManager
                 if (nameSet.Count > 1)
                     throw new Exception("Multiple message names conflict");
 
-                var name = nameSet.Single();
-                _headers[name] = header;
-                _headerNames[header] = name;
+                var names = nameSet.Single();
+                _headers[(message.Direction, names)] = header;
+                _headerNames[header] = names;
 
                 if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existing))
-                    existing.Add(name);
+                    existing.Add(names);
                 else
-                    _identifierNames.Add(identifier with { Client = ClientType.None }, [name]);
+                    _identifierNames.Add(identifier with { Client = ClientType.None }, [names]);
             }
         }
         finally
@@ -189,7 +189,7 @@ public sealed class MessageManager(string filePath) : IMessageManager
             }
             if (sets.Count > 1)
                 throw new AmbiguousIdentifierException(identifier, sets);
-            return _headers.TryGetValue(sets.Single(), out header);
+            return _headers.TryGetValue((identifier.Direction, sets.Single()), out header);
         }
         finally
         {

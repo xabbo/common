@@ -29,7 +29,7 @@ public class MessageMapTests
     [InlineData(Xxxx, Yyyy, Zzzz, "u:x f:y s:z")]
     public void TestMessageNames(string? unity, string? flash, string? shockwave, string result)
     {
-        var names = new MessageNames(Direction.None, unity, flash, shockwave);
+        var names = new MessageNames(unity, flash, shockwave);
         Assert.Equal(result, names.ToString());
     }
 }
