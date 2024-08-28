@@ -51,9 +51,12 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     }
 
     /// <summary>
-    /// Returns a span of `<paramref name="length"/>` bytes from the specified `<paramref name="start"/>` position.
-    /// If `<paramref name="start"/>` + `<paramref name="length"/>` is greater than the packet's length,
+    /// Allocates `<paramref name="length"/>` bytes from the `<paramref name="start"/>` position
+    /// and returns the allocated range as a <see cref="Span{T}"/> of bytes.
+    /// <para/>
+    /// If `<paramref name="start"/>+<paramref name="length"/>` is greater than the packet's length,
     /// the buffer is grown to support the new length.
+    /// <para/>
     /// `<paramref name="start"/>` may not be greater than the current packet length.
     /// </summary>
     public Span<byte> Allocate(int start, int length)
@@ -68,8 +71,11 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     }
 
     /// <summary>
-    /// Resizes a range of the buffer to the specified length.
-    /// The tail portion of the buffer after the end of the range will be copied into the correct position.
+    /// Resizes a specified range of the buffer to the specified length and returns the resized range as a <see cref="Span{T}"/> of bytes.
+    /// <para/>
+    /// The tail portion of the buffer after the end of the range will be shifted into the correct position.
+    /// <para/>
+    /// The expanded portion of the range is not cleared, so it is the caller's responsibility to write valid data to the resulting span.
     /// </summary>
     public Span<byte> Resize(Range range, int length)
     {
