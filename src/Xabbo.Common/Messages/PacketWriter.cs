@@ -1,6 +1,5 @@
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -21,6 +20,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     public int Length => Packet.Length;
 
     public PacketWriter(IPacket packet) : this(packet, ref packet.Position) { }
+
+    public PacketReader Reader() => new(Packet, ref Pos);
+    public PacketReader ReaderAt(ref int pos) => new(Packet, ref pos);
+    public PacketWriter Writer() => new(Packet, ref Pos);
+    public PacketWriter WriterAt(ref int pos) => new(Packet, ref pos);
 
     /// <summary>
     /// Allocates the specified number of bytes from the current position
@@ -261,4 +265,96 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// Writes the specified value of type <typeparamref name="T"/> to the current position and advances it.
     /// </summary>
     public void Compose<T>(T value) where T : IComposer => value.Compose(in this);
+
+    public void ReplaceBool(bool value)
+    {
+        if (Client == ClientType.Shockwave)
+            ReplaceVL64(value ? 1 : 0);
+        else
+            WriteBool(value);
+    }
+
+    public void ReplaceByte(byte value) => WriteByte(value);
+
+    public void ReplaceShort(short value) => WriteShort(value);
+
+    public void ReplaceInt(int value)
+    {
+        if (Client == ClientType.Shockwave)
+            ReplaceVL64(value);
+        else
+            WriteInt(value);
+    }
+
+    public void ReplaceFloat(float value)
+    {
+        if (Client is ClientType.Flash or ClientType.Shockwave)
+            ReplaceString(FormatFloat(value));
+        else
+            WriteFloat(value);
+    }
+
+    public void ReplaceLong(long value) => WriteLong(value);
+
+    public void ReplaceString(string value)
+    {
+        if (Client is ClientType.Shockwave &&
+            Header.Direction is Direction.In)
+        {
+            int end = Span[Pos..].IndexOf<byte>(0x02);
+            int newLen = Encoding.UTF8.GetByteCount(value);
+            if (end < 0) {
+                Encoding.UTF8.GetBytes(value, Resize(Packet.Buffer.Length - Pos, newLen));
+            } else {
+                Encoding.UTF8.GetBytes(value, Resize(end - Pos, newLen + 1)[..^1]);
+                Span[Pos-1] = 0x02;
+            }
+        }
+        else
+        {
+            int start = Pos;
+            int preLen = Reader().ReadShort();
+            int postLen = Encoding.UTF8.GetByteCount(value);
+            Pos = start;
+            WriteShort((short)postLen);
+            Encoding.UTF8.GetBytes(value, Resize(preLen, postLen));
+        }
+    }
+
+    public void ReplaceLength(Length value)
+    {
+        if (Client is ClientType.Unity)
+            WriteShort((short)value);
+        else
+            ReplaceInt(value);
+    }
+
+    public void ReplaceId(Id value)
+    {
+        if (Client is ClientType.Unity)
+            WriteLong(value);
+        else
+            ReplaceInt((int)value);
+    }
+
+    public void ReplaceB64(B64 value) => WriteB64(value);
+
+    public void ReplaceVL64(VL64 value) => VL64.Encode(Resize(VL64.DecodeLength(Span[Pos]), VL64.EncodeLength(value)), value);
+    
+    public void ReplaceStruct<T>(T value) where T : IParserComposer<T>
+    {
+        // Save the start position.
+        int start = Pos, end = Pos;
+        // Parse the existing value to find the end position.
+        ReaderAt(ref end).Parse<T>();
+        // Now we have the size of the existing struct, which we can resize.
+        int preSize = end - start;
+        // Borrow the end of the buffer to compose the new value.
+        start = Length; end = Length;
+        WriterAt(ref end).Compose(value);
+        // Copy the new value into the resized range in place of the previous value.
+        Span[start..end].CopyTo(Resize(preSize, end - start));
+        // Resize the borrowed tail of the buffer back to zero.
+        Packet.Buffer.Resize(start..end, 0);
+    }
 }
