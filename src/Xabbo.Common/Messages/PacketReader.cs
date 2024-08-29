@@ -37,7 +37,10 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <para/>
     /// Decoded as a <see cref="VL64"/> on Shockwave, otherwise as a <see cref="byte"/> .
     /// </summary>
-    public bool ReadBool() => ReadSpan(1)[0] != 0;
+    public bool ReadBool() => Client switch {
+        ClientType.Shockwave => ReadVL64() != 0,
+        _ => ReadSpan(1)[0] != 0
+    };
 
     /// <summary>
     /// Reads a <see cref="byte"/> from the current position and advances it.
