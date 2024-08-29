@@ -10,10 +10,10 @@ namespace Xabbo.Messages;
 public readonly ref struct PacketReader(IPacket packet, ref int pos)
 {
     private readonly IPacket Packet = packet;
-    private readonly ref int Pos = ref pos;
+    public readonly ref int Pos = ref pos;
     public Header Header => Packet.Header;
     public ClientType Client => Packet.Header.Client;
-    private Span<byte> Span => Packet.Buffer.Span;
+    public ReadOnlySpan<byte> Span => Packet.Buffer.Span;
     public int Length => Packet.Length;
     public int Available => Packet.Length - Pos;
 
