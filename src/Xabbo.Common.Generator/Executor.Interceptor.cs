@@ -1,4 +1,3 @@
-using System.CodeDom.Compiler;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -23,8 +22,7 @@ internal static partial class Executor
 
         internal static string GenerateSource(InterceptorInfo interceptor)
         {
-            var buffer = new StringWriter();
-            var w = new IndentedTextWriter(buffer);
+            var w = new SourceWriter();
 
             w.WriteLines([
                 "using System;",
@@ -58,13 +56,13 @@ internal static partial class Executor
                 w.WriteLines([$"namespace {interceptor.Namespace};", ""]);
 
             w.WriteLine($"public partial class {interceptor.Name} : IMessageHandler");
-            using (w.BraceBlock())
+            using (w.BraceScope())
             {
                 w.WriteLine("IDisposable IMessageHandler.Attach(IInterceptor interceptor)");
-                using (w.BraceBlock())
+                using (w.BraceScope())
                 {
                     w.WriteLine("return interceptor.Dispatcher.Register(new InterceptGroup([");
-                    using (w.IndentBlock())
+                    using (w.IndentScope())
                     {
                         GenerateInterceptsFor(w, interceptor);
                     }
@@ -72,10 +70,10 @@ internal static partial class Executor
                 }
             }
 
-            return buffer.ToString();
+            return w.ToString();
         }
 
-        internal static void GenerateInterceptsFor(IndentedTextWriter w, InterceptorInfo interceptor)
+        internal static void GenerateInterceptsFor(SourceWriter w, InterceptorInfo interceptor)
         {
             for (int i = 0; i < interceptor.Intercepts.Length; i++)
             {
@@ -86,11 +84,11 @@ internal static partial class Executor
 
                 // Write intercept handler
                 w.WriteLine("new InterceptHandler(");
-                using (w.IndentBlock())
+                using (w.IndentScope())
                 {
                     // Write target identifiers
                     w.WriteLine("(ReadOnlySpan<Identifier>)[");
-                    using (w.IndentBlock())
+                    using (w.IndentScope())
                     {
                         for (int j = 0; j < intercept.Identifiers.Length; j++)
                         {

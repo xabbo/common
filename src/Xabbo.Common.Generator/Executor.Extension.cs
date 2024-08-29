@@ -1,4 +1,3 @@
-using System.CodeDom.Compiler;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -25,8 +24,7 @@ internal static partial class Executor
 
         static string GenerateSource(ExtensionInfo extension)
         {
-            var buffer = new StringWriter();
-            var w = new IndentedTextWriter(buffer, new string(' ', 4));
+            using var w = new SourceWriter();
 
             w.WriteLines([
                 "using System;",
@@ -43,10 +41,10 @@ internal static partial class Executor
                 "{"
             ]);
 
-            using (w.IndentBlock())
+            using (w.IndentScope())
             {
                 w.WriteLine("ExtensionInfo IExtensionInfoInit.Info => new(");
-                using (w.IndentBlock())
+                using (w.IndentScope())
                 {
                     var properties = new List<string>(4);
                     if (extension.Name is not null)
@@ -70,7 +68,7 @@ internal static partial class Executor
             }
             w.WriteLine("}");
 
-            return buffer.ToString();
+            return w.ToString();
         }
     }
 }
