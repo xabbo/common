@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Text;
 
 namespace Xabbo.Messages;
 
@@ -70,6 +71,22 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public PacketReader ReaderAt(ref int pos) => new(this, ref pos);
     public PacketWriter Writer() => new(this, ref _position);
     public PacketWriter WriterAt(ref int pos) => new(this, ref pos);
+    
+    public string Content
+    {
+        get
+        {
+            UnsupportedClientException.ThrowIf(Header.Client, ~ClientType.Shockwave);
+            return Encoding.UTF8.GetString(Buffer.Span); 
+        }
+
+        set
+        {
+            UnsupportedClientException.ThrowIf(Header.Client, ~ClientType.Shockwave);
+            Position = 0;
+            Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
+        }
+    }
 
     public ReadOnlySpan<byte> ReadSpan(int n) => Reader().ReadSpan(n);
     public void WriteSpan(ReadOnlySpan<byte> span) => Writer().WriteSpan(span);
