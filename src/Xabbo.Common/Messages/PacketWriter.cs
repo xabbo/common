@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -96,6 +97,16 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     }
 
     /// <summary>
+    /// Writes a short array to the current position and advances it.
+    /// </summary>
+    public void WriteShortArray(ICollection<short> values)
+    {
+        WriteLength(values.Count);
+        foreach (short value in values)
+            WriteShort(value);
+    }
+
+    /// <summary>
     /// Writes the specified <see cref="int"/> value to the current position and advances it.
     /// <para/>
     /// Encoded as a <see cref="VL64"/> on Shockwave, otherwise as a 32-bit integer.
@@ -106,6 +117,16 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
             WriteVL64(value);
         else
             BinaryPrimitives.WriteInt32BigEndian(Allocate(4), value);
+    }
+
+    /// <summary>
+    /// Writes an int array to the current position and advances it.
+    /// </summary>
+    public void WriteIntArray(ICollection<int> values)
+    {
+        WriteLength(values.Count);
+        foreach (int value in values)
+            WriteInt(value);
     }
 
     /// <summary>
@@ -179,6 +200,17 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 
         Encoding.UTF8.GetBytes(value, span);
     }
+
+    /// <summary>
+    /// Writes a string array to the current position and advances it.
+    /// </summary>
+    public void WriteStringArray(ICollection<string> values)
+    {
+        WriteLength(values.Count);
+        foreach (string value in values)
+            WriteString(value);
+    }
+
 
     /// <summary>
     /// Writes the specified <see cref="Id"/> value to the current position and advances it.
@@ -340,7 +372,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     public void ReplaceB64(B64 value) => WriteB64(value);
 
     public void ReplaceVL64(VL64 value) => VL64.Encode(Resize(VL64.DecodeLength(Span[Pos]), VL64.EncodeLength(value)), value);
-    
+
     public void ReplaceStruct<T>(T value) where T : IParserComposer<T>
     {
         // Save the start position.

@@ -64,6 +64,17 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     };
 
     /// <summary>
+    /// Reads a short array from the current position and advances it.
+    /// </summary>
+    public short[] ReadShortArray()
+    {
+        short[] array = new short[ReadLength()];
+        for (int i = 0; i < array.Length; i++)
+            array[i] = ReadShort();
+        return array;
+    }
+
+    /// <summary>
     /// Reads an <see cref="int"/> from the current position and advances it.
     /// <para/>
     /// Decoded as a <see cref="VL64"/> on Shockwave, otherwise as a 32-bit integer.
@@ -72,6 +83,17 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
         ClientType.Shockwave => ReadVL64(),
         _ => BinaryPrimitives.ReadInt32BigEndian(ReadSpan(4)),
     };
+
+    /// <summary>
+    /// Reads an int array from the current position and advances it.
+    /// </summary>
+    public int[] ReadIntArray()
+    {
+        int[] array = new int[ReadLength()];
+        for (int i = 0; i < array.Length; i++)
+            array[i] = ReadInt();
+        return array;
+    }
 
     /// <summary>
     /// Reads a <see cref="float"/> from the current position and advances it.
@@ -118,6 +140,17 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
             return Encoding.UTF8.GetString(Span[start..(Pos-1)]);
         }
         return Encoding.UTF8.GetString(ReadSpan(ReadShort()));
+    }
+
+    /// <summary>
+    /// Reads a string array from the current position and advances it.
+    /// </summary>
+    public string[] ReadStringArray()
+    {
+        string[] array = new string[ReadLength()];
+        for (int i = 0; i < array.Length; i++)
+            array[i] = ReadString();
+        return array;
     }
 
     /// <summary>
