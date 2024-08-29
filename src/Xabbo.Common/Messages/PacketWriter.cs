@@ -306,7 +306,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
             if (end < 0) {
                 Encoding.UTF8.GetBytes(value, Resize(Packet.Buffer.Length - Pos, newLen));
             } else {
-                Encoding.UTF8.GetBytes(value, Resize(end - Pos, newLen + 1)[..^1]);
+                Encoding.UTF8.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
                 Span[Pos-1] = 0x02;
             }
         }
