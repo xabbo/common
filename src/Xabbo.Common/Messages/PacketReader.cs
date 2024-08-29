@@ -109,19 +109,13 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
             Header.Direction == Direction.In)
         {
             if (Pos >= Span.Length)
-                throw new Exception("Not enough bytes to read value.");
-            int start = Pos, end;
-            int terminator = Span[Pos..].IndexOf<byte>(2);
-            if (terminator == -1)
-            {
-                Pos = end = Span.Length;
-            }
-            else
-            {
-                Pos = Pos + terminator + 1;
-                end = Pos - 1;
-            }
-            return Encoding.UTF8.GetString(Span[start..end]);
+                throw new IndexOutOfRangeException("Attempted to read string at the end of the packet.");
+            int start = Pos;
+            int end = Span[Pos..].IndexOf<byte>(2);
+            if (end == -1)
+                throw new IndexOutOfRangeException("Attempted to read an unterminated string.");
+            Pos += end + 1;
+            return Encoding.UTF8.GetString(Span[start..(Pos-1)]);
         }
         return Encoding.UTF8.GetString(ReadSpan(ReadShort()));
     }

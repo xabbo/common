@@ -301,14 +301,14 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
         if (Client is ClientType.Shockwave &&
             Header.Direction is Direction.In)
         {
+            if (Pos >= Span.Length)
+                throw new IndexOutOfRangeException("Attempted to replace string at the end of the packet.");
             int end = Span[Pos..].IndexOf<byte>(0x02);
             int newLen = Encoding.UTF8.GetByteCount(value);
-            if (end < 0) {
-                Encoding.UTF8.GetBytes(value, Resize(Packet.Buffer.Length - Pos, newLen));
-            } else {
-                Encoding.UTF8.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
-                Span[Pos-1] = 0x02;
-            }
+            if (end < 0)
+                throw new IndexOutOfRangeException("Attempted to replace an unterminated string.");
+            Encoding.UTF8.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
+            Span[Pos-1] = 0x02;
         }
         else
         {
