@@ -33,3 +33,9 @@ internal readonly struct EquatableArray<T>(T[] array) : IEquatable<EquatableArra
 
     public static implicit operator EquatableArray<T>(T[] array) => new(array);
 }
+
+internal static class ArrayExtensions
+{
+    public static EquatableArray<T> ToEquatableArray<T>(this T[] array) where T : IEquatable<T> => new(array);
+    public static EquatableArray<T> ToEquatableArray<T>(this IEnumerable<T> enumerable) where T : IEquatable<T> => new(enumerable.ToArray());
+}

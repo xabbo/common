@@ -75,4 +75,40 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
+
+    internal static readonly DiagnosticDescriptor NotPrimitiveType = new(
+        id: "XABBO010",
+        title: "Not a primitive packet type",
+        messageFormat: "'{0}' is not a primitive packet type",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor NotPrimitiveOrParserType = new(
+        id: "XABBO011",
+        title: "The type must be a packet primitive type or implement the IParser<T> interface",
+        messageFormat: "'{0}' is not a packet primitive or IParser<T> implementation",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor NotPrimitiveOrComposerType = new(
+        id: "XABBO012",
+        title: "The type must be a packet primitive type or implement the IComposer interface",
+        messageFormat: "'{0}' is not a packet primitive or IComposer implementation",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor NotPrimitiveOrParserComposerType = new(
+        id: "XABBO013",
+        title: "The type must be a packet primitive type or implement the IParserComposer<T> interface",
+        messageFormat: "'{0}' is not a packet primitive or IParserComposer<T> implementation",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
 }
