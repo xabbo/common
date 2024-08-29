@@ -352,9 +352,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
         // Borrow the end of the buffer to compose the new value.
         start = Length; end = Length;
         WriterAt(ref end).Compose(value);
+        int postSize = end - start;
         // Copy the new value into the resized range in place of the previous value.
-        Span[start..end].CopyTo(Resize(preSize, end - start));
+        Span<byte> resized = Resize(preSize, postSize);
+        Span[^postSize..].CopyTo(resized);
         // Resize the borrowed tail of the buffer back to zero.
-        Packet.Buffer.Resize(start..end, 0);
+        Packet.Buffer.Resize(^postSize.., 0);
     }
 }
