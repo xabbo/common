@@ -38,11 +38,18 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     { }
 
     /// <summary>
-    /// Constructs a new packet with the specified protocol and message header.
+    /// Constructs a new packet with the specified header.
     /// </summary>
     /// <param name="header">The message header.</param>
     public Packet(Header header)
         : this(header, new PacketBuffer())
+    { }
+    
+    /// <summary>
+    /// Constructs a new packet.
+    /// </summary>
+    public Packet()
+        : this(Header.Unknown, new PacketBuffer())
     { }
 
     public Packet Copy() => new(Header, Buffer.Copy());
