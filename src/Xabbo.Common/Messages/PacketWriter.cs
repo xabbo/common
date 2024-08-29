@@ -44,7 +44,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <param name="pre">The length to resize from.</param>
     /// <param name="post">The length to resize to</param>
     /// <returns>The resized range as a <see cref="Span{T}"/> of bytes.</returns>
-    private Span<byte> Resize(int pre, int post)
+    public Span<byte> Resize(int pre, int post)
     {
         Span<byte> resized = Packet.Buffer.Resize(Pos..(Pos+pre), post);
         Pos += post;
