@@ -34,7 +34,7 @@ internal static partial class Executor
             ]);
 
             if (extension.Namespace != "")
-                w.WriteLines([ $"namespace {extension.Namespace};", "" ]);
+                w.WriteLines([$"namespace {extension.Namespace};", ""]);
 
             w.WriteLines([
                 $"public partial class {extension.ClassName} : IExtensionInfoInit",

@@ -9,7 +9,9 @@ namespace Xabbo.Messages;
 public readonly record struct MessageNames(string? Unity = null, string? Flash = null, string? Shockwave = null)
 {
     private static readonly ImmutableArray<ClientType> ClientTypes = [
-        ClientType.Unity, ClientType.Flash, ClientType.Shockwave
+        ClientType.Unity,
+        ClientType.Flash,
+        ClientType.Shockwave
     ];
 
     public string? GetName(ClientType client) => client switch
@@ -53,7 +55,7 @@ public readonly record struct MessageNames(string? Unity = null, string? Flash =
             string? name = GetName(ClientTypes[i]);
             if (name is null) continue;
 
-            for (int j = i+1; j < ClientTypes.Length; j++)
+            for (int j = i + 1; j < ClientTypes.Length; j++)
             {
                 ClientType other = ClientTypes[j];
                 if ((processed & other) != 0)

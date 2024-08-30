@@ -44,39 +44,44 @@ public class VariadicGenerator : IIncrementalGenerator
         "Send" => InvocationKind.Send,
         _ => (InvocationKind)(-1)
     };
-    
+
     static bool ImplementsParser(ITypeSymbol? symbol) =>
         symbol is { } type && type.AllInterfaces.Any(IsIParserInterface);
 
     static bool ImplementsComposer(ITypeSymbol? symbol) =>
         symbol is { } type && type.AllInterfaces.Any(IsIComposerInterface);
-    
+
     static bool IsPrimitivePacketType(ITypeSymbol? symbol)
     {
         if (symbol is null) return false;
-        
-        if (symbol is {
-            ContainingNamespace: {
-                ContainingNamespace.IsGlobalNamespace: true,
-                Name: "System",
-            },
-            Name: "Boolean" or "Byte" or "Int16" or "Int32" or "Single" or "Int64" or "String",
-        }) return true;
-        
-        if (symbol is {
-            ContainingNamespace: {
-                ContainingNamespace.IsGlobalNamespace: true,
-                Name: "Xabbo",
-            },
-            Name: "Id" or "Length"
-        }) return true;
+
+        if (symbol is
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "System",
+                },
+                Name: "Boolean" or "Byte" or "Int16" or "Int32" or "Single" or "Int64" or "String",
+            }) return true;
+
+        if (symbol is
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "Xabbo",
+                },
+                Name: "Id" or "Length"
+            }) return true;
 
         return false;
     }
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterPostInitializationOutput(context => {
+        context.RegisterPostInitializationOutput(context =>
+        {
             using var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("Xabbo.Common.Generator.Templates.XabboExtensions.Base.cs");
             using var sr = new StreamReader(s);
             context.AddSource("XabboExtensions.Base.g.cs", SourceText.From(sr.ReadToEnd(), Encoding.UTF8));
@@ -84,8 +89,10 @@ public class VariadicGenerator : IIncrementalGenerator
 
         // Collect invocations
         IncrementalValuesProvider<Result<VariadicInvocation?>> allInvocationResults = context.SyntaxProvider.CreateSyntaxProvider(
-            static (node, _) => node is InvocationExpressionSyntax {
-                Expression: MemberAccessExpressionSyntax {
+            static (node, _) => node is InvocationExpressionSyntax
+            {
+                Expression: MemberAccessExpressionSyntax
+                {
                     Name.Identifier.Value:
                         "Read" or "ReadAt" or
                         "Write" or "WriteAt" or
@@ -94,26 +101,27 @@ public class VariadicGenerator : IIncrementalGenerator
                         "Send"
                 }
             },
-            static (ctx, _) => {
+            static (ctx, _) =>
+            {
                 var invocationExpression = (InvocationExpressionSyntax)ctx.Node;
                 var memberAccess = (MemberAccessExpressionSyntax)invocationExpression.Expression;
                 var simpleName = memberAccess.Name;
-                
+
                 InvocationKind invocationKind = GetInvocationKind(simpleName.Identifier.ValueText);
                 if (invocationKind == (InvocationKind)(-1))
                     return null;
-                
-                bool hasArguments = (invocationKind & InvocationKind.HasArguments) > 0; 
+
+                bool hasArguments = (invocationKind & InvocationKind.HasArguments) > 0;
                 bool requireParser = (invocationKind & InvocationKind.RequiresParser) > 0;
-                bool requireComposer = (invocationKind & InvocationKind.RequiresComposer) > 0; 
+                bool requireComposer = (invocationKind & InvocationKind.RequiresComposer) > 0;
                 bool isPositional = (invocationKind & InvocationKind.At) > 0;
                 bool isSend = (invocationKind & InvocationKind.Send) > 0;
-                
+
                 TypeInfo memberTypeInfo = ctx.SemanticModel.GetTypeInfo(memberAccess.Expression);
                 if (memberTypeInfo.Type is not INamedTypeSymbol memberType) return null;
-                
+
                 Func<INamedTypeSymbol, bool> checkInterface = isSend ? IsIConnectionInterface : IsIPacketInterface;
-                
+
                 if (!checkInterface(memberType) &&
                     !memberType.AllInterfaces.Any(checkInterface))
                 {
@@ -121,9 +129,9 @@ public class VariadicGenerator : IIncrementalGenerator
                 }
 
                 var diagnostics = new List<DiagnosticInfo>();
-                
+
                 VariadicType[] types;
-                
+
                 List<SyntaxNode> args;
                 if (hasArguments)
                 {
@@ -133,11 +141,11 @@ public class VariadicGenerator : IIncrementalGenerator
                         TypeInfo typeInfo = ctx.SemanticModel.GetTypeInfo(((ArgumentSyntax)args[0]).Expression);
                         if (typeInfo.Type is not INamedTypeSymbol typeSymbol) return null;
 
-                        if (IsHeaderType(typeSymbol)) invocationKind |= InvocationKind.Header;    
+                        if (IsHeaderType(typeSymbol)) invocationKind |= InvocationKind.Header;
                         else if (IsIdentifierType(typeSymbol)) invocationKind |= InvocationKind.Identifier;
                         else return null;
                     }
-                    
+
                     if (isSend || isPositional)
                         args.RemoveAt(0);
                 }
@@ -145,7 +153,7 @@ public class VariadicGenerator : IIncrementalGenerator
                 {
                     if (simpleName is not GenericNameSyntax genericName)
                         return null;
-                    args = [.. genericName.TypeArgumentList.Arguments]; 
+                    args = [.. genericName.TypeArgumentList.Arguments];
                 }
 
                 types = new VariadicType[args.Count];
@@ -160,7 +168,7 @@ public class VariadicGenerator : IIncrementalGenerator
 
                     TypeInfo typeInfo = ctx.SemanticModel.GetTypeInfo(hasArguments ? ((ArgumentSyntax)args[i]).Expression : args[i]);
                     ITypeSymbol? type = typeInfo.Type;
-                    
+
                     if (type is IArrayTypeSymbol arrayType)
                     {
                         isArray = true;
@@ -178,7 +186,8 @@ public class VariadicGenerator : IIncrementalGenerator
 
                         if (!isValidType)
                         {
-                            DiagnosticDescriptor descriptor = requireComposer switch {
+                            DiagnosticDescriptor descriptor = requireComposer switch
+                            {
                                 true when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
                                 true => DiagnosticDescriptors.NotPrimitiveOrComposerType,
                                 false when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserType,
@@ -191,7 +200,7 @@ public class VariadicGenerator : IIncrementalGenerator
                                 hasArguments ? type.ToDisplayString() : args[i].GetText().ToString()
                             ));
                         }
-                        
+
                         namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
                         typeName = type.Name;
                         isParser = ImplementsParser(type); // type.Interfaces.Any(IsIParserInterface);
@@ -212,7 +221,7 @@ public class VariadicGenerator : IIncrementalGenerator
                         //     var type = methodSymbol.Parameters[0].Type;
                         // }
                     }
-                    
+
                     types[i] = new VariadicType(
                         IsTypeKnown: isTypeKnown,
                         Namespace: namespaceName,
@@ -222,7 +231,7 @@ public class VariadicGenerator : IIncrementalGenerator
                         IsComposer: isComposer
                     );
                 }
-                
+
                 return new Result<VariadicInvocation?>(
                     new VariadicInvocation(
                         invocationKind,
@@ -232,7 +241,7 @@ public class VariadicGenerator : IIncrementalGenerator
                 );
             }
         );
-        
+
         // Report diagnostics
         context.RegisterSourceOutput(
             allInvocationResults.SelectMany((x, _) => x.Errors),
@@ -248,7 +257,8 @@ public class VariadicGenerator : IIncrementalGenerator
             .Where(x => (x.Kind & InvocationKind.RequiresParser) > 0)
             .SelectMany((x, _) => x.Types)
             .Collect()
-            .Select((types, _) => {
+            .Select((types, _) =>
+            {
                 HashSet<VariadicType> distinctTypes = [];
                 foreach (var type in types.Where(type => type.IsParser || type.IsArray))
                 {
@@ -275,7 +285,8 @@ public class VariadicGenerator : IIncrementalGenerator
                     .ToEquatableArray()
                 );
 
-            context.RegisterSourceOutput(arities, (spc, arities) => {
+            context.RegisterSourceOutput(arities, (spc, arities) =>
+            {
                 if (arities.Length > 0)
                 {
                     string sourceText = GenerateInvocationCountSource(invocationKind, arities);
@@ -285,7 +296,8 @@ public class VariadicGenerator : IIncrementalGenerator
         }
 
         // Generate Read<T> implementation
-        context.RegisterSourceOutput(distinctReadTypes, (spc, readTypes) => {
+        context.RegisterSourceOutput(distinctReadTypes, (spc, readTypes) =>
+        {
             using var w = new SourceWriter();
 
             using (w.BraceScope("internal static partial class XabboExtensions"))
@@ -348,11 +360,14 @@ public class VariadicGenerator : IIncrementalGenerator
         ]);
     }
 
-    static bool IsIComposerInterface(INamedTypeSymbol symbol) => symbol is {
+    static bool IsIComposerInterface(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -361,11 +376,14 @@ public class VariadicGenerator : IIncrementalGenerator
         Name: "IComposer"
     };
 
-    static bool IsIParserInterface(INamedTypeSymbol symbol) => symbol is {
+    static bool IsIParserInterface(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Interface,
         IsGenericType: true,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -374,11 +392,14 @@ public class VariadicGenerator : IIncrementalGenerator
         Name: "IParser"
     };
 
-    static bool IsIParserComposerInterface(INamedTypeSymbol symbol) => symbol is {
+    static bool IsIParserComposerInterface(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Interface,
         IsGenericType: true,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -388,11 +409,14 @@ public class VariadicGenerator : IIncrementalGenerator
     };
 
 
-    static bool IsIPacketInterface(INamedTypeSymbol symbol) => symbol is {
+    static bool IsIPacketInterface(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -401,12 +425,15 @@ public class VariadicGenerator : IIncrementalGenerator
         Name: "IPacket"
     };
 
-    
-    static bool IsIConnectionInterface(INamedTypeSymbol symbol) => symbol is {
+
+    static bool IsIConnectionInterface(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -414,11 +441,14 @@ public class VariadicGenerator : IIncrementalGenerator
         },
         Name: "IConnection"
     };
-    
-    static bool IsHeaderType(INamedTypeSymbol symbol) => symbol is {
+
+    static bool IsHeaderType(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Struct,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -427,10 +457,13 @@ public class VariadicGenerator : IIncrementalGenerator
         Name: "Header"
     };
 
-    static bool IsIdentifierType(INamedTypeSymbol symbol) => symbol is {
+    static bool IsIdentifierType(INamedTypeSymbol symbol) => symbol is
+    {
         TypeKind: TypeKind.Struct,
-        ContainingNamespace: {
-            ContainingNamespace: {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
                 ContainingNamespace.IsGlobalNamespace: true,
                 Name: "Xabbo"
             },
@@ -510,7 +543,7 @@ public class VariadicGenerator : IIncrementalGenerator
             for (int i = 0; i < arities.Length; i++)
             {
                 int arity = arities[i];
-                
+
                 if (i > 0)
                     w.WriteLine();
                 w.WriteLines([
@@ -556,7 +589,7 @@ public class VariadicGenerator : IIncrementalGenerator
             for (int i = 0; i < arities.Length; i++)
             {
                 int arity = arities[i];
-                
+
                 if (i > 0)
                     w.WriteLine();
                 w.WriteLines([
@@ -630,7 +663,7 @@ public class VariadicGenerator : IIncrementalGenerator
             for (int i = 0; i < arities.Length; i++)
             {
                 int arity = arities[i];
-                
+
                 if (i > 0)
                     w.WriteLine();
                 w.WriteLines([

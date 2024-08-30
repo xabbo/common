@@ -1,7 +1,6 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Xabbo.Messages;
@@ -45,7 +44,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <returns>The resized range as a <see cref="Span{T}"/> of bytes.</returns>
     public Span<byte> Resize(int pre, int post)
     {
-        Span<byte> resized = Packet.Buffer.Resize(Pos..(Pos+pre), post);
+        Span<byte> resized = Packet.Buffer.Resize(Pos..(Pos + pre), post);
         Pos += post;
         return resized;
     }
@@ -99,7 +98,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// </summary>
     public void WriteShortArray(IEnumerable<short> values)
     {
-        short[] array = (values as short[]) ?? [..values];
+        short[] array = (values as short[]) ?? [.. values];
         WriteLength(array.Length);
         foreach (short value in array)
             WriteShort(value);
@@ -123,7 +122,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// </summary>
     public void WriteIntArray(IEnumerable<int> values)
     {
-        int[] array = (values as int[]) ?? [..values];
+        int[] array = (values as int[]) ?? [.. values];
         WriteLength(array.Length);
         foreach (int value in array)
             WriteInt(value);
@@ -188,7 +187,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
         if (Client == ClientType.Shockwave &&
             Header.Direction == Direction.In)
         {
-            span = Allocate(len+1);
+            span = Allocate(len + 1);
             span[^1] = 0x02;
             span = span[..^1];
         }
@@ -206,7 +205,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// </summary>
     public void WriteStringArray(IEnumerable<string> values)
     {
-        string[] array = (values as string[]) ?? [..values];
+        string[] array = (values as string[]) ?? [.. values];
         WriteLength(array.Length);
         foreach (string value in array)
             WriteString(value);
@@ -292,7 +291,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// </summary>
     public void ComposeArray<T>(IEnumerable<T> values) where T : IComposer
     {
-        T[] array = (values as T[]) ?? [..values];
+        T[] array = (values as T[]) ?? [.. values];
         WriteLength(array.Length);
         foreach (T value in array)
             Compose(value);
@@ -340,7 +339,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
             if (end < 0)
                 throw new IndexOutOfRangeException("Attempted to replace an unterminated string.");
             Encoding.UTF8.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
-            Span[Pos-1] = 0x02;
+            Span[Pos - 1] = 0x02;
         }
         else
         {

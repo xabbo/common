@@ -14,8 +14,8 @@ public class Generator : IIncrementalGenerator
         IncrementalValuesProvider<GeneratorAttributeSyntaxContext> extensionContexts = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 Constants.ExtensionAttributeMetadataName,
-                predicate: static(node, _) => node is ClassDeclarationSyntax,
-                transform: static(ctx, _) => ctx
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
+                transform: static (ctx, _) => ctx
             );
 
         // Extract ExtensionInfo
@@ -46,7 +46,8 @@ public class Generator : IIncrementalGenerator
         // Combine [Extension] and [Intercepts]
         IncrementalValuesProvider<GeneratorAttributeSyntaxContext> interceptorAndExtensionContexts = interceptorContexts.Collect()
             .Combine(extensionContexts.Collect())
-            .SelectMany((x, _) => {
+            .SelectMany((x, _) =>
+            {
                 HashSet<string> seen = [];
                 foreach (var item in x.Left)
                     seen.Add(item.TargetSymbol.ToDisplayString());

@@ -69,9 +69,9 @@ internal sealed class SourceWriter() : IndentedTextWriter(new StringWriter(), ne
         }
     }
 
-    public void WriteTypeParam(int i, int arity) => Write(arity > 1 ? $"T{i+1}": "T");
-    public void WriteTypeArg(int i, int arity) => Write(arity > 1 ? $"T{i+1} arg{i+1}": "T arg");
-    public void WriteTypeArgName(int i, int arity) => Write(arity > 1 ? $"arg{i+1}": "arg");
+    public void WriteTypeParam(int i, int arity) => Write(arity > 1 ? $"T{i + 1}" : "T");
+    public void WriteTypeArg(int i, int arity) => Write(arity > 1 ? $"T{i + 1} arg{i + 1}" : "T arg");
+    public void WriteTypeArgName(int i, int arity) => Write(arity > 1 ? $"arg{i + 1}" : "arg");
 
     /// <summary>
     /// Writes type arguments for use in a method's argument list.

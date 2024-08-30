@@ -34,7 +34,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
             Assert.Equal(0, packet.Position);
         }
     }
-    
+
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWriteString(ClientType client, Direction direction)
@@ -44,7 +44,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         packet.Position = 0;
         Assert.Equal("hello, world", packet.Read<string>());
     }
-    
+
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWriteStruct(ClientType client, Direction direction)
@@ -74,7 +74,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         packet.Write<string>("hello, world");
 
         packet.Position = 0;
-        
+
         _logger.WriteLine(packet.Buffer.Span.HexDump());
 
         Assert.True(packet.Read<bool>());
@@ -103,15 +103,15 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
             packet.Read<bool, bool, byte, short, int, float, long, string>()
         );
     }
-    
+
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestParserComposer(ClientType client, Direction direction)
     {
-        Packet packet = new(new Header(client, direction, 0));        
+        Packet packet = new(new Header(client, direction, 0));
 
         packet.Write(new Tile(1, 2, 3.4f));
-        
+
         packet.Position = 0;
         var tile = packet.Read<Tile>();
         Assert.Equal(1, tile.X);
@@ -150,7 +150,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         // There is no more data in the packet
         Assert.Equal(packet.Length, packet.Position);
     }
-    
+
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReplaceStruct(ClientType client, Direction direction)
@@ -160,16 +160,16 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         p.Write(Canary);
         p.Write(new Tile(1, 2, 3));
         p.Write(Canary);
-        
+
         p.Position = 0;
         p.Read<int>();
         p.Writer().ReplaceStruct(new Tile(4, 5, 6));
-        
+
         p.Position = 0;
         Assert.Equal(Canary, p.Read<int>());
         Tile actual = p.Read<Tile>();
         Assert.Equal(Canary, p.Read<int>());
-        
+
         Assert.Equal(4, actual.X);
         Assert.Equal(5, actual.Y);
         Assert.Equal(6, actual.Z);
@@ -186,22 +186,22 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         packet.Write(writeArray);
 
         int[] readArray = packet.ReadAt<int[]>(0);
-        
+
         Assert.True(writeArray.SequenceEqual(readArray));
     }
-    
+
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWriteStructArray(ClientType client, Direction direction)
     {
-        Tile[] array1 = [new(1,2,3), new(4,5,6), new(7,8,9)];
+        Tile[] array1 = [new(1, 2, 3), new(4, 5, 6), new(7, 8, 9)];
 
         var packet = new Packet(new Header(client, direction, 0));
         packet.Write(array1);
 
         packet.Position = 0;
         Tile[] array2 = packet.Read<Tile[]>();
-        
+
         Assert.True(array1.SequenceEqual(array2));
     }
 
@@ -212,7 +212,8 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         var packet = new Packet(Header.Unknown with { Client = client });
         packet.Write<Length>(0);
 
-        int expectedBytes = client switch {
+        int expectedBytes = client switch
+        {
             ClientType.Unity => 2, // short
             ClientType.Flash => 4, // int
             ClientType.Shockwave => 1, // VL64
@@ -236,7 +237,8 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         var packet = new Packet(Header.Unknown with { Client = client });
         packet.Write<Id>(0);
 
-        int expectedBytes = client switch {
+        int expectedBytes = client switch
+        {
             ClientType.Unity => 8, // long
             ClientType.Flash => 4, // int
             ClientType.Shockwave => 1, // VL64
@@ -264,7 +266,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         Assert.Equal(packet.Length, packet.Position);
         Assert.Equal("hello, world", packet.Content);
         Assert.Equal(12, packet.Length);
-        
+
         packet.Content = "this is a test";
         Assert.Equal("this is a test", packet.Content);
         Assert.Equal(14, packet.Length);
@@ -272,10 +274,10 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         packet.Content = "";
         Assert.Equal("", packet.Content);
         Assert.Equal(0, packet.Length);
-        
+
         packet.Header = packet.Header with { Client = ClientType.Flash };
         Assert.Throws<UnsupportedClientException>(() => packet.Content);
         Assert.Throws<UnsupportedClientException>(() => packet.Content = "test");
     }
-    
+
 }

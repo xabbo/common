@@ -51,7 +51,7 @@ public interface IPacket : IDisposable
     /// Creates a new writer for this packet at the specified position.
     /// </summary>
     PacketWriter WriterAt(ref int pos);
-    
+
     /// <summary>
     /// Gets or sets the contents of the packet as a string.
     /// <para/>

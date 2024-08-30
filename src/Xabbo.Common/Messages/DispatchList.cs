@@ -50,12 +50,14 @@ internal sealed class DispatchList
             int keep = 0;
             for (int i = 0; i < _registrations.Count; i++)
             {
-                if (_registrations[i]._deregistered) {
+                if (_registrations[i]._deregistered)
+                {
                     continue;
                 }
                 intercept.Packet.Position = 0;
                 _registrations[i]._handler.Callback.Invoke(intercept);
-                if (!_registrations[i]._deregistered) {
+                if (!_registrations[i]._deregistered)
+                {
                     if (keep < i)
                         _registrations[keep] = _registrations[i];
                     keep++;

@@ -130,7 +130,8 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         var handler = new Mock<Action<Intercept>>();
 
-        Ext.Intercept([In.Chat, In.Shout, In.Whisper], e => {
+        Ext.Intercept([In.Chat, In.Shout, In.Whisper], e =>
+        {
             string msg = e.Packet.Read<string>();
             if (msg.Contains("block me"))
                 e.Block();
@@ -149,7 +150,8 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         var mockHandler = new Mock<Action<Intercept>>();
 
-        Ext.Intercept([In.Chat, In.Shout, In.Whisper], e => {
+        Ext.Intercept([In.Chat, In.Shout, In.Whisper], e =>
+        {
             e.Packet.Read<int>();
             e.Packet.Modify<string>(s => s.Replace("apple", "orange"));
         });
@@ -261,7 +263,8 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
             new InterceptHandler(In.Chat, targetedHandler.Object) { Target = ClientType.Flash },
             new InterceptHandler(In.Shout, targetedHandler.Object) { Target = ClientType.Flash | ClientType.Shockwave },
             new InterceptHandler(In.Whisper, untargetedHandler.Object) { Target = ClientType.Unity },
-        ]) { Persistent = true });
+        ])
+        { Persistent = true });
 
         Dispatch(In.Chat);
         Dispatch(In.Shout);
@@ -276,12 +279,13 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         SimulateConnect(ClientType.Flash);
 
-        Dispatcher.Register([ new(In.Chat, _ => { }) ]);
+        Dispatcher.Register([new(In.Chat, _ => { })]);
 
         SimulateDisconnect();
 
-        Assert.Throws<InvalidOperationException>(() => {
-            Dispatcher.Register([ new(In.Chat, _ => { }) ]);
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            Dispatcher.Register([new(In.Chat, _ => { })]);
         });
     }
 }

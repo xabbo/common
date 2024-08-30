@@ -37,7 +37,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <para/>
     /// Decoded as a <see cref="VL64"/> on Shockwave, otherwise as a <see cref="byte"/> .
     /// </summary>
-    public bool ReadBool() => Client switch {
+    public bool ReadBool() => Client switch
+    {
         ClientType.Shockwave => ReadVL64() != 0,
         _ => ReadSpan(1)[0] != 0
     };
@@ -48,7 +49,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// Not supported on Shockwave.
     /// </summary>
     /// <exception cref="UnsupportedClientException">If the <see cref="Client"/> is <see cref="ClientType.Shockwave"/>.</exception>
-    public byte ReadByte() => Client switch {
+    public byte ReadByte() => Client switch
+    {
         ClientType.Shockwave => throw new UnsupportedClientException(Client),
         _ => ReadSpan(1)[0]
     };
@@ -58,7 +60,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <para/>
     /// Decoded as a <see cref="B64"/> on Shockwave, otherwise as a 16-bit integer.
     /// </summary>
-    public short ReadShort() => Client switch {
+    public short ReadShort() => Client switch
+    {
         ClientType.Shockwave => ReadB64(),
         _ => BinaryPrimitives.ReadInt16BigEndian(ReadSpan(2)),
     };
@@ -79,7 +82,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <para/>
     /// Decoded as a <see cref="VL64"/> on Shockwave, otherwise as a 32-bit integer.
     /// </summary>
-    public int ReadInt() => Client switch {
+    public int ReadInt() => Client switch
+    {
         ClientType.Shockwave => ReadVL64(),
         _ => BinaryPrimitives.ReadInt32BigEndian(ReadSpan(4)),
     };
@@ -100,7 +104,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <para/>
     /// Read as a <see cref="string"/> on Flash and Shockwave, otherwise decoded as a 32-bit floating point number.
     /// </summary>
-    public float ReadFloat() => Client switch {
+    public float ReadFloat() => Client switch
+    {
         ClientType.Flash or ClientType.Shockwave => float.Parse(ReadString()),
         _ => BinaryPrimitives.ReadSingleBigEndian(ReadSpan(4)),
     };
@@ -113,7 +118,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// <exception cref="UnsupportedClientException">
     /// If the <see cref="Client"/> is <see cref="ClientType.Flash"/> or <see cref="ClientType.Shockwave"/>.
     /// </exception>
-    public long ReadLong() => Client switch {
+    public long ReadLong() => Client switch
+    {
         ClientType.Flash or ClientType.Shockwave => throw new UnsupportedClientException(Client),
         _ => BinaryPrimitives.ReadInt64BigEndian(ReadSpan(8)),
     };
@@ -137,7 +143,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
             if (end == -1)
                 throw new IndexOutOfRangeException("Attempted to read an unterminated string.");
             Pos += end + 1;
-            return Encoding.UTF8.GetString(Span[start..(Pos-1)]);
+            return Encoding.UTF8.GetString(Span[start..(Pos - 1)]);
         }
         return Encoding.UTF8.GetString(ReadSpan(ReadShort()));
     }
@@ -159,7 +165,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// Read as a <see cref="long"/> on Unity, or an <see cref="int"/> on Flash and Shockwave.
     /// </summary>
     /// <exception cref="UnsupportedClientException">If the client type is invalid.</exception>
-    public Id ReadId() => Client switch {
+    public Id ReadId() => Client switch
+    {
         ClientType.Unity => ReadLong(),
         ClientType.Flash or ClientType.Shockwave => ReadInt(),
         _ => throw new UnsupportedClientException(Client),
@@ -171,7 +178,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// Read as a <see cref="short"/> on Unity, or an <see cref="int"/> on Flash and Shockwave.
     /// </summary>
     /// <exception cref="UnsupportedClientException">If the client type is invalid.</exception>
-    public Length ReadLength() => Client switch {
+    public Length ReadLength() => Client switch
+    {
         ClientType.Unity => ReadShort(),
         ClientType.Flash or ClientType.Shockwave => ReadInt(),
         _ => throw new UnsupportedClientException(Client),
@@ -183,7 +191,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// Not supported on Unity or Flash.
     /// </summary>
     /// <exception cref="UnsupportedClientException">If the <see cref="Client"/> is <see cref="ClientType.Unity"/> or <see cref="ClientType.Flash"/>.</exception>
-    public B64 ReadB64() => Client switch {
+    public B64 ReadB64() => Client switch
+    {
         ClientType.Unity or ClientType.Flash => throw new UnsupportedClientException(Client),
         _ => B64.Decode(ReadSpan(2)),
     };
@@ -194,7 +203,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     /// Not supported on Unity or Flash.
     /// </summary>
     /// <exception cref="UnsupportedClientException">If the <see cref="Client"/> is <see cref="ClientType.Unity"/> or <see cref="ClientType.Flash"/>.</exception>
-    public VL64 ReadVL64() => Client switch {
+    public VL64 ReadVL64() => Client switch
+    {
         ClientType.Unity or ClientType.Flash => throw new UnsupportedClientException(Client),
         _ => VL64.Decode(ReadSpan(VL64.DecodeLength(Span[Pos]))),
     };

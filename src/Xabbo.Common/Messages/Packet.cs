@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 using System.Text;
 
@@ -45,7 +45,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public Packet(Header header)
         : this(header, new PacketBuffer())
     { }
-    
+
     /// <summary>
     /// Constructs a new packet.
     /// </summary>
@@ -71,7 +71,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     public PacketReader ReaderAt(ref int pos) => new(this, ref pos);
     public PacketWriter Writer() => new(this, ref _position);
     public PacketWriter WriterAt(ref int pos) => new(this, ref pos);
-    
+
     public string Content
     {
         get

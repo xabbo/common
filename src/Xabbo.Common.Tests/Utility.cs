@@ -11,7 +11,7 @@ public static class Utility
         static char ToChar(byte b)
         {
             if (0x20 <= b && b <= 0x7e)
-                return (char)b;    
+                return (char)b;
             else
                 return '.';
         }

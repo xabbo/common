@@ -9,14 +9,14 @@ public class GeneratorTests
         // This should generate a case in Read<T> for typeof(TestParser)
         p.Read<TestParser>();
     }
-    
+
     static void GenerateReadArrayParser(IPacket p)
     {
         // This should generate cases in Read<T> for
         // typeof(TestParserArrayOnly[]) and typeof(TestParserArrayOnly)
         p.Read<TestParserArrayOnly[]>();
     }
-    
+
     static void GenerateReplaceParserComposer(IPacket p)
     {
         // This should generate a case in Read<T> for typeof(TestParserComposer)

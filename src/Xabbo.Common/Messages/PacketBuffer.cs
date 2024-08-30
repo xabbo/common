@@ -67,7 +67,7 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
         ArgumentOutOfRangeException.ThrowIfGreaterThan(start, Length);
 
         Grow(start + length);
-        return Span[start..(start+length)];
+        return Span[start..(start + length)];
     }
 
     /// <summary>
@@ -88,15 +88,15 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
         if (diff > 0)
         {
             Grow(Length + diff);
-            Span[(start+preLen)..^diff].CopyTo(Span[(start+length)..]);
+            Span[(start + preLen)..^diff].CopyTo(Span[(start + length)..]);
         }
         else if (diff < 0)
         {
-            Span[(start+preLen)..].CopyTo(Span[(start+length)..^-diff]);
+            Span[(start + preLen)..].CopyTo(Span[(start + length)..^-diff]);
             Length += diff;
         }
 
-        return Span[start..(start+length)];
+        return Span[start..(start + length)];
     }
 
     /// <summary>

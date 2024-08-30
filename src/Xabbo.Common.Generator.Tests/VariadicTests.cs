@@ -17,7 +17,7 @@ public class VariadicTests
 
         p.Read<bool, byte, short, int, float, long, string, Id, Length>();
     }
-    
+
     // Ensures the variadic ReadAt<T...> methods are generated.
     static void GenerateReadAt(IPacket p)
     {
@@ -28,7 +28,7 @@ public class VariadicTests
 
         p.ReadAt<bool, byte, short, int, float, long, string, Id, Length>(0);
     }
-    
+
     // Ensures the variadic Write<T...> methods are generated.
     static void GenerateWrite(IPacket p)
     {
@@ -39,7 +39,7 @@ public class VariadicTests
 
         p.Write<bool, byte, short, int, float, long, string, Id, Length>(false, 1, 2, 3, 4, 5, "6", 7, 8);
     }
-    
+
     // Ensures the variadic WriteAt<T...> methods are generated.
     static void GenerateWriteAt(IPacket p)
     {
@@ -61,7 +61,7 @@ public class VariadicTests
 
         p.Replace<bool, byte, short, int, float, long, string, Id, Length>(false, 1, 2, 3, 4, 5, "6", 7, 8);
     }
-    
+
     // Ensures the variadic ReplaceAt<T...> methods are generated.
     static void GenerateReplaceAt(IPacket p)
     {
@@ -72,9 +72,9 @@ public class VariadicTests
 
         p.ReplaceAt<bool, byte, short, int, float, long, string, Id, Length>(0, false, 1, 2, 3, 4, 5, "6", 7, 8);
     }
-    
+
     // TODO: Modify(At)
-    
+
     static void GenerateSendHeader(IConnection c)
     {
         Header header = new();
