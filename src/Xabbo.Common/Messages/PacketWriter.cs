@@ -355,18 +355,18 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 
     public void ReplaceLength(Length value)
     {
-        if (Client is ClientType.Unity)
-            WriteShort((short)value);
+        if (Client is ClientType.Shockwave)
+            ReplaceVL64((int)value);
         else
-            ReplaceInt(value);
+            WriteLength(value);
     }
 
     public void ReplaceId(Id value)
     {
-        if (Client is ClientType.Unity)
-            WriteLong(value);
+        if (Client is ClientType.Shockwave)
+            ReplaceVL64((int)value);
         else
-            ReplaceInt((int)value);
+            WriteId(value);
     }
 
     public void ReplaceB64(B64 value) => WriteB64(value);
