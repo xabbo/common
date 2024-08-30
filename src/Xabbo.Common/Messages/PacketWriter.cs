@@ -97,10 +97,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <summary>
     /// Writes a short array to the current position and advances it.
     /// </summary>
-    public void WriteShortArray(ICollection<short> values)
+    public void WriteShortArray(IEnumerable<short> values)
     {
-        WriteLength(values.Count);
-        foreach (short value in values)
+        short[] array = (values as short[]) ?? [..values];
+        WriteLength(array.Length);
+        foreach (short value in array)
             WriteShort(value);
     }
 
@@ -120,10 +121,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <summary>
     /// Writes an int array to the current position and advances it.
     /// </summary>
-    public void WriteIntArray(ICollection<int> values)
+    public void WriteIntArray(IEnumerable<int> values)
     {
-        WriteLength(values.Count);
-        foreach (int value in values)
+        int[] array = (values as int[]) ?? [..values];
+        WriteLength(array.Length);
+        foreach (int value in array)
             WriteInt(value);
     }
 
@@ -202,10 +204,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <summary>
     /// Writes a string array to the current position and advances it.
     /// </summary>
-    public void WriteStringArray(ICollection<string> values)
+    public void WriteStringArray(IEnumerable<string> values)
     {
-        WriteLength(values.Count);
-        foreach (string value in values)
+        string[] array = (values as string[]) ?? [..values];
+        WriteLength(array.Length);
+        foreach (string value in array)
             WriteString(value);
     }
 
@@ -287,10 +290,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <summary>
     /// Composes the specified array of <typeparamref name="T"/> to the current position and advances it.
     /// </summary>
-    public void ComposeArray<T>(ICollection<T> values) where T : IComposer
+    public void ComposeArray<T>(IEnumerable<T> values) where T : IComposer
     {
-        WriteLength(values.Count);
-        foreach (T value in values)
+        T[] array = (values as T[]) ?? [..values];
+        WriteLength(array.Length);
+        foreach (T value in array)
             Compose(value);
     }
 
