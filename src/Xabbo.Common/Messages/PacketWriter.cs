@@ -11,8 +11,6 @@ namespace Xabbo.Messages;
 /// </summary>
 public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 {
-    public static string FormatFloat(float value) => value.ToString("0.0##############", CultureInfo.InvariantCulture);
-
     private readonly IPacket Packet = packet;
     public readonly ref int Pos = ref pos;
     public Header Header => Packet.Header;
@@ -139,7 +137,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
         switch (Client)
         {
             case ClientType.Flash or ClientType.Shockwave:
-                WriteString(FormatFloat(value));
+                WriteString((FloatAsString)value);
                 break;
             default:
                 BinaryPrimitives.WriteSingleBigEndian(Allocate(4), value);
@@ -321,7 +319,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     public void ReplaceFloat(float value)
     {
         if (Client is ClientType.Flash or ClientType.Shockwave)
-            ReplaceString(FormatFloat(value));
+            ReplaceString((FloatAsString)value);
         else
             WriteFloat(value);
     }
