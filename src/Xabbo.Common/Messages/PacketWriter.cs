@@ -292,9 +292,19 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     }
 
     /// <summary>
-    /// Writes the specified value of type <typeparamref name="T"/> to the current position and advances it.
+    /// Composes the specified <typeparamref name="T"/> to the current position and advances it.
     /// </summary>
     public void Compose<T>(T value) where T : IComposer => value.Compose(in this);
+
+    /// <summary>
+    /// Composes the specified array of <typeparamref name="T"/> to the current position and advances it.
+    /// </summary>
+    public void ComposeArray<T>(ICollection<T> values) where T : IComposer
+    {
+        WriteLength(values.Count);
+        foreach (T value in values)
+            Compose(value);
+    }
 
     public void ReplaceBool(bool value)
     {

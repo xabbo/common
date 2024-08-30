@@ -200,7 +200,18 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     };
 
     /// <summary>
-    /// Parses a value of type <typeparamref name="T"/> from the current position and advances it.
+    /// Parses a <typeparamref name="T"/> from the current position and advances it.
     /// </summary>
     public T Parse<T>() where T : IParser<T> => T.Parse(in this);
+
+    /// <summary>
+    /// Parses an array of <typeparamref name="T"/> from the current position and advances it.
+    /// </summary>
+    public T[] ParseArray<T>() where T : IParser<T>
+    {
+        T[] array = new T[ReadLength()];
+        for (int i = 0; i < array.Length; i++)
+            array[i] = Parse<T>();
+        return array;
+    }
 }
