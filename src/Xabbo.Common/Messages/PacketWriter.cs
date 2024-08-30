@@ -263,14 +263,8 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <exception cref="UnsupportedClientException">If the <see cref="Client"/> is <see cref="ClientType.Unity"/> or <see cref="ClientType.Flash"/>.</exception>
     public void WriteB64(B64 value)
     {
-        switch (Client)
-        {
-            case ClientType.Unity or ClientType.Flash:
-                throw new UnsupportedClientException(Client);
-            default:
-                B64.Encode(Allocate(2), value);
-                break;
-        }
+        UnsupportedClientException.ThrowIf(Client, ~ClientType.Shockwave);
+        B64.Encode(Allocate(2), value);
     }
 
     /// <summary>
@@ -281,14 +275,8 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     /// <exception cref="UnsupportedClientException">If the <see cref="Client"/> is <see cref="ClientType.Unity"/> or <see cref="ClientType.Flash"/>.</exception>
     public void WriteVL64(VL64 value)
     {
-        switch (Client)
-        {
-            case ClientType.Unity or ClientType.Flash:
-                throw new UnsupportedClientException(Client);
-            default:
-                VL64.Encode(Allocate(VL64.EncodeLength(value)), value);
-                break;
-        }
+        UnsupportedClientException.ThrowIf(Client, ~ClientType.Shockwave);
+        VL64.Encode(Allocate(VL64.EncodeLength(value)), value);
     }
 
     /// <summary>
@@ -379,7 +367,11 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 
     public void ReplaceB64(B64 value) => WriteB64(value);
 
-    public void ReplaceVL64(VL64 value) => VL64.Encode(Resize(VL64.DecodeLength(Span[Pos]), VL64.EncodeLength(value)), value);
+    public void ReplaceVL64(VL64 value)
+    {
+        UnsupportedClientException.ThrowIf(Client, ~ClientType.Shockwave);
+        VL64.Encode(Resize(VL64.DecodeLength(Span[Pos]), VL64.EncodeLength(value)), value);
+    }
 
     public void ReplaceStruct<T>(T value) where T : IParserComposer<T>
     {

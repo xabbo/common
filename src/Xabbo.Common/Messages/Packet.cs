@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Text;
 
@@ -76,13 +76,13 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     {
         get
         {
-            UnsupportedClientException.ThrowIf(Header.Client, ~ClientType.Shockwave);
-            return Encoding.UTF8.GetString(Buffer.Span); 
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            return Encoding.UTF8.GetString(Buffer.Span);
         }
 
         set
         {
-            UnsupportedClientException.ThrowIf(Header.Client, ~ClientType.Shockwave);
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
             Position = 0;
             Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
         }

@@ -10,13 +10,28 @@ public sealed class UnsupportedClientException(ClientType client)
 {
     public ClientType Client { get; } = client;
 
-    public static void ThrowIfUnknown(ClientType client)
+    /// <summary>
+    /// Throws if the specified client is not a known client.
+    /// </summary>
+    public static void ThrowIfNone(ClientType client)
     {
         if ((client & ClientType.All) == ClientType.None)
             throw new UnsupportedClientException(client);
     }
 
+    /// <summary>
+    /// Throws if the client is any of the specified clients.
+    /// </summary>
     public static void ThrowIf(ClientType client, ClientType clients)
+    {
+        if ((client & clients) != ClientType.None)
+            throw new UnsupportedClientException(client);
+    }
+
+    /// <summary>
+    /// Throws if the client is unknown or any of the specified clients.
+    /// </summary>
+    public static void ThrowIfNoneOr(ClientType client, ClientType clients)
     {
         if ((client & ClientType.All) == ClientType.None)
             throw new UnsupportedClientException(client);
