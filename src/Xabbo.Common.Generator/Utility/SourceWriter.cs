@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Xabbo.Common.Generator.Utility;
 
@@ -111,4 +112,6 @@ internal sealed class SourceWriter() : IndentedTextWriter(new StringWriter(), ne
         Flush();
         return ((StringWriter)InnerWriter).ToString();
     }
+
+    public SourceText ToSourceText() => SourceText.From(ToString(), System.Text.Encoding.UTF8);
 }

@@ -1,5 +1,3 @@
-using System.Text;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -17,10 +15,10 @@ internal static partial class Executor
             string hintName = $"{interceptor.Name}.Interceptor.g.cs";
             if (interceptor.Namespace != "")
                 hintName = $"{interceptor.Namespace}.{hintName}";
-            context.AddSource(hintName, SourceText.From(GenerateSource(interceptor), Encoding.UTF8));
+            context.AddSource(hintName, GenerateSource(interceptor));
         }
 
-        internal static string GenerateSource(InterceptorInfo interceptor)
+        internal static SourceText GenerateSource(InterceptorInfo interceptor)
         {
             var w = new SourceWriter();
 
@@ -70,7 +68,7 @@ internal static partial class Executor
                 }
             }
 
-            return w.ToString();
+            return w.ToSourceText();
         }
 
         internal static void GenerateInterceptsFor(SourceWriter w, InterceptorInfo interceptor)

@@ -15,14 +15,13 @@ internal static partial class Executor
     {
         internal static void Execute(SourceProductionContext context, ExtensionInfo extension)
         {
-            string source = GenerateSource(extension);
             string hintName = $"{extension.ClassName}.Extension.g.cs";
             if (extension.Namespace != "")
                 hintName = $"{extension.Namespace}.{hintName}";
-            context.AddSource(hintName, SourceText.From(source, Encoding.UTF8));
+            context.AddSource(hintName, GenerateSource(extension));
         }
 
-        static string GenerateSource(ExtensionInfo extension)
+        static SourceText GenerateSource(ExtensionInfo extension)
         {
             using var w = new SourceWriter();
 
@@ -68,7 +67,7 @@ internal static partial class Executor
             }
             w.WriteLine("}");
 
-            return w.ToString();
+            return w.ToSourceText();
         }
     }
 }

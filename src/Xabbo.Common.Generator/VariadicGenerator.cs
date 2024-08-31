@@ -289,8 +289,7 @@ public class VariadicGenerator : IIncrementalGenerator
             {
                 if (arities.Length > 0)
                 {
-                    string sourceText = GenerateInvocationCountSource(invocationKind, arities);
-                    spc.AddSource($"XabboExtensions.{invocationKind}.g.cs", SourceText.From(sourceText, Encoding.UTF8));
+                    spc.AddSource($"XabboExtensions.{invocationKind}.g.cs", GenerateInvocationCountSource(invocationKind, arities));
                 }
             });
         }
@@ -472,7 +471,7 @@ public class VariadicGenerator : IIncrementalGenerator
         Name: "Identifier"
     };
 
-    static string GenerateInvocationCountSource(InvocationKind kind, EquatableArray<int> arities) => kind switch
+    static SourceText GenerateInvocationCountSource(InvocationKind kind, EquatableArray<int> arities) => kind switch
     {
         InvocationKind.Read => GenerateReadInvocationArities(arities, false),
         InvocationKind.ReadAt => GenerateReadInvocationArities(arities, true),
@@ -486,7 +485,7 @@ public class VariadicGenerator : IIncrementalGenerator
         _ => throw new NotImplementedException(kind.ToString()),
     };
 
-    static string GenerateReadInvocationArities(EquatableArray<int> arities, bool positional)
+    static SourceText GenerateReadInvocationArities(EquatableArray<int> arities, bool positional)
     {
         using var w = new SourceWriter();
 
@@ -530,10 +529,11 @@ public class VariadicGenerator : IIncrementalGenerator
                 }
             }
         }
-        return w.ToString();
+
+        return w.ToSourceText();
     }
 
-    static string GenerateWriterInvocationArities(bool replace, EquatableArray<int> arities, bool positional)
+    static SourceText GenerateWriterInvocationArities(bool replace, EquatableArray<int> arities, bool positional)
     {
         string methodName = replace ? "Replace" : "Write";
 
@@ -578,10 +578,11 @@ public class VariadicGenerator : IIncrementalGenerator
                 }
             }
         }
-        return w.ToString();
+
+        return w.ToSourceText();
     }
 
-    static string GenerateModifyInvocationArities(EquatableArray<int> arities, bool positional)
+    static SourceText GenerateModifyInvocationArities(EquatableArray<int> arities, bool positional)
     {
         using var w = new SourceWriter();
         using (w.BraceScope("internal static partial class XabboExtensions"))
@@ -650,10 +651,11 @@ public class VariadicGenerator : IIncrementalGenerator
                 }
             }
         }
-        return w.ToString();
+
+        return w.ToSourceText();
     }
 
-    static string GenerateSendInvocationArities(InvocationKind kind, EquatableArray<int> arities)
+    static SourceText GenerateSendInvocationArities(InvocationKind kind, EquatableArray<int> arities)
     {
         bool isHeader = (kind & InvocationKind.Header) > 0;
 
@@ -697,7 +699,7 @@ public class VariadicGenerator : IIncrementalGenerator
                 }
             }
         }
-        return w.ToString();
-    }
 
+        return w.ToSourceText();
+    }
 }
