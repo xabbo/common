@@ -1,9 +1,9 @@
 ﻿[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 internal static partial class XabboExtensions
 {
-    // * To be generated *
+    // * Implementation to be generated *
     // private static T Read<T>(in PacketReader r);
-    
+
     private static T[] ReadArray<T>(in global::Xabbo.Messages.PacketReader r)
     {
         T[] array = new T[r.ReadLength()];
@@ -11,7 +11,7 @@ internal static partial class XabboExtensions
             array[i] = Read<T>(in r);
         return array;
     }
-    
+
     private static void Write<T>(in global::Xabbo.Messages.PacketWriter w, T value)
     {
         switch (value)
@@ -43,31 +43,15 @@ internal static partial class XabboExtensions
         }
     }
 
-    private static void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)
-    {
-        switch (value)
-        {
-            case bool v: w.ReplaceBool(v); break;
-            case byte v: w.ReplaceByte(v); break;
-            case short v: w.ReplaceShort(v); break;
-            case int v: w.ReplaceInt(v); break;
-            case float v: w.ReplaceFloat(v); break;
-            case long v: w.ReplaceLong(v); break;
-            case string v: w.ReplaceString(v); break;
-            case global::Xabbo.Length v: w.ReplaceLength(v); break;
-            case global::Xabbo.Id v: w.ReplaceId(v); break;
-            case global::Xabbo.Messages.B64 v: w.ReplaceB64(v); break;
-            case global::Xabbo.Messages.VL64 v: w.ReplaceVL64(v); break;
-            default: throw new global::System.NotSupportedException($"Cannot replace value of type '{typeof(T)}'.");
-        }
-    }
-    
+    // * Implementation to be generated *
+    // private static void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)
+
     private static void Modify<T>(in global::Xabbo.Messages.PacketWriter w, global::System.Func<T, T> modifier)
     {
         int pos = w.Pos;
         Replace<T>(in w, modifier(Read<T>(w.ReaderAt(ref pos))));
     }
-    
+
     /// <summary>
     /// Reads a value of the specified type from the current position in the packet.
     /// </summary>
@@ -94,7 +78,7 @@ internal static partial class XabboExtensions
         global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p);
         Write<T>(in w, value);
     }
-    
+
     /// <summary>
     /// Writes a value of the specified type to the specified position in the packet.
     /// </summary>
@@ -103,7 +87,7 @@ internal static partial class XabboExtensions
         global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p, ref pos);
         Write<T>(in w, value);
     }
-    
+
     /// <summary>
     /// Replaces a value of the specified type at the current position in the packet.
     /// </summary>

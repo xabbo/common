@@ -23,5 +23,6 @@ internal enum InvocationKind
 
     HasArguments = Write | Replace | Modify | Send,
     RequiresParser = Read | Replace | Modify,
-    RequiresComposer = Write | Replace | Modify | Send
+    RequiresComposer = Write | Replace | Modify | Send,
+    RequiresParserComposer = RequiresParser & RequiresComposer
 }

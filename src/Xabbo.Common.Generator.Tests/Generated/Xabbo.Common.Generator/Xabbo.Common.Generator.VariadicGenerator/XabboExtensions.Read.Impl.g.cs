@@ -11,7 +11,7 @@
         if (typeof(T) == typeof(string)) return (T)(object)r.ReadString();
         if (typeof(T) == typeof(global::Xabbo.Id)) return (T)(object)r.ReadId();
         if (typeof(T) == typeof(global::Xabbo.Length)) return (T)(object)r.ReadLength();
-        /* Generated 4 cases */
+        /* Generated 5 cases */
         if (typeof(T) == typeof(global::Xabbo.Common.Generator.Tests.TestParser))
             return (T)(object)r.Parse<global::Xabbo.Common.Generator.Tests.TestParser>();
         if (typeof(T) == typeof(global::Xabbo.Common.Generator.Tests.TestParserArrayOnly[]))
@@ -20,6 +20,8 @@
             return (T)(object)r.Parse<global::Xabbo.Common.Generator.Tests.TestParserArrayOnly>();
         if (typeof(T) == typeof(global::Xabbo.Common.Generator.Tests.TestParserComposer))
             return (T)(object)r.Parse<global::Xabbo.Common.Generator.Tests.TestParserComposer>();
+        if (typeof(T) == typeof(global::Xabbo.Common.Generator.Tests.TestModifiable))
+            return (T)(object)r.Parse<global::Xabbo.Common.Generator.Tests.TestModifiable>();
         throw new global::System.NotSupportedException($"Cannot read value of type '{typeof(T)}'.");
     }
 }

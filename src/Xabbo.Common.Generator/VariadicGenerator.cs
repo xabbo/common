@@ -115,6 +115,7 @@ public class VariadicGenerator : IIncrementalGenerator
                 bool requireParser = (invocationKind & InvocationKind.RequiresParser) > 0;
                 bool requireComposer = (invocationKind & InvocationKind.RequiresComposer) > 0;
                 bool isPositional = (invocationKind & InvocationKind.At) > 0;
+                bool isModify = (invocationKind & InvocationKind.Modify) > 0;
                 bool isSend = (invocationKind & InvocationKind.Send) > 0;
 
                 TypeInfo memberTypeInfo = ctx.SemanticModel.GetTypeInfo(memberAccess.Expression);
@@ -159,71 +160,96 @@ public class VariadicGenerator : IIncrementalGenerator
                 types = new VariadicType[args.Count];
                 for (int i = 0; i < args.Count; i++)
                 {
-                    bool isTypeKnown = false;
+                    bool isKnownType = false;
+                    bool isValidType = false;
                     string namespaceName = "";
-                    string typeName = "";
+                    string typeName = "?";
                     bool isArray = false;
                     bool isParser = false;
                     bool isComposer = false;
 
-                    TypeInfo typeInfo = ctx.SemanticModel.GetTypeInfo(hasArguments ? ((ArgumentSyntax)args[i]).Expression : args[i]);
-                    ITypeSymbol? type = typeInfo.Type;
+                    SyntaxNode arg = args[i];
+                    ArgumentSyntax? argSyntax = args[i] as ArgumentSyntax;
+                    TypeInfo typeInfo = ctx.SemanticModel.GetTypeInfo(
+                        argSyntax is not null ? argSyntax.Expression : arg);
+                    SymbolInfo symbolInfo = ctx.SemanticModel.GetSymbolInfo(
+                        argSyntax is not null ? argSyntax.Expression : arg);
+                    ITypeSymbol? type = typeInfo.ConvertedType;
 
-                    if (type is IArrayTypeSymbol arrayType)
+                    // If this is a modifier, extract the parameter type from the Func<T, T> or method symbol
+                    if (isModify)
                     {
-                        isArray = true;
-                        type = arrayType.ElementType;
+                        if (type is INamedTypeSymbol namedTypeSymbol)
+                        {
+                            if (namedTypeSymbol is
+                            {
+                                ContainingNamespace: {
+                                    ContainingNamespace.IsGlobalNamespace: true,
+                                    Name: "System",
+                                },
+                                Name: "Func",
+                                IsGenericType: true,
+                                TypeParameters.Length: 2
+                            })
+                            {
+                                type = namedTypeSymbol.TypeArguments[0];
+                            }
+                        }
+                        else if (argSyntax is not null)
+                        {
+                            var op = ctx.SemanticModel.GetOperation(argSyntax.Expression);
+                            if (symbolInfo.Symbol is IMethodSymbol { Parameters.Length: 1 } methodSymbol)
+                            {
+                                type = methodSymbol.Parameters[0].Type;
+                            }
+                            else
+                            {
+                                // ?
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (type is IArrayTypeSymbol arrayType)
+                        {
+                            isArray = true;
+                            type = arrayType.ElementType;
+                        }
                     }
 
                     if (type is INamedTypeSymbol namedType)
                     {
-                        isTypeKnown = true;
+                        isKnownType = true;
 
-                        bool isValidType = IsPrimitivePacketType(namedType) || (
+                        isValidType = IsPrimitivePacketType(namedType) || (
                             !(requireComposer && !ImplementsComposer(namedType)) &&
-                            !(requireParser && !ImplementsParser(namedType))
-                        );
-
-                        if (!isValidType)
-                        {
-                            DiagnosticDescriptor descriptor = requireComposer switch
-                            {
-                                true when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
-                                true => DiagnosticDescriptors.NotPrimitiveOrComposerType,
-                                false when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserType,
-                                false => DiagnosticDescriptors.NotPrimitiveType
-                            };
-
-                            diagnostics.Add(new DiagnosticInfo(
-                                descriptor,
-                                args[i].GetLocation(),
-                                hasArguments ? type.ToDisplayString() : args[i].GetText().ToString()
-                            ));
-                        }
+                            !(requireParser && !ImplementsParser(namedType)));
 
                         namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
                         typeName = type.Name;
-                        isParser = ImplementsParser(type); // type.Interfaces.Any(IsIParserInterface);
+                        isParser = ImplementsParser(type);
                         isComposer = ImplementsComposer(type);
                     }
-                    else
+
+                    if (!isKnownType || !isValidType)
                     {
-                        // For Modify<T, ...>(Func<T, T> modifier, ...)
-                        // The compiler doesn't know about the Func<T, T> argument type, since the source hasn't been generated yet.
-                        // However, the type information will be available if a Func<T, T> is explicitly suppplied.
-                        // 
-                        // It's possible to get the type of the first parameter,
-                        // from the IMethodSymbol of the argument expression
-                        //
-                        // var op = ctx.SemanticModel.GetSymbolInfo(((ArgumentSyntax)args[i]).Expression);
-                        // if (op.Symbol is IMethodSymbol methodSymbol)
-                        // {
-                        //     var type = methodSymbol.Parameters[0].Type;
-                        // }
+                        DiagnosticDescriptor descriptor = requireComposer switch
+                        {
+                            true when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
+                            true => DiagnosticDescriptors.NotPrimitiveOrComposerType,
+                            false when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserType,
+                            false => DiagnosticDescriptors.NotPrimitiveType
+                        };
+
+                        diagnostics.Add(new DiagnosticInfo(
+                            descriptor,
+                            args[i].GetLocation(),
+                            type?.ToDisplayString() ?? typeName
+                        ));
                     }
 
                     types[i] = new VariadicType(
-                        IsTypeKnown: isTypeKnown,
+                        IsTypeKnown: isKnownType,
                         Namespace: namespaceName,
                         Name: typeName,
                         IsArray: isArray,
@@ -253,8 +279,9 @@ public class VariadicGenerator : IIncrementalGenerator
             .Where(static (x) => x.Value is not null)
             .Select(static (x, _) => x.Value!);
 
+        // Get distinct types required for Read<T>
         var distinctReadTypes = allInvocations
-            .Where(x => (x.Kind & InvocationKind.RequiresParser) > 0)
+            .Where(x => (x.Kind & (InvocationKind.RequiresParser)) > 0)
             .SelectMany((x, _) => x.Types)
             .Collect()
             .Select((types, _) =>
@@ -265,6 +292,21 @@ public class VariadicGenerator : IIncrementalGenerator
                     distinctTypes.Add(type);
                     if (type.IsParser && type.IsArray)
                         distinctTypes.Add(type with { IsArray = false });
+                }
+                return distinctTypes.ToEquatableArray();
+            });
+
+        // Get distinct IParserComposer<T> types
+        var distinctParserComposerTypes = allInvocations
+            .Where(x => (x.Kind & InvocationKind.RequiresParserComposer) > 0)
+            .SelectMany((x, _) => x.Types)
+            .Collect()
+            .Select((types, _) =>
+            {
+                HashSet<VariadicType> distinctTypes = [];
+                foreach (var type in types.Where(t => t.IsParser && t.IsComposer))
+                {
+                    distinctTypes.Add(type);
                 }
                 return distinctTypes.ToEquatableArray();
             });
@@ -342,6 +384,43 @@ public class VariadicGenerator : IIncrementalGenerator
             }
             spc.AddSource("XabboExtensions.Read.Impl.g.cs", SourceText.From(w.ToString(), Encoding.UTF8));
         });
+
+        // Generate Replace<T> implementation
+        context.RegisterSourceOutput(
+            distinctParserComposerTypes,
+            (spc, types) =>
+            {
+                using var w = new SourceWriter();
+                using (w.BraceScope("internal static partial class XabboExtensions"))
+                {
+                    using (w.BraceScope("private static void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)"))
+                    {
+                        w.WriteLine("switch (value)");
+                        using (w.BraceScope())
+                        {
+                            w.WriteLines([
+                                "case bool v: w.ReplaceBool(v); break;",
+                                "case byte v: w.ReplaceByte(v); break;",
+                                "case short v: w.ReplaceShort(v); break;",
+                                "case int v: w.ReplaceInt(v); break;",
+                                "case float v: w.ReplaceFloat(v); break;",
+                                "case long v: w.ReplaceLong(v); break;",
+                                "case string v: w.ReplaceString(v); break;",
+                                "case global::Xabbo.Length v: w.ReplaceLength(v); break;",
+                                "case global::Xabbo.Id v: w.ReplaceId(v); break;",
+                                "case global::Xabbo.Messages.B64 v: w.ReplaceB64(v); break;",
+                                "case global::Xabbo.Messages.VL64 v: w.ReplaceVL64(v); break;",
+                            ]);
+                            // Write cases
+                            foreach (var type in types)
+                                w.WriteLine($"case global::{type} v: w.ReplaceStruct(v); break;");
+                            w.WriteLine("default: throw new global::System.NotSupportedException($\"Cannot replace value of type '{typeof(T)}'.\");");
+                        }
+                    }
+                }
+                spc.AddSource("XabboExtensions.Replace.Impl.g.cs", w.ToSourceText());
+            }
+        );
     }
 
     static void EmitPrimitiveReaders(SourceWriter w)

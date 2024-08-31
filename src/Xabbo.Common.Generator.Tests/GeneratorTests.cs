@@ -19,8 +19,19 @@ public class GeneratorTests
 
     static void GenerateReplaceParserComposer(IPacket p)
     {
-        // This should generate a case in Read<T> for typeof(TestParserComposer)
-        // because Replace needs to parse the structure first to obtain its length
+        // This should generate a case in Replace<T> for TestParserComposer.
+        // It should also generate a case in Read<T> for typeof(TestParserComposer)
+        // because Replace needs to parse the structure first to obtain its length.
         p.Replace(new TestParserComposer());
+    }
+
+    [Fact]
+    static void TestModifiable()
+    {
+        Packet p = new();
+        p.Write(4);
+
+        p.ModifyAt(0, (TestModifiable m) => new(m.Value * 3));
+        Assert.Equal(12, p.ReadAt<int>(0));
     }
 }

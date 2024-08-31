@@ -7,4 +7,13 @@ internal sealed record VariadicType(
     bool IsComposer,
     bool IsArray,
     bool IsTypeKnown
-);
+)
+{
+    public override string ToString()
+    {
+        if (!string.IsNullOrWhiteSpace(Namespace))
+            return $"{Namespace}.{Name}";
+        else
+            return $"{Name}";
+    }
+}
