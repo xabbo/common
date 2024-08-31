@@ -27,7 +27,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     public ReadOnlySpan<byte> ReadSpan(int n)
     {
         if (Pos + n > Span.Length)
-            throw new IndexOutOfRangeException($"Not enough bytes to read value.");
+            throw new IndexOutOfRangeException($"Cannot read past the packet length. Attempted to read {n} bytes from position {Pos} when length is {Length}.");
         Pos += n;
         return Span[(Pos - n)..Pos];
     }
