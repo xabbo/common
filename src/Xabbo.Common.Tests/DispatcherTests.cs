@@ -288,4 +288,33 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
             Dispatcher.Register([new(In.Chat, _ => { })]);
         });
     }
+
+    class MoveMsg(int x, int y) : IMessage
+    {
+        public Identifier Identifier => (ClientType.Flash, Direction.Out, "MoveAvatar");
+        public int X { get; set; } = x;
+        public int Y { get; set; } = y;
+        public void Compose(in PacketWriter p)
+        {
+            p.WriteInt(X);
+            p.WriteInt(Y);
+        }
+    }
+
+    [Fact]
+    public void TestIMessageImplementation()
+    {
+        var msg = new MoveMsg(3, 4);
+        var mock = new Mock<IConnection>();
+        mock.Setup(x => x.Messages).Returns(Messages);
+        mock.Object.Send(msg);
+
+        mock.Verify(x => x.Send(It.IsAny<IPacket>()), Times.Once);
+        mock.Verify(x => x.Send(
+            It.Is<IPacket>(p =>
+                p.Header == Messages.Resolve(msg.Identifier) &&
+                p.Length == 8
+            ))
+        );
+    }
 }

@@ -55,7 +55,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static T Read<T>(this global::Xabbo.Messages.IPacket p)
     {
-        global::Xabbo.Messages.PacketReader r = new global::Xabbo.Messages.PacketReader(p);
+        global::Xabbo.Messages.PacketReader r = p.Reader();
         return Read<T>(in r);
     }
 
@@ -64,7 +64,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static T ReadAt<T>(this global::Xabbo.Messages.IPacket p, int pos)
     {
-        global::Xabbo.Messages.PacketReader r = new global::Xabbo.Messages.PacketReader(p, ref pos);
+        global::Xabbo.Messages.PacketReader r = p.ReaderAt(ref pos);
         return Read<T>(in r);
     }
 
@@ -73,7 +73,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void Write<T>(this global::Xabbo.Messages.IPacket p, T value)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p);
+        global::Xabbo.Messages.PacketWriter w = p.Writer();
         Write<T>(in w, value);
     }
 
@@ -82,7 +82,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void WriteAt<T>(this global::Xabbo.Messages.IPacket p, int pos, T value)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p, ref pos);
+        global::Xabbo.Messages.PacketWriter w = p.WriterAt(ref pos);
         Write<T>(in w, value);
     }
 
@@ -91,7 +91,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void Replace<T>(this global::Xabbo.Messages.IPacket p, T value)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p);
+        global::Xabbo.Messages.PacketWriter w = p.Writer();
         Replace<T>(in w, value);
     }
 
@@ -100,7 +100,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void ReplaceAt<T>(this global::Xabbo.Messages.IPacket p, int pos, T value)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p, ref pos);
+        global::Xabbo.Messages.PacketWriter w = p.WriterAt(ref pos);
         Replace<T>(in w, value);
     }
 
@@ -109,7 +109,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void Modify<T>(this global::Xabbo.Messages.IPacket p, global::System.Func<T, T> modifier)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p);
+        global::Xabbo.Messages.PacketWriter w = p.Writer();
         Modify<T>(in w, modifier);
     }
 
@@ -118,26 +118,7 @@ internal static partial class XabboExtensions
     /// </summary>
     public static void ModifyAt<T>(this global::Xabbo.Messages.IPacket p, int pos, global::System.Func<T, T> modifier)
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p, ref pos);
+        global::Xabbo.Messages.PacketWriter w = p.WriterAt(ref pos);
         Modify<T>(in w, modifier);
-    }
-
-    /// <summary>
-    /// Sends an empty packet with the specified message header.
-    /// </summary>
-    public static void Send(this global::Xabbo.Connection.IConnection c, global::Xabbo.Messages.Header header)
-    {
-        using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header);
-        c.Send(p);
-    }
-
-    /// <summary>
-    /// Sends an empty packet with the specified message identifier.
-    /// </summary>
-    public static void Send(this global::Xabbo.Connection.IConnection c, global::Xabbo.Messages.Identifier identifier)
-    {
-        global::Xabbo.Messages.Header header = c.Messages.Resolve(identifier);
-        using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header);
-        c.Send(p);
     }
 }
