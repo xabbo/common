@@ -46,7 +46,8 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
             (ClientType.Flash, Direction.In, "ItemAdd"),
             (ClientType.Shockwave, Direction.In, "Items_2"),
         ]),
-        header => {
+        header =>
+        {
             Assert.Equal(ClientType.Flash, header.Client);
             Assert.Equal(Direction.In, header.Direction);
             Assert.Equal(MessagesFixture.ItemAdd, header.Value);
@@ -105,12 +106,14 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
         Assert.Equal(MessagesFixture.FlashObjects, header.Value);
 
         // Shockwave:Objects should not resolve
-        Assert.Throws<UnresolvedIdentifiersException>(() => {
+        Assert.Throws<UnresolvedIdentifiersException>(() =>
+        {
             Messages.Resolve((ClientType.Shockwave, Direction.In, "Objects"));
         });
 
         // None:Objects should throw
-        Assert.Throws<AmbiguousIdentifierException>(() => {
+        Assert.Throws<AmbiguousIdentifierException>(() =>
+        {
             Messages.Resolve((Direction.In, "Objects"));
         });
     }

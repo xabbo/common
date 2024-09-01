@@ -88,9 +88,9 @@ public sealed class MessageManager(string filePath) : IMessageManager
 
     public Headers Resolve(ReadOnlySpan<Identifier> identifiers)
     {
-         if (TryResolve(identifiers, out Headers? headers, out Identifiers? unresolved))
+        if (TryResolve(identifiers, out Headers? headers, out Identifiers? unresolved))
             return headers;
-         else
+        else
             throw new UnresolvedIdentifiersException(unresolved);
     }
 

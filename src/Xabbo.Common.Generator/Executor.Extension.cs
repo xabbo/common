@@ -1,4 +1,3 @@
-using System.CodeDom.Compiler;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -16,17 +15,15 @@ internal static partial class Executor
     {
         internal static void Execute(SourceProductionContext context, ExtensionInfo extension)
         {
-            string source = GenerateSource(extension);
             string hintName = $"{extension.ClassName}.Extension.g.cs";
             if (extension.Namespace != "")
                 hintName = $"{extension.Namespace}.{hintName}";
-            context.AddSource(hintName, SourceText.From(source, Encoding.UTF8));
+            context.AddSource(hintName, GenerateSource(extension));
         }
 
-        static string GenerateSource(ExtensionInfo extension)
+        static SourceText GenerateSource(ExtensionInfo extension)
         {
-            var buffer = new StringWriter();
-            var w = new IndentedTextWriter(buffer, new string(' ', 4));
+            using var w = new SourceWriter();
 
             w.WriteLines([
                 "using System;",
@@ -36,17 +33,17 @@ internal static partial class Executor
             ]);
 
             if (extension.Namespace != "")
-                w.WriteLines([ $"namespace {extension.Namespace};", "" ]);
+                w.WriteLines([$"namespace {extension.Namespace};", ""]);
 
             w.WriteLines([
                 $"public partial class {extension.ClassName} : IExtensionInfoInit",
                 "{"
             ]);
 
-            using (w.IndentBlock())
+            using (w.IndentScope())
             {
                 w.WriteLine("ExtensionInfo IExtensionInfoInit.Info => new(");
-                using (w.IndentBlock())
+                using (w.IndentScope())
                 {
                     var properties = new List<string>(4);
                     if (extension.Name is not null)
@@ -70,7 +67,7 @@ internal static partial class Executor
             }
             w.WriteLine("}");
 
-            return buffer.ToString();
+            return w.ToSourceText();
         }
     }
 }

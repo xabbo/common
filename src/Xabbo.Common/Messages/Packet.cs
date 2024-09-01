@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
+using System.Text;
 
 namespace Xabbo.Messages;
 
@@ -39,11 +39,18 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     { }
 
     /// <summary>
-    /// Constructs a new packet with the specified protocol and message header.
+    /// Constructs a new packet with the specified header.
     /// </summary>
     /// <param name="header">The message header.</param>
     public Packet(Header header)
         : this(header, new PacketBuffer())
+    { }
+
+    /// <summary>
+    /// Constructs a new packet.
+    /// </summary>
+    public Packet()
+        : this(Header.Unknown, new PacketBuffer())
     { }
 
     public Packet Copy() => new(Header, Buffer.Copy());
@@ -60,38 +67,28 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
     /// </summary>
     public void Dispose() => Buffer.Dispose();
 
-    private PacketReader Reader(ref int pos) => new(this, ref pos);
-    private PacketWriter Writer(ref int pos) => new(this, ref pos);
+    public PacketReader Reader() => new(this, ref _position);
+    public PacketReader ReaderAt(ref int pos) => new(this, ref pos);
+    public PacketWriter Writer() => new(this, ref _position);
+    public PacketWriter WriterAt(ref int pos) => new(this, ref pos);
 
-    public T Read<T>() => Reader(ref _position).Read<T>();
-    public T ReadAt<T>(int pos) => Reader(ref pos).Read<T>();
+    public string Content
+    {
+        get
+        {
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            return Encoding.UTF8.GetString(Buffer.Span);
+        }
 
-    public T[] ReadArray<T>() => Reader(ref _position).ReadArray<T>();
-    public T[] ReadArrayAt<T>(int pos) => Reader(ref pos).ReadArray<T>();
+        set
+        {
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            Position = 0;
+            Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
+        }
+    }
 
-    public Span<byte> Allocate(int n) => Writer(ref _position).Allocate(n);
-
-    public void Write(ReadOnlySpan<byte> span) => Writer(ref _position).Write(span);
-    public void Write<T>(T value) => Writer(ref _position).Write(value);
-    public void WriteAt<T>(int pos, T value) => Writer(ref pos).Write(value);
-
-    public void Compose<T>(T value) where T : IComposer => Writer(ref _position).Compose(value);
-    public void ComposeAt<T>(int pos, T value) where T : IComposer => Writer(ref pos).Compose(value);
-    public void ComposeAll<T>(IEnumerable<T> values) where T : IComposer, IManyComposer<T> => Writer(ref _position).ComposeAll(values);
-    public void ComposeAllAt<T>(int pos, IEnumerable<T> values) where T : IComposer, IManyComposer<T> => Writer(ref pos).ComposeAll(values);
-
-    public void Replace<T>(T value) => Writer(ref _position).Replace(value);
-    public void ReplaceAt<T>(int pos, T value) => Writer(ref pos).Replace(value);
-
-    public void Modify<T>(Func<T, T> transform) => Writer(ref _position).Modify(transform);
-    public void ModifyAt<T>(int pos, Func<T, T> transform) => Writer(ref pos).Modify(transform);
-
-    public T Parse<T>() where T : IParser<T> => Reader(ref _position).Parse<T>();
-    public T ParseAt<T>(int pos) where T : IParser<T> => Reader(ref pos).Parse<T>();
-
-    public T[] ParseArray<T>() where T : IParser<T> => Reader(ref _position).ParseArray<T>();
-    public T[] ParseArrayAt<T>(int pos) where T : IParser<T> => Reader(ref pos).ParseArray<T>();
-
-    public T[] ParseAll<T>() where T : IParser<T>, IManyParser<T> => Reader(ref _position).ParseAll<T>();
-    public T[] ParseAllAt<T>(int pos) where T : IParser<T>, IManyParser<T> => Reader(ref pos).ParseAll<T>();
+    public ReadOnlySpan<byte> ReadSpan(int n) => Reader().ReadSpan(n);
+    public void WriteSpan(ReadOnlySpan<byte> span) => Writer().WriteSpan(span);
+    public Span<byte> Allocate(int n) => Writer().Allocate(n);
 }

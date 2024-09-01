@@ -161,7 +161,8 @@ internal static partial class Extractor
                         Client client = Client.None;
 
                         int colonIndex = name.IndexOf(':');
-                        if (colonIndex >= 0) {
+                        if (colonIndex >= 0)
+                        {
                             string clientIdentifier = name.Substring(0, colonIndex);
                             if (clientIdentifier.Length == 1)
                                 client = clientIdentifier[0].ToClient();
@@ -204,19 +205,23 @@ internal static partial class Extractor
                 ));
             }
 
-            if (method is not {
-                ReturnsVoid: true,
-                Parameters: [{
-                    RefKind: RefKind.None,
-                    Type: {
-                        ContainingNamespace: {
-                            ContainingNamespace.IsGlobalNamespace: true,
-                            Name: "Xabbo"
-                        },
-                        Name: "Intercept"
-                    }
-                }]
-            })
+            if (method is not
+                {
+                    ReturnsVoid: true,
+                    Parameters: [
+                        {
+                            RefKind: RefKind.None,
+                            Type:
+                            {
+                                ContainingNamespace:
+                                {
+                                    ContainingNamespace.IsGlobalNamespace: true,
+                                    Name: "Xabbo"
+                                },
+                                Name: "Intercept"
+                            }
+                        }]
+                })
             {
                 diagnostics.Add(new DiagnosticInfo(
                     DiagnosticDescriptors.InvalidInterceptMethodSignature,

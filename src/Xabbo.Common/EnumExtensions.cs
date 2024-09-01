@@ -22,7 +22,8 @@ public static class EnumExtensions
     /// Returns a short string representation of the specified client.
     /// </summary>
     /// <returns><c>u</c>, <c>f</c>, <c>s</c> or a combination representing which client flags are set.</returns>
-    public static string Short(this ClientType client) => client switch {
+    public static string Short(this ClientType client) => client switch
+    {
         ClientType.None => "",
         ClientType.Unity => "u",
         ClientType.Unity | ClientType.Flash => "uf",

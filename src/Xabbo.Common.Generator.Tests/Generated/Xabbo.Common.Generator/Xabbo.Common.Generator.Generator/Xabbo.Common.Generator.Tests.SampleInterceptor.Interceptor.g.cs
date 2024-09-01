@@ -4,13 +4,13 @@ using Xabbo;
 using Xabbo.Messages;
 using Xabbo.Interceptor;
 
-[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Tests.SampleInterceptor.OnChat(Xabbo.Intercept)")]
-[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Tests.SampleInterceptor.OnMove(Xabbo.Intercept)")]
-[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Tests.SampleInterceptor.OnPingPong(Xabbo.Intercept)")]
-[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Tests.SampleInterceptor.OnObjects(Xabbo.Intercept)")]
-[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Tests.SampleInterceptor.OnToken(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnChat(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnMove(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnPingPong(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnObjects(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnShockwaveObjects(Xabbo.Intercept)")]
 
-namespace Xabbo.Common.Tests;
+namespace Xabbo.Common.Generator.Tests;
 
 public partial class SampleInterceptor : IMessageHandler
 {
@@ -48,7 +48,7 @@ public partial class SampleInterceptor : IMessageHandler
                 (ReadOnlySpan<Identifier>)[
                     (ClientType.Shockwave, Direction.In, "Objects")
                 ],
-                OnToken
+                OnShockwaveObjects
             ) { Target = ClientType.Shockwave }
         ]));
     }

@@ -6,9 +6,3 @@ public sealed record ExtensionInfo(
     string? Author = null,
     string? Version = null
 );
-
-public class ASdf : IExtensionInfoInit {
-    ExtensionInfo IExtensionInfoInit.Info => new(
-        Author: "asd"
-    );
-}

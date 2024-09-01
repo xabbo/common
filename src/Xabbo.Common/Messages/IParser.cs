@@ -1,7 +1,7 @@
 ﻿namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents an object that can be deserialized from a packet.
+/// Represents an object that can be parsed from a packet.
 /// </summary>
 public interface IParser<T> where T : IParser<T>
 {

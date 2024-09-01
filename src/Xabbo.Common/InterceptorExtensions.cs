@@ -13,10 +13,10 @@ namespace Xabbo;
 public static class InterceptorExtensions
 {
     public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Header> headers, Action<Intercept> callback)
-        => interceptor.Dispatcher.Register(new([ new(headers, callback) ]) { Persistent = true });
+        => interceptor.Dispatcher.Register(new([new(headers, callback)]) { Persistent = true });
 
     public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback)
-        => interceptor.Dispatcher.Register(new([ new(identifiers, callback) ]) { Persistent = true });
+        => interceptor.Dispatcher.Register(new([new(identifiers, callback)]) { Persistent = true });
 
     /// <summary>
     /// Asynchronously captures the first intercepted packet matching any of the specified headers.
@@ -49,6 +49,6 @@ public static class InterceptorExtensions
         int timeout = -1, bool block = false, Func<IPacket, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default)
     {
-        return new CaptureMessageTask(interceptor, [..interceptor.Messages.Resolve(identifiers)], block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
+        return new CaptureMessageTask(interceptor, [.. interceptor.Messages.Resolve(identifiers)], block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
     }
 }

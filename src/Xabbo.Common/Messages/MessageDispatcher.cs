@@ -147,7 +147,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
             // Skip if the current client is not targeted.
             if ((handler.Target & _currentClient) == ClientType.None)
                 continue;
-            var set = new Headers([.. handler.Headers ]);
+            var set = new Headers([.. handler.Headers]);
             if (handler.Identifiers.Length > 0)
             {
                 if (Messages.TryResolve(handler.Identifiers, out Headers? headers, out Identifiers? unresolved))

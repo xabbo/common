@@ -8,6 +8,9 @@ namespace Xabbo.Messages;
 /// </summary>
 public readonly record struct VL64(int Value)
 {
+    public static readonly VL64 MinValue = new(-0x7fffffff);
+    public static readonly VL64 MaxValue = new(0x7fffffff);
+
     /// <summary>
     /// Returns the number of bytes required to represent the specified VL64.
     /// </summary>
@@ -20,6 +23,9 @@ public readonly record struct VL64(int Value)
 
     public static void Encode(Span<byte> buf, VL64 value)
     {
+        if (value < MinValue || value > MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(value), "Value is outside the range of a VL64.");
+
         int n = EncodeLength(value);
         if (buf.Length < n)
             throw new Exception($"Not enough space in buffer to encode {value} as a VL64. (need {n} bytes, have {buf.Length})");
