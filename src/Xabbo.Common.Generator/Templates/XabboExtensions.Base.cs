@@ -1,8 +1,7 @@
 [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
 internal static partial class XabboExtensions
 {
-    // * Implementation to be generated *
-    // private static T Read<T>(in PacketReader r);
+    private static partial T Read<T>(in global::Xabbo.Messages.PacketReader r);
 
     private static T[] ReadArray<T>(in global::Xabbo.Messages.PacketReader r)
     {
@@ -43,8 +42,7 @@ internal static partial class XabboExtensions
         }
     }
 
-    // * Implementation to be generated *
-    // private static void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)
+    private static partial void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value);
 
     private static void Modify<T>(in global::Xabbo.Messages.PacketWriter w, global::System.Func<T, T> modifier)
     {

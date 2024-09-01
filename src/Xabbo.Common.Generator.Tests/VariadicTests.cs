@@ -73,7 +73,35 @@ public class VariadicTests
         p.ReplaceAt<bool, byte, short, int, float, long, string, Id, Length>(0, false, 1, 2, 3, 4, 5, "6", 7, 8);
     }
 
-    // TODO: Modify(At)
+    static void GenerateModify(IPacket p)
+    {
+        p.Modify(
+            (bool _) => false,
+            (byte _) => 1,
+            (short _) => 2,
+            (int _) => 3,
+            (float _) => 4,
+            (long _) => 5,
+            (string _) => "6",
+            (Id _) => 7,
+            (Length _) => 8
+        );
+    }
+
+    static void GenerateModifyAt(IPacket p)
+    {
+        p.ModifyAt(0,
+            (bool _) => false,
+            (byte _) => 1,
+            (short _) => 2,
+            (int _) => 3,
+            (float _) => 4,
+            (long _) => 5,
+            (string _) => "6",
+            (Id _) => 7,
+            (Length _) => 8
+        );
+    }
 
     static void GenerateSendHeader(IConnection c)
     {
@@ -84,6 +112,9 @@ public class VariadicTests
         c.Send(header, 1, 2);
         c.Send(header, 1, 2, 3);
         c.Send(header, 1, 2, 3, 4);
+        c.Send(header, 1, 2, 3, 4, 5);
+
+        c.Send<bool, byte, short, int, float, long, string, Id, Length>(header, true, 1, 2, 3, 4, 5, "6", 7, 8);
     }
 
     static void GenerateSendIdentifier(IConnection c)
@@ -95,5 +126,7 @@ public class VariadicTests
         c.Send(identifier, 1, 2);
         c.Send(identifier, 1, 2, 3);
         c.Send(identifier, 1, 2, 3, 4);
+
+        c.Send<bool, byte, short, int, float, long, string, Id, Length>(identifier, true, 1, 2, 3, 4, 5, "6", 7, 8);
     }
 }
