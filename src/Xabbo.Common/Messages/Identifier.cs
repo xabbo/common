@@ -7,6 +7,8 @@ namespace Xabbo.Messages;
 /// </summary>
 public readonly record struct Identifier(ClientType Client, Direction Direction, string Name)
 {
+    public static readonly Identifier Unknown = new();
+
     public Identifier()
         : this(ClientType.None, Direction.None, "")
     { }
