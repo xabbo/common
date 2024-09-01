@@ -1,6 +1,6 @@
 ﻿internal static partial class XabboExtensions
 {
-    private static T Read<T>(in global::Xabbo.Messages.PacketReader r)
+    private static partial T Read<T>(in global::Xabbo.Messages.PacketReader r)
     {
         if (typeof(T) == typeof(bool)) return (T)(object)r.ReadBool();
         if (typeof(T) == typeof(byte)) return (T)(object)r.ReadByte();
@@ -14,8 +14,8 @@
         /* Generated 3 cases */
         if (typeof(T) == typeof(global::Xabbo.Common.Tests.Tile))
             return (T)(object)r.Parse<global::Xabbo.Common.Tests.Tile>();
-        if (typeof(T) == typeof(global::System.Int32[]))
-            return (T)(object)ReadArray<global::System.Int32>(in r);
+        if (typeof(T) == typeof(int[]))
+            return (T)(object)ReadArray<int>(in r);
         if (typeof(T) == typeof(global::Xabbo.Common.Tests.Tile[]))
             return (T)(object)ReadArray<global::Xabbo.Common.Tests.Tile>(in r);
         throw new global::System.NotSupportedException($"Cannot read value of type '{typeof(T)}'.");

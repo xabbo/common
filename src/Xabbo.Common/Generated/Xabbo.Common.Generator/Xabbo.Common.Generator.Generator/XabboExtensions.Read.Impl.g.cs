@@ -1,6 +1,6 @@
 ﻿internal static partial class XabboExtensions
 {
-    private static T Read<T>(in global::Xabbo.Messages.PacketReader r)
+    private static partial T Read<T>(in global::Xabbo.Messages.PacketReader r)
     {
         if (typeof(T) == typeof(bool)) return (T)(object)r.ReadBool();
         if (typeof(T) == typeof(byte)) return (T)(object)r.ReadByte();

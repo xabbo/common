@@ -1,6 +1,6 @@
 ﻿internal static partial class XabboExtensions
 {
-    private static void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)
+    private static partial void Replace<T>(in global::Xabbo.Messages.PacketWriter w, T value)
     {
         switch (value)
         {
@@ -15,8 +15,7 @@
             case global::Xabbo.Id v: w.ReplaceId(v); break;
             case global::Xabbo.Messages.B64 v: w.ReplaceB64(v); break;
             case global::Xabbo.Messages.VL64 v: w.ReplaceVL64(v); break;
-            case global::Xabbo.Common.Generator.Tests.TestParserComposer v: w.ReplaceStruct(v); break;
-            case global::Xabbo.Common.Generator.Tests.TestModifiable v: w.ReplaceStruct(v); break;
+            /* Generated 0 cases */
             default: throw new global::System.NotSupportedException($"Cannot replace value of type '{typeof(T)}'.");
         }
     }
