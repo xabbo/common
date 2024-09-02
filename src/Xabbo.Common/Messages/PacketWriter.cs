@@ -25,6 +25,27 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     public PacketWriter WriterAt(ref int pos) => new(Packet, ref pos);
 
     /// <summary>
+    /// Gets the contents of the packet as a string.
+    /// <para/>
+    /// Only supported on Shockwave.
+    /// </summary>
+    public string Content
+    {
+        get
+        {
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            return Encoding.UTF8.GetString(Packet.Buffer.Span);
+        }
+
+        set
+        {
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            Pos = 0;
+            Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
+        }
+    }
+
+    /// <summary>
     /// Allocates the specified number of bytes from the current position
     /// and returns the allocated range as a <see cref="Span{T}"/> of bytes.
     /// </summary>

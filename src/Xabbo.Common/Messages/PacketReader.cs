@@ -20,6 +20,20 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos)
     public PacketReader(IPacket packet) : this(packet, ref packet.Position) { }
 
     /// <summary>
+    /// Gets the contents of the packet as a string.
+    /// <para/>
+    /// Only supported on Shockwave.
+    /// </summary>
+    public string Content
+    {
+        get
+        {
+            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+            return Encoding.UTF8.GetString(Packet.Buffer.Span);
+        }
+    }
+
+    /// <summary>
     /// Reads a <see cref="Span{T}"/> of bytes of length <paramref name="n"/> from the current position and advances it.
     /// </summary>
     /// <param name="n">The number of bytes to read.</param>

@@ -74,18 +74,8 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDispo
 
     public string Content
     {
-        get
-        {
-            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
-            return Encoding.UTF8.GetString(Buffer.Span);
-        }
-
-        set
-        {
-            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
-            Position = 0;
-            Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
-        }
+        get => Reader().Content;
+        set => Writer().Content = value;
     }
 
     public ReadOnlySpan<byte> ReadSpan(int n) => Reader().ReadSpan(n);
