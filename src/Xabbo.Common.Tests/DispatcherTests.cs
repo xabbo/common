@@ -75,15 +75,32 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
     private void DispatchN(Identifier identifier, int n)
     {
+        IPacket packet = new Packet(Messages.Resolve(identifier));
+        bool block = false;
         for (int i = 0; i < n; i++)
-            Dispatch(identifier);
+            Dispatch(ref packet, ref block);
+        packet.Dispose();
     }
 
-    private Intercept Dispatch(Identifier identifier) => Dispatch(new Packet(Messages.Resolve(identifier)));
-
-    private Intercept Dispatch(IPacket packet)
+    private void Dispatch(Header header)
     {
-        Intercept intercept = new(Ext, packet);
+        IPacket packet = new Packet(header);
+        bool block = false;
+        Dispatch(ref packet, ref block);
+        packet.Dispose();
+    }
+
+    private void Dispatch(Identifier identifier)
+    {
+        IPacket packet = new Packet(Messages.Resolve(identifier));
+        bool block = false;
+        Dispatch(ref packet, ref block);
+        packet.Dispose();
+    }
+
+    private Intercept Dispatch(ref IPacket packet, ref bool block)
+    {
+        Intercept intercept = new(Ext, ref packet, ref block);
         Dispatcher.Dispatch(intercept);
         return intercept;
     }
@@ -91,9 +108,10 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     [Fact(DisplayName = "Intercept should be correctly routed to registered handler")]
     public void TestIntercept()
     {
-        var handler = new Mock<Action<Intercept>>();
+        int invocations = 0;
+        void callback(Intercept e) => invocations++;
 
-        var registration = Ext.Intercept(In.Chat, handler.Object);
+        var registration = Ext.Intercept(In.Chat, callback);
 
         Dispatch(In.Chat);
 
@@ -102,34 +120,33 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         Dispatch(In.Chat);
 
         // Verify that the handler was invoked only once, and not after the handler was removed.
-        handler.Verify(e => e.Invoke(It.IsAny<Intercept>()), Times.Once);
+        Assert.Equal(1, invocations);
     }
 
     [Fact(DisplayName = "Intercepting on Header.All should intercept all packets")]
     public void TestGlobalIntercept()
     {
-        const int expectedCount = 5;
+        const int expectedInvocations = 5;
 
-        var handler = new Mock<Action<Intercept>>();
+        int actualInvocations = 0;
+        void callback(Intercept e) => actualInvocations++;
 
-        var registration = Ext.Intercept(Header.All, handler.Object);
+        var registration = Ext.Intercept(Header.All, callback);
 
-        for (int i = 0; i < expectedCount; i++)
-            Dispatcher.Dispatch(new(Ext, new Packet((ClientType.Flash, Direction.In, (short)i))));
+        for (int i = 0; i < expectedInvocations; i++)
+            Dispatch((ClientType.Flash, Direction.In, (short)i));
 
         registration.Dispose();
 
-        for (int i = 0; i < expectedCount; i++)
-            Dispatcher.Dispatch(new(Ext, new Packet((ClientType.Flash, Direction.In, (short)i))));
+        for (int i = 0; i < expectedInvocations; i++)
+            Dispatch((ClientType.Flash, Direction.In, (short)i));
 
-        handler.Verify(e => e.Invoke(It.IsAny<Intercept>()), Times.Exactly(expectedCount));
+        Assert.Equal(actualInvocations, expectedInvocations);
     }
 
     [Fact(DisplayName = "Intercept successfully flags a packet as blocked")]
     public void TestBlock()
     {
-        var handler = new Mock<Action<Intercept>>();
-
         Ext.Intercept([In.Chat, In.Shout, In.Whisper], e =>
         {
             string msg = e.Packet.Read<string>();
@@ -137,43 +154,43 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
                 e.Block();
         });
 
-        var pkt = new Packet(Messages.Resolve(In.Shout));
-        pkt.Write("please don't block me");
+        IPacket packet = new Packet(Messages.Resolve(In.Shout));
+        packet.Write("please don't block me");
 
-        var intercept = Dispatch(pkt);
+        bool block = false;
+        Dispatch(ref packet, ref block);
 
-        Assert.True(intercept.IsBlocked);
+        Assert.True(block);
     }
 
     [Fact(DisplayName = "Modify correctly modifies packet inside an intercept handler")]
     public void TestModify()
     {
-        var mockHandler = new Mock<Action<Intercept>>();
-
         Ext.Intercept([In.Chat, In.Shout, In.Whisper], e =>
         {
             e.Packet.Read<int>();
             e.Packet.Modify<string>(s => s.Replace("apple", "orange"));
         });
 
-        IPacket pkt = new Packet(Messages.Resolve(In.Shout));
-        pkt.Write(1234, "I like apples");
+        IPacket packet = new Packet(Messages.Resolve(In.Shout));
+        packet.Write(1234, "I like apples");
 
-        var intercept = Dispatch(pkt);
-        pkt = intercept.Packet;
+        bool block = false;
+        var intercept = Dispatch(ref packet, ref block);
 
-        pkt.Position = 0;
-        pkt.Read<int>();
+        packet.Position = 0;
+        packet.Read<int>();
 
-        Assert.Equal("I like oranges", pkt.Read<string>());
+        Assert.Equal("I like oranges", packet.Read<string>());
     }
 
     [Fact(DisplayName = "Dispatcher.Reset should clear intercept handleres")]
     public void TestDispatcherReset()
     {
-        var handler = new Mock<Action<Intercept>>();
+        int expectedInvocations = 1, actualInvocations = 0;
+        void callback(Intercept e) => actualInvocations++;
 
-        Ext.Intercept(In.Chat, handler.Object);
+        Ext.Intercept(In.Chat, callback);
 
         Dispatch(In.Chat);
 
@@ -181,15 +198,16 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         Dispatch(In.Chat);
 
-        handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Once);
+        Assert.Equal(expectedInvocations, actualInvocations);
     }
 
     [Fact(DisplayName = "Persistent intercept should be reattached on reconnect")]
     public void TestPersistentIntercept()
     {
-        var handler = new Mock<Action<Intercept>>();
+        int expectedInvocations = 5, actualInvocations = 0;
+        void callback(Intercept e) => actualInvocations++;
 
-        Ext.Intercept(In.Chat, handler.Object);
+        Ext.Intercept(In.Chat, callback);
 
         DispatchN(In.Chat, 1); // o
 
@@ -201,15 +219,16 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         DispatchN(In.Chat, 4); // o
 
-        handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(5));
+        Assert.Equal(expectedInvocations, actualInvocations);
     }
 
     [Fact(DisplayName = "Persistent intercept should detach immediately on disposal")]
     public void TestPersistentInterceptDisposable()
     {
-        var handler = new Mock<Action<Intercept>>();
+        int expectedInvocations = 1, actualInvocations = 0;
+        void callback(Intercept e) => actualInvocations++;
 
-        var persistentIntercept = Ext.Intercept(In.Chat, handler.Object);
+        var persistentIntercept = Ext.Intercept(In.Chat, callback);
 
         DispatchN(In.Chat, 1); // o
 
@@ -225,7 +244,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         DispatchN(In.Chat, 8); // x
 
-        handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Once);
+        Assert.Equal(expectedInvocations, actualInvocations);
     }
 
     [Fact(DisplayName = "Transient intercept should not persist after reconnect")]
@@ -233,10 +252,11 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         SimulateConnect(ClientType.Flash);
 
-        var handler = new Mock<Action<Intercept>>();
+        int expectedInvocations = 1, actualInvocations = 0;
+        void callback(Intercept e) => actualInvocations++;
 
         Dispatcher.Register(new InterceptGroup([
-            new InterceptHandler(In.Chat, handler.Object)
+            new InterceptHandler(In.Chat, callback)
         ]));
 
         DispatchN(In.Chat, 1);
@@ -245,7 +265,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
         DispatchN(In.Chat, 2);
 
-        handler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Once);
+        Assert.Equal(actualInvocations, expectedInvocations);
     }
 
     [Fact(DisplayName = "Only targeted handlers should be attached")]
@@ -253,25 +273,24 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         SimulateConnect(ClientType.Flash);
 
-        var targetedHandler = new Mock<Action<Intercept>>();
-        targetedHandler.Setup(x => x.Invoke(It.IsAny<Intercept>()));
+        int expectedTargetedInvocations = 2, actualTargetedInvocations = 0;
+        void targetedCallback(Intercept e) => actualTargetedInvocations++;
 
-        var untargetedHandler = new Mock<Action<Intercept>>();
-        untargetedHandler.Setup(x => x.Invoke(It.IsAny<Intercept>()));
+        int expectedUntargetedInvocations = 0, actualUntargetedInvocations = 0;
+        void untargetedCallback(Intercept e) => actualTargetedInvocations++;
 
         Dispatcher.Register(new InterceptGroup([
-            new InterceptHandler(In.Chat, targetedHandler.Object) { Target = ClientType.Flash },
-            new InterceptHandler(In.Shout, targetedHandler.Object) { Target = ClientType.Flash | ClientType.Shockwave },
-            new InterceptHandler(In.Whisper, untargetedHandler.Object) { Target = ClientType.Unity },
-        ])
-        { Persistent = true });
+            new InterceptHandler(In.Chat, targetedCallback) { Target = ClientType.Flash },
+            new InterceptHandler(In.Shout, targetedCallback) { Target = ClientType.Flash | ClientType.Shockwave },
+            new InterceptHandler(In.Whisper, untargetedCallback) { Target = ClientType.Unity },
+        ]));
 
         Dispatch(In.Chat);
         Dispatch(In.Shout);
         Dispatch(In.Whisper);
 
-        targetedHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Exactly(2));
-        untargetedHandler.Verify(x => x.Invoke(It.IsAny<Intercept>()), Times.Never);
+        Assert.Equal(expectedTargetedInvocations, actualTargetedInvocations);
+        Assert.Equal(expectedUntargetedInvocations, actualUntargetedInvocations);
     }
 
     [Fact(DisplayName = "Transient intercepts should throw when registered while disconnected")]
