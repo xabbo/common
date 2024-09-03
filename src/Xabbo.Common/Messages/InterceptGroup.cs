@@ -22,29 +22,8 @@ public sealed class InterceptGroup : IReadOnlyList<InterceptHandler>
 
     public bool Persistent { get; set; }
     public void Add(InterceptHandler handler) => _handlers.Add(handler);
-    public void Add(ReadOnlySpan<Header> headers, Action<Intercept> callback) => Add(new(headers, callback));
+    public void Add(ReadOnlySpan<Header> headers, InterceptCallback callback) => Add(new(headers, callback));
 
     public IEnumerator<InterceptHandler> GetEnumerator() => _handlers.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-}
-
-/// <summary>
-/// Defines a set of headers with an intercept callback.
-/// </summary>
-public sealed class InterceptHandler(ReadOnlySpan<Header> headers, ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback)
-{
-    public InterceptHandler(ReadOnlySpan<Header> headers, Action<Intercept> callback) : this(headers, [], callback) { }
-    public InterceptHandler(ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback) : this([], identifiers, callback) { }
-
-    /// <summary>
-    /// Specifies which clients this handler should be registered for.
-    /// The handler will only be attached on the specified sessions.
-    /// </summary>
-    public ClientType Target { get; init; } = ClientType.All;
-
-    private readonly Header[] _headers = headers.ToArray();
-    private readonly Identifier[] _identifiers = identifiers.ToArray();
-    public ReadOnlySpan<Header> Headers => _headers;
-    public ReadOnlySpan<Identifier> Identifiers => _identifiers;
-    public Action<Intercept> Callback => callback;
 }

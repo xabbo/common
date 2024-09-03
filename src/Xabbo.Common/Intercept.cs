@@ -8,11 +8,11 @@ namespace Xabbo;
 /// <summary>
 /// Contains the event arguments of an intercepted packet.
 /// </summary>
-public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventArgs, IDisposable
+public readonly ref struct Intercept(IInterceptor interceptor, ref IPacket packet, ref bool block)
 {
-    private readonly IPacket _originalPacket = packet;
     private readonly Header _originalHeader = packet.Header;
-    private IPacket _packet = packet;
+    private readonly ref IPacket _packet = ref packet;
+    private readonly ref bool _blocked = ref block;
 
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
@@ -46,7 +46,7 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
     /// </summary>
-    public bool IsBlocked { get; private set; }
+    public bool IsBlocked => _blocked;
 
     /// <summary>
     /// Gets whether the intercepted packet's unmodified header matches any of the specified identifiers.
@@ -56,14 +56,5 @@ public sealed class Intercept(IInterceptor interceptor, IPacket packet) : EventA
     /// <summary>
     /// Flags the packet to be blocked from its destination by the interceptor.
     /// </summary>
-    public void Block() => IsBlocked = true;
-
-    /// <summary>
-    /// Disposes of this Intercept instance and its packet.
-    /// </summary>
-    public void Dispose()
-    {
-        _originalPacket.Dispose();
-        Packet.Dispose();
-    }
+    public void Block() => _blocked = true;
 }
