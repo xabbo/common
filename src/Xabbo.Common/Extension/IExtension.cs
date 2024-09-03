@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Xabbo.Interceptor;
+using Xabbo.Messages;
 
 namespace Xabbo.Extension;
 
@@ -22,5 +23,5 @@ public interface IExtension : IInterceptor
     /// <summary>
     /// Invoked when a packet has been intercepted.
     /// </summary>
-    event Action<Intercept>? Intercepted;
+    event InterceptCallback? Intercepted;
 }

@@ -12,10 +12,10 @@ namespace Xabbo;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class InterceptorExtensions
 {
-    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Header> headers, Action<Intercept> callback)
+    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Header> headers, InterceptCallback callback)
         => interceptor.Dispatcher.Register(new([new(headers, callback)]) { Persistent = true });
 
-    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, Action<Intercept> callback)
+    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, InterceptCallback callback)
         => interceptor.Dispatcher.Register(new([new(identifiers, callback)]) { Persistent = true });
 
     /// <summary>
