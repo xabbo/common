@@ -7,6 +7,7 @@ using Xabbo.Extension;
 
 using Xabbo.Common.Tests.Fixtures;
 using Xabbo.Connection;
+using Xunit.Abstractions;
 
 namespace Xabbo.Common.Tests;
 
@@ -32,6 +33,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         public static readonly Identifier Whisper = _();
     }
 
+    private ITestOutputHelper Log { get; }
     private MessagesFixture Fixture { get; }
     private IMessageManager Messages { get; }
     private IMessageDispatcher Dispatcher { get; }
@@ -39,8 +41,9 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
 
     private Mock<IExtension> ExtMock { get; }
 
-    public DispatcherTests(MessagesFixture fixture)
+    public DispatcherTests(ITestOutputHelper output, MessagesFixture fixture)
     {
+        Log = output;
         Fixture = fixture;
         Messages = fixture.Messages;
 
@@ -308,15 +311,38 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         });
     }
 
-    class MoveMsg(int x, int y) : IMessage
+    public class MoveMsg(int x, int y) : IMessage<MoveMsg>
     {
-        public Identifier Identifier => (ClientType.Flash, Direction.Out, "MoveAvatar");
+        static Identifier IMessage<MoveMsg>.Identifier => Out.MoveAvatar;
         public int X { get; set; } = x;
         public int Y { get; set; } = y;
-        public void Compose(in PacketWriter p)
+        void IComposer.Compose(in PacketWriter p)
         {
-            p.WriteInt(X);
-            p.WriteInt(Y);
+            if (p.Client == ClientType.Shockwave)
+            {
+                p.WriteB64((B64)X);
+                p.WriteB64((B64)Y);
+            }
+            else
+            {
+                p.WriteInt(X);
+                p.WriteInt(Y);
+            }
+        }
+        static MoveMsg IParser<MoveMsg>.Parse(in PacketReader p)
+        {
+            int x, y;
+            if (p.Client == ClientType.Shockwave)
+            {
+                x = p.ReadB64();
+                y = p.ReadB64();
+            }
+            else
+            {
+                x = p.ReadInt();
+                y = p.ReadInt();
+            }
+            return new MoveMsg(x, y);
         }
     }
 
@@ -324,15 +350,17 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     public void TestIMessageImplementation()
     {
         var msg = new MoveMsg(3, 4);
-        var mock = new Mock<IConnection>();
-        mock.Setup(x => x.Messages).Returns(Messages);
-        mock.Object.Send(msg);
 
-        mock.Verify(x => x.Send(It.IsAny<IPacket>()), Times.Once);
-        mock.Verify(x => x.Send(
+        Header expectedHeader = Messages.Resolve(((IMessage<MoveMsg>)msg).GetIdentifier(ClientType.Flash));
+        int expectedLength = 8;
+
+        Ext.Send(msg);
+
+        ExtMock.Verify(x => x.Send(It.IsAny<IPacket>()), Times.Once);
+        ExtMock.Verify(x => x.Send(
             It.Is<IPacket>(p =>
-                p.Header == Messages.Resolve(msg.Identifier) &&
-                p.Length == 8
+                p.Header == expectedHeader &&
+                p.Length == expectedLength
             ))
         );
     }
