@@ -12,9 +12,11 @@ public sealed class InterceptHandler(ReadOnlySpan<Header> headers, ReadOnlySpan<
 
     /// <summary>
     /// Specifies which clients this handler should be registered for.
-    /// The handler will only be attached on the specified sessions.
+    /// The handler will only be attached on the specified clients.
     /// </summary>
     public ClientType Target { get; init; } = ClientType.All;
+
+    public bool UseTargetedIdentifiers { get; set; }
 
     private readonly Header[] _headers = headers.ToArray();
     private readonly Identifier[] _identifiers = identifiers.ToArray();
