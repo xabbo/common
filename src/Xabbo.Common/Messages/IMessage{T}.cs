@@ -29,7 +29,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     {
         return new InterceptHandler([.. T.Identifiers], (e) => {
             int pos = 0;
-            callback(new Intercept<T>(ref e, e.Packet.ReaderAt(ref pos).Parse<T>()));
+            callback(new Intercept<T>(ref e, new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>()));
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
@@ -44,7 +44,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         return new InterceptHandler([.. T.Identifiers], (e) =>
         {
             int pos = 0;
-            callback(e.Packet.ReaderAt(ref pos).Parse<T>());
+            callback(new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>());
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
@@ -59,7 +59,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         return new InterceptHandler([.. T.Identifiers], e =>
         {
             int pos = 0;
-            callback(e, e.Packet.ReaderAt(ref pos).Parse<T>());
+            callback(e, new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>());
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers

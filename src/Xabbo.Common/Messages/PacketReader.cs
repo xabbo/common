@@ -7,10 +7,11 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Provides primitive packet read operations.
 /// </summary>
-public readonly ref struct PacketReader(IPacket packet, ref int pos)
+public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserContext? context = null)
 {
     private readonly IPacket Packet = packet;
     public readonly ref int Pos = ref pos;
+    public IParserContext? Context => context;
     public Header Header => Packet.Header;
     public ClientType Client => Packet.Header.Client;
     public ReadOnlySpan<byte> Span => Packet.Buffer.Span;

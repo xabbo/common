@@ -8,13 +8,8 @@ namespace Xabbo.Connection;
 /// <summary>
 /// Represents a connection to the game server.
 /// </summary>
-public interface IConnection
+public interface IConnection : IParserContext
 {
-    /// <summary>
-    /// Gets the message manager associated with this connection.
-    /// </summary>
-    IMessageManager Messages { get; }
-
     /// <summary>
     /// Gets if the connection is established.
     /// </summary>
