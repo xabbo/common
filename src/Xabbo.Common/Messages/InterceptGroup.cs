@@ -20,7 +20,13 @@ public sealed class InterceptGroup : IReadOnlyList<InterceptHandler>
         _handlers = [.. handlers];
     }
 
+    /// <summary>
+    /// Gets or sets whether this is a persistent intercept group.
+    /// Persistent intercept groups can be attached before a connection is established,
+    /// and will be re-attached each time the game connects.
+    /// </summary>
     public bool Persistent { get; set; }
+
     public void Add(InterceptHandler handler) => _handlers.Add(handler);
     public void Add(ReadOnlySpan<Header> headers, InterceptCallback callback) => Add(new(headers, callback));
 
