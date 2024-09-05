@@ -96,7 +96,13 @@ public static class InterceptorExtensions
             [.. T.Identifiers],
             timeout,
             block,
-            shouldCapture is not null ? (packet) => shouldCapture.Invoke(T.Parse(packet.Reader())) : null,
+            (packet) => {
+                int pos = 0;
+                PacketReader r = new(packet, ref pos, interceptor);
+                if (!T.Matches(in r)) return false;
+                pos = 0;
+                return shouldCapture?.Invoke(T.Parse(in r)) ?? true;
+            },
             cancellationToken
         );
         return T.Parse(packet.Reader());

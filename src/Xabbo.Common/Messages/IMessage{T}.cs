@@ -18,6 +18,11 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     static abstract Identifier Identifier { get; }
 
     /// <summary>
+    /// Checks whether the specified packet matches this message.
+    /// </summary>
+    static virtual bool Matches(in PacketReader p) => true;
+
+    /// <summary>
     /// Gets the identifier for this message instance.
     /// </summary>
     public virtual Identifier GetIdentifier(ClientType client) => T.Identifier;
@@ -29,7 +34,10 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     {
         return new InterceptHandler([.. T.Identifiers], (e) => {
             int pos = 0;
-            callback(new Intercept<T>(ref e, new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>()));
+            PacketReader r = new(e.Packet, ref pos, e.Interceptor);
+            if (!T.Matches(in r)) return;
+            pos = 0;
+            callback(new Intercept<T>(ref e, r.Parse<T>()));
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
@@ -44,7 +52,10 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         return new InterceptHandler([.. T.Identifiers], (e) =>
         {
             int pos = 0;
-            callback(new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>());
+            PacketReader r = new(e.Packet, ref pos, e.Interceptor);
+            if (!T.Matches(in r)) return;
+            pos = 0;
+            callback(r.Parse<T>());
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
@@ -59,7 +70,10 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         return new InterceptHandler([.. T.Identifiers], e =>
         {
             int pos = 0;
-            callback(e, new PacketReader(e.Packet, ref pos, e.Interceptor).Parse<T>());
+            PacketReader r = new(e.Packet, ref pos, e.Interceptor);
+            if (!T.Matches(in r)) return;
+            pos = 0;
+            callback(e, r.Parse<T>());
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
