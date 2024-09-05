@@ -25,15 +25,6 @@ public static class InterceptorExtensions
         => interceptor.Dispatcher.Register(new([new(identifiers, callback)]) { Persistent = true });
 
     /// <summary>
-    /// Registers an intercept for the specified message with the provided <see cref="InterceptCallback{T}"/>.
-    /// </summary>
-    public static IDisposable Intercept<T>(this IInterceptor interceptor, InterceptCallback<T> callback)
-        where T : IMessage<T>
-    {
-        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<T>.CreateHandler(callback) ]) { Persistent = true });
-    }
-
-    /// <summary>
     /// Registers an intercept for the specified message with the provided <see cref="MessageCallback{T}"/>.
     /// </summary>
     public static IDisposable Intercept<T>(this IInterceptor interceptor, MessageCallback<T> callback)
