@@ -20,7 +20,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     /// <summary>
     /// Checks whether the specified packet matches this message.
     /// </summary>
-    static virtual bool Matches(in PacketReader p) => true;
+    static virtual bool Match(in PacketReader p) => true;
 
     /// <summary>
     /// Gets the identifier for this message instance.
@@ -35,7 +35,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         return new InterceptHandler([.. T.Identifiers], (e) => {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Matches(in r)) return;
+            if (!T.Match(in r)) return;
             pos = 0;
             callback(new Intercept<T>(ref e, r.Parse<T>()));
         })
@@ -53,7 +53,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Matches(in r)) return;
+            if (!T.Match(in r)) return;
             pos = 0;
             callback(r.Parse<T>());
         })
@@ -71,7 +71,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
         {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Matches(in r)) return;
+            if (!T.Match(in r)) return;
             pos = 0;
             callback(e, r.Parse<T>());
         })

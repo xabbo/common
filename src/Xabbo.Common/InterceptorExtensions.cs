@@ -99,7 +99,7 @@ public static class InterceptorExtensions
             (packet) => {
                 int pos = 0;
                 PacketReader r = new(packet, ref pos, interceptor);
-                if (!T.Matches(in r)) return false;
+                if (!T.Match(in r)) return false;
                 pos = 0;
                 return shouldCapture?.Invoke(T.Parse(in r)) ?? true;
             },
