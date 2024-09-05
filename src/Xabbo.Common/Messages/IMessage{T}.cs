@@ -25,12 +25,12 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     /// <summary>
     /// Gets the identifier for this message instance.
     /// </summary>
-    public virtual Identifier GetIdentifier(ClientType client) => T.Identifier;
+    virtual Identifier GetIdentifier(ClientType client) => T.Identifier;
 
     /// <summary>
     /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptCallback{T}"/> .
     /// </summary>
-    public static InterceptHandler CreateHandler(InterceptCallback<T> callback)
+    static InterceptHandler CreateHandler(InterceptCallback<T> callback)
     {
         return new InterceptHandler([.. T.Identifiers], (e) => {
             int pos = 0;
@@ -47,7 +47,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     /// <summary>
     /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="MessageCallback{T}"/> .
     /// </summary>
-    public static InterceptHandler CreateHandler(MessageCallback<T> callback)
+    static InterceptHandler CreateHandler(MessageCallback<T> callback)
     {
         return new InterceptHandler([.. T.Identifiers], (e) =>
         {
@@ -65,7 +65,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     /// <summary>
     /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptMessageCallback{T}"/> .
     /// </summary>
-    public static InterceptHandler CreateHandler(InterceptMessageCallback<T> callback)
+    static InterceptHandler CreateHandler(InterceptMessageCallback<T> callback)
     {
         return new InterceptHandler([.. T.Identifiers], e =>
         {
