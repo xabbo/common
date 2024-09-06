@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -139,7 +139,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         var transients = new List<IDisposable>(group.Count);
         var headerMap = new Dictionary<InterceptHandler, HashSet<Header>>();
 
-        Identifiers? allUnresolved = null;
+        Identifiers? unresolved = null;
 
         // First pass makes sure identifiers are resolved where required.
         foreach (var handler in group)
@@ -148,35 +148,29 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
             if ((handler.Target & _currentClient) == ClientType.None)
                 continue;
             var set = new Headers([.. handler.Headers]);
-            if (handler.Identifiers.Length > 0)
+            foreach (var identifier in handler.Identifiers)
             {
-                if (Messages.TryResolve(handler.Identifiers, out Headers? headers, out Identifiers? unresolved))
-                {
-                    set.UnionWith(Messages.Resolve(handler.Identifiers));
-                }
-                else
-                {
-                    (allUnresolved ??= []).UnionWith(unresolved);
+                // Only attach identifiers for the current client if we are using targeted identifiers.
+                if (handler.UseTargetedIdentifiers && identifier.Client != _currentClient)
                     continue;
-                }
+                if (Messages.TryGetHeader(identifier, out Header header))
+                    set.Add(header);
+                else
+                    (unresolved ??= []).Add(identifier);
             }
             headerMap[handler] = set;
         }
 
-        if (allUnresolved is not null)
-            throw new UnresolvedIdentifiersException(allUnresolved);
+        if (unresolved is not null)
+            throw new UnresolvedIdentifiersException(unresolved);
 
         foreach (var handler in group)
         {
-            // If the handler does not exist here, it was either not included in the target clients,
-            // or some of its identifiers failed to resolve and it is marked as not required.
-            if (headerMap.TryGetValue(handler, out var headers))
-            {
-                foreach (var header in headers)
-                {
-                    transients.Add(GetDispatchList(header).Register(handler));
-                }
-            }
+            // If the handler does not exist here, the current client is not targeted.
+            if (!headerMap.TryGetValue(handler, out var headers))
+                continue;
+            foreach (var header in headers)
+                transients.Add(GetDispatchList(header).Register(handler));
         }
 
         return new Transient([.. transients]);

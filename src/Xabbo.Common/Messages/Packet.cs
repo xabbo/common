@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Buffers;
-using System.Text;
 
 namespace Xabbo.Messages;
 
-public sealed class Packet(Header header, PacketBuffer buffer) : IPacket, IDisposable
+public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
 {
     public Header Header { get; set; } = header;
     public PacketBuffer Buffer { get; } = buffer;

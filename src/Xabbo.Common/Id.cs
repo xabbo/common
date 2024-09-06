@@ -23,5 +23,19 @@ public readonly struct Id(long value)
         return new Id(value);
     }
 
+    public static bool TryParse(string? s, out Id id)
+    {
+        if (!long.TryParse(s, out long value))
+        {
+            id = 0;
+            return false;
+        }
+        else
+        {
+            id = value;
+            return true;
+        }
+    }
+
     public override string ToString() => Value.ToString();
 }

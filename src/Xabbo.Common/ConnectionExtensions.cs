@@ -28,26 +28,17 @@ public static class ConnectionExtensions
     }
 
     /// <summary>
-    /// Sends a message to the client or server, specified by the direction of the message identifier or header.
+    /// Sends a message to the client or server, specified by the direction of the message.
     /// </summary>
-    public static void Send(this IConnection connection, IMessage message)
+    public static void Send<T>(this IConnection connection, IMessage<T> message)
+        where T : IMessage<T>
     {
-        Header header;
-        Identifier identifier = message.Identifier;
+        Identifier identifier = message.GetIdentifier(connection.Session.Client.Type);
+        if (identifier == Identifier.Unknown)
+            throw new Exception($"No identifier for IMessage<{typeof(T).Name}>");
 
-        if (identifier != Identifier.Unknown)
-        {
-            header = connection.Messages.Resolve(identifier);
-        }
-        else
-        {
-            header = message.Header;
-            if (header == Header.Unknown)
-                throw new Exception("Message identifier and header are both unknown.");
-        }
-
-        using Packet packet = new(header);
-        packet.Writer().Compose(message);
+        using Packet packet = new(connection.Messages.Resolve(identifier));
+        packet.Writer().Compose<IComposer>(message);
         connection.Send(packet);
     }
 }
