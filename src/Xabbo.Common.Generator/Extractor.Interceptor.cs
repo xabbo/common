@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using Xabbo.Common.Generator.Diagnostics;
 using Xabbo.Common.Generator.Model;
+using Xabbo.Common.Generator.Utility;
 
 namespace Xabbo.Common.Generator;
 
@@ -67,7 +68,6 @@ internal static partial class Extractor
                 }
             }
 
-
             // Extract intercept info.
             foreach (ISymbol member in members)
             {
@@ -100,6 +100,10 @@ internal static partial class Extractor
             Client interceptsOn = targetClients;
 
             bool hasInterceptAttribute = false;
+            AttributeData?
+                interceptAttribute = null,
+                interceptInAttribute = null,
+                interceptOutAttribute = null;
 
             foreach (AttributeData attr in member.GetAttributes())
             {
@@ -108,42 +112,19 @@ internal static partial class Extractor
 
                 if (attributeName == Constants.InterceptsAttributeMetadataName)
                 {
-                    if (attr.ConstructorArguments.Length == 0)
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
-                            attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                        ));
-                    }
-                    else
-                    {
-                        if (attr.ConstructorArguments[0].Value is int clientTypeValue)
-                        {
-                            interceptsOn &= (Client)clientTypeValue;
-                            if (interceptsOn == Client.None && targetClients != Client.None)
-                            {
-                                diagnostics.Add(new DiagnosticInfo(
-                                    DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
-                                    attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                                ));
-                            }
-                        }
-                    }
+                    interceptAttribute = attr;
+                    hasInterceptAttribute = true;
                     continue;
                 }
 
                 Direction direction = GetDirectionForInterceptAttribute(attributeName);
                 if (direction == Direction.None) continue;
-
-                hasInterceptAttribute = true;
-
                 if (attr.ConstructorArguments.Length != 1)
-                    throw new Exception("arguments len must be 1");
+                    continue;
 
                 var argument = attr.ConstructorArguments[0];
-
                 if (argument.Kind != TypedConstantKind.Array)
-                    throw new Exception("argument kind is " + argument.Kind);
+                    continue;
 
                 if (argument.Values.Length == 0)
                 {
@@ -151,51 +132,57 @@ internal static partial class Extractor
                         DiagnosticDescriptors.IdentifiersNotSpecified,
                         attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                     ));
+                    continue;
                 }
-                else
+
+                hasInterceptAttribute = true;
+
+                foreach (TypedConstant nameConstant in argument.Values)
                 {
-                    foreach (TypedConstant nameConstant in argument.Values)
+                    if (nameConstant.Value is not string name) continue;
+
+                    Client client = Client.None;
+
+                    int colonIndex = name.IndexOf(':');
+                    if (colonIndex >= 0)
                     {
-                        if (nameConstant.Value is not string name) continue;
+                        string clientIdentifier = name[..colonIndex];
+                        if (clientIdentifier.Length == 1)
+                            client = clientIdentifier[0].ToClient();
 
-                        Client client = Client.None;
-
-                        int colonIndex = name.IndexOf(':');
-                        if (colonIndex >= 0)
-                        {
-                            string clientIdentifier = name.Substring(0, colonIndex);
-                            if (clientIdentifier.Length == 1)
-                                client = clientIdentifier[0].ToClient();
-
-                            if (client == Client.None)
-                            {
-                                diagnostics.Add(new DiagnosticInfo(
-                                    DiagnosticDescriptors.InvalidSingleClientSpecifier,
-                                    attr.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
-                                    name.Substring(0, colonIndex + 1)
-                                ));
-                                continue;
-                            }
-
-                            name = name.Substring(colonIndex + 1);
-                        }
-
-                        if (!Identifier.IsValid(name))
+                        if (client == Client.None)
                         {
                             diagnostics.Add(new DiagnosticInfo(
-                                DiagnosticDescriptors.InvalidMessageIdentifier,
+                                DiagnosticDescriptors.InvalidSingleClientSpecifier,
                                 attr.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
-                                name
+                                name[..(colonIndex + 1)]
                             ));
                             continue;
                         }
 
-                        identifiers.Add(new Identifier(client, direction, name));
+                        name = name[(colonIndex + 1)..];
                     }
+
+                    if (!Identifier.IsValid(name))
+                    {
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.InvalidMessageIdentifier,
+                            attr.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                            name
+                        ));
+                        continue;
+                    }
+
+                    identifiers.Add(new Identifier(client, direction, name));
                 }
+
+                if (direction == Direction.In) interceptInAttribute = attr;
+                else if (direction == Direction.Out) interceptOutAttribute = attr;
             }
 
             if (!hasInterceptAttribute) return null;
+
+            string? messageHandlerType = null;
 
             if (member.IsStatic)
             {
@@ -205,34 +192,84 @@ internal static partial class Extractor
                 ));
             }
 
-            if (method is not
-                {
-                    ReturnsVoid: true,
-                    Parameters: [
-                        {
-                            RefKind: RefKind.None,
-                            Type:
-                            {
-                                ContainingNamespace:
-                                {
-                                    ContainingNamespace.IsGlobalNamespace: true,
-                                    Name: "Xabbo"
-                                },
-                                Name: "Intercept"
-                            }
-                        }]
-                })
+            if (!AnalysisHelper.IsInterceptHandlerSignature(method))
             {
-                diagnostics.Add(new DiagnosticInfo(
-                    DiagnosticDescriptors.InvalidInterceptMethodSignature,
-                    method.Locations.FirstOrDefault()
-                ));
+                if (AnalysisHelper.IsInterceptMessageHandlerSignature(method))
+                {
+                    messageHandlerType = ((INamedTypeSymbol)method.Parameters[0].Type).TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+                else if (AnalysisHelper.IsInterceptMessageHandlerSignature2(method))
+                {
+                    messageHandlerType = method.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+                else if (AnalysisHelper.IsMessageHandlerSignature(method))
+                {
+                    messageHandlerType = method.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+                else
+                {
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.InvalidInterceptMethodSignature,
+                        method?.DeclaringSyntaxReferences.First().GetSyntax().GetLocation()
+                    ));
+                    return null;
+                }
+            }
+
+            if (interceptAttribute is not null)
+            {
+                if (messageHandlerType is not null)
+                {
+                    if (interceptAttribute is { ConstructorArguments.Length: > 0 })
+                    {
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.ClientSpecifierOnMessageHandler,
+                            interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                        ));
+                    }
+                    if (interceptInAttribute is not null)
+                    {
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
+                            interceptInAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                        ));
+                    }
+                    if (interceptOutAttribute is not null)
+                    {
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
+                            interceptOutAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                        ));
+                    }
+                }
+                else
+                {
+                    if (interceptAttribute is { ConstructorArguments.Length: 0 })
+                    {
+                        diagnostics.Add(new DiagnosticInfo(
+                            DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
+                            interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                        ));
+                    }
+                    else if (interceptAttribute.ConstructorArguments is [ { Value: int clientTypeValue } ])
+                    {
+                        interceptsOn &= (Client)clientTypeValue;
+                        if (interceptsOn == Client.None && targetClients != Client.None)
+                        {
+                            diagnostics.Add(new DiagnosticInfo(
+                                DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
+                                interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                            ));
+                        }
+                    }
+                }
             }
 
             return new InterceptInfo(
                 identifiers.ToArray(),
                 interceptsOn,
-                member.Name
+                member.Name,
+                messageHandlerType
             );
         }
     }

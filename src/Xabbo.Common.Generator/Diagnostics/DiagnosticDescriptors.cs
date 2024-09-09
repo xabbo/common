@@ -70,7 +70,7 @@ internal static class DiagnosticDescriptors
     internal static readonly DiagnosticDescriptor InvalidInterceptMethodSignature = new(
         id: "XABBO008",
         title: "Invalid intercept method signature",
-        messageFormat: "Intercept method signature must be void(Xabbo.Intercept)",
+        messageFormat: "Intercept method signature must be void(Intercept), void(Intercept<IMessage<T>>), void(IMessage<T>) or void(Intercept, IMessage<T>)",
         category: "Xabbo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true
@@ -107,6 +107,24 @@ internal static class DiagnosticDescriptors
         id: "XABBO013",
         title: "The type must be a packet primitive type or implement the IParserComposer<T> interface",
         messageFormat: "'{0}' is not a packet primitive or IParserComposer<T> implementation",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor DirectionalInterceptOnMessageHandler = new(
+        id: "XABBO014",
+        title: "Message intercept handlers should not specify directional intercept attributes",
+        messageFormat: "Message intercept handlers should not specify directional intercept attributes",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor ClientSpecifierOnMessageHandler = new(
+        id: "XABBO015",
+        title: "Message intercept handlers should not specify a target client",
+        messageFormat: "Message intercept handlers should not specify a target client",
         category: "Xabbo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true

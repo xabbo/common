@@ -113,11 +113,119 @@ internal static class AnalysisHelper
         Name: "IConnection"
     };
 
+    public static bool IsIMessageInterface(INamedTypeSymbol symbol) => symbol is
+    {
+        TypeKind: TypeKind.Interface,
+        IsGenericType: true,
+        Arity: 1,
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "Xabbo"
+            },
+            Name: "Messages",
+        },
+        Name: "IMessage"
+    };
+
+    /// <summary>
+    /// Returns true if the method signature is <c>void(Intercept)</c>.
+    /// </summary>
+    public static bool IsInterceptHandlerSignature(IMethodSymbol method) => method is
+    {
+        ReturnsVoid: true,
+        Parameters: [
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol
+                {
+                    IsGenericType: false,
+                    ContainingNamespace:
+                    {
+                        ContainingNamespace.IsGlobalNamespace: true,
+                        Name: "Xabbo"
+                    },
+                    Name: "Intercept"
+                }
+            }
+        ]
+    };
+
+    /// <summary>
+    /// Returns true if the method signature is <c>void(Intercept&lt;T&gt;)</c>.
+    /// </summary>
+    public static bool IsInterceptMessageHandlerSignature(IMethodSymbol method) => method is
+    {
+        ReturnsVoid: true,
+        Parameters: [
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol
+                {
+                    IsGenericType: true,
+                    Arity: 1,
+                    ContainingNamespace:
+                    {
+                        ContainingNamespace.IsGlobalNamespace: true,
+                        Name: "Xabbo"
+                    },
+                    Name: "Intercept"
+                }
+            }
+        ]
+    };
+
+    /// <summary>
+    /// Returns true if the method signature is <c>void(IMessage&lt;T&gt;)</c>.
+    /// </summary>
+    public static bool IsMessageHandlerSignature(IMethodSymbol method) => method is
+    {
+        ReturnsVoid: true,
+        Parameters: [
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol messageTypeSymbol
+            }
+        ]
+    } && ImplementsIMessage(messageTypeSymbol);
+
+    /// <summary>
+    /// Returns true if the method signature is <c>void(Intercept, IMessage&lt;T&gt;)</c>.
+    /// </summary>
+    public static bool IsInterceptMessageHandlerSignature2(IMethodSymbol method) => method is
+    {
+        ReturnsVoid: true,
+        Parameters: [
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol
+                {
+                    IsGenericType: false,
+                    ContainingNamespace:
+                    {
+                        ContainingNamespace.IsGlobalNamespace: true,
+                        Name: "Xabbo"
+                    },
+                    Name: "Intercept"
+                }
+            },
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol messageTypeSymbol
+            }
+        ]
+    } && ImplementsIMessage(messageTypeSymbol);
+
     public static bool ImplementsParser(ITypeSymbol? symbol) =>
         symbol is { } type && type.AllInterfaces.Any(IsIParserInterface);
 
     public static bool ImplementsComposer(ITypeSymbol? symbol) =>
         symbol is { } type && type.AllInterfaces.Any(IsIComposerInterface);
+
+    public static bool ImplementsIMessage(ITypeSymbol? symbol)
+        => symbol is { } type && type.AllInterfaces.Any(IsIMessageInterface);
 
     public static bool IsPrimitivePacketType(ITypeSymbol? symbol)
     {
