@@ -73,11 +73,28 @@ public class Generator : IIncrementalGenerator
             Executor.Interceptor.Execute
         );
 
+        // Extract info for interceptor contexts
+        IncrementalValuesProvider<Result<InterceptorContextInfo?>> interceptorContextResults = interceptorAndExtensionContexts
+            .Select((context, _) => Extractor.InterceptorContext.ExtractInterceptorContextInfo(context));
+
+        // Report diagnostics
+        context.RegisterSourceOutput(
+            interceptorContextResults.SelectMany((result, _) => result.Errors),
+            Executor.ReportDiagnostic
+        );
+
+        // Generate interceptor context methods
+        IncrementalValuesProvider<InterceptorContextInfo> interceptorContextInfos = interceptorContextResults
+            .Where(x => x.Value is not null)
+            .Select((x, _) => x.Value!);
+
+        context.RegisterSourceOutput(interceptorContextInfos, Executor.InterceptorContext.Execute);
+
         // Variadic source generation
         context.RegisterPostInitializationOutput(Executor.Variadic.RegisterPostInitializationOutput);
 
         // Collect all invocations of Read, Write, Replace, Modify and Send
-        var invocationResults = context.SyntaxProvider.CreateSyntaxProvider(
+        IncrementalValuesProvider<Result<VariadicInvocation?>> invocationResults = context.SyntaxProvider.CreateSyntaxProvider(
             static (node, _) => Extractor.Variadic.IsCandidateForGeneration(node),
             Extractor.Variadic.ExtractVariadicInvocation
         );

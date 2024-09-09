@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Xabbo.Common.Generator.Diagnostics;
+
 using Xabbo.Common.Generator.Model;
 
 using static Xabbo.Common.Generator.Utility.AnalysisHelper;
@@ -159,53 +159,18 @@ internal static partial class Extractor
             for (int i = 0; i < types.Length; i++)
             {
                 var (syntax, typeSymbol) = syntaxTypes[i];
-
-                bool isValidType = false;
-                string namespaceName = "";
-                bool isArray = false;
-                bool isParser = false;
-                bool isComposer = false;
-
-                if (typeSymbol is IArrayTypeSymbol arrayType && !isReplace && !isModify)
-                {
-                    isArray = true;
-                    typeSymbol = arrayType.ElementType;
-                }
-
-                if (typeSymbol is INamedTypeSymbol namedType)
-                {
-                    isValidType = IsPrimitivePacketType(namedType) || (
-                        !(requireComposer && !ImplementsComposer(namedType)) &&
-                        !(requireParser && !ImplementsParser(namedType)));
-
-                    namespaceName = typeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-                    isParser = ImplementsParser(typeSymbol);
-                    isComposer = ImplementsComposer(typeSymbol);
-                }
+                var (type, isValidType) = ToVariadicType(invocationKind, typeSymbol);
 
                 if (!isValidType)
                 {
-                    DiagnosticDescriptor descriptor = requireComposer switch
-                    {
-                        true when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
-                        true => DiagnosticDescriptors.NotPrimitiveOrComposerType,
-                        false when requireParser => DiagnosticDescriptors.NotPrimitiveOrParserType,
-                        false => DiagnosticDescriptors.NotPrimitiveType
-                    };
-
                     diagnostics.Add(new DiagnosticInfo(
-                        descriptor,
+                        GetInvalidTypeDescriptor(invocationKind),
                         syntax.GetLocation(),
                         typeSymbol?.ToDisplayString() ?? "?"
                     ));
                 }
 
-                types[i] = new VariadicType(
-                    FullyQualifiedName: typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "?",
-                    IsArray: isArray,
-                    IsParser: isParser,
-                    IsComposer: isComposer
-                );
+                types[i] = type;
             }
 
             return new Result<VariadicInvocation?>(

@@ -1,5 +1,8 @@
 using Microsoft.CodeAnalysis;
 
+using Xabbo.Common.Generator.Diagnostics;
+using Xabbo.Common.Generator.Model;
+
 namespace Xabbo.Common.Generator.Utility;
 
 internal static class AnalysisHelper
@@ -155,5 +158,55 @@ internal static class AnalysisHelper
                 },
             } containingNamespace,
         } && containingNamespace.Name == parentNs && symbol.Name == "";
+    }
+
+    public static (VariadicType Type, bool IsValid) ToVariadicType(InvocationKind invocationKind, ITypeSymbol? typeSymbol)
+    {
+        bool isValidType = false;
+        bool isArray = false;
+        bool isParser = false;
+        bool isComposer = false;
+
+        if (typeSymbol is IArrayTypeSymbol arrayType &&
+            (invocationKind & InvocationKind.Replace) == 0 &&
+            (invocationKind & InvocationKind.Modify) == 0)
+        {
+            isArray = true;
+            typeSymbol = arrayType.ElementType;
+        }
+
+        if (typeSymbol is INamedTypeSymbol namedType)
+        {
+            isValidType = IsPrimitivePacketType(namedType) || (
+                !(((invocationKind & InvocationKind.RequiresComposer) > 0) && !ImplementsComposer(namedType)) &&
+                !(((invocationKind & InvocationKind.RequiresParser) > 0) && !ImplementsParser(namedType)));
+
+            isParser = ImplementsParser(typeSymbol);
+            isComposer = ImplementsComposer(typeSymbol);
+        }
+
+        return (
+            new VariadicType(
+                FullyQualifiedName: typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "?",
+                IsArray: isArray,
+                IsParser: isParser,
+                IsComposer: isComposer
+            ),
+            isValidType
+        );
+    }
+
+    public static DiagnosticDescriptor GetInvalidTypeDescriptor(InvocationKind kind)
+    {
+        bool
+            requiresParser = (kind & InvocationKind.RequiresParser) > 0,
+            requiresComposer = (kind & InvocationKind.RequiresComposer) > 0;
+        return requiresParser switch
+        {
+            true when requiresParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
+            true => DiagnosticDescriptors.NotPrimitiveOrParserType,
+            false when requiresComposer => DiagnosticDescriptors.NotPrimitiveOrComposerType,
+            false => DiagnosticDescriptors.NotPrimitiveType
+        };
     }
 }

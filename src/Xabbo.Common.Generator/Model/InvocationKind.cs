@@ -12,6 +12,7 @@ internal enum InvocationKind
     At = 0x8000,
     Header = 0x4000,
     Identifier = 0x2000,
+    Message = 0x1000,
 
     ReadAt = Read | At,
     WriteAt = Write | At,
@@ -20,6 +21,7 @@ internal enum InvocationKind
 
     SendHeader = Send | Header,
     SendIdentifier = Send | Identifier,
+    SendMessage = Send | Message,
 
     HasArguments = Write | Replace | Modify | Send,
     RequiresParser = Read | Replace | Modify,

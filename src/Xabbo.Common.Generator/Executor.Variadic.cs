@@ -72,14 +72,13 @@ internal static partial class Executor
                     ]);
                     w.Write($"public static ");
                     if (arity > 1) w.Write('(');
-                    w.WriteTypeParams(arity);
+                    w.WriteTypeParams(arity, includeAngleBrackets: false);
                     if (arity > 1) w.Write(')');
                     w.Write(" Read");
                     if (positional)
                         w.Write("At");
-                    w.Write('<');
                     w.WriteTypeParams(arity);
-                    w.Write(">(this global::Xabbo.Messages.IPacket p");
+                    w.Write("(this global::Xabbo.Messages.IPacket p");
                     if (positional)
                         w.Write(", int pos");
                     w.WriteLine(")");
@@ -91,7 +90,7 @@ internal static partial class Executor
                         w.WriteLine(");");
                         w.Write("return ");
                         if (arity > 1) w.Write('(');
-                        w.WriteTypeParams(arity, "Read<", ">(in r)", 5);
+                        w.WriteTypeParams(arity, "Read<", ">(in r)", group: 5, includeAngleBrackets: false);
                         if (arity > 1) w.Write(')');
                         w.WriteLine(';');
                     }
@@ -123,9 +122,8 @@ internal static partial class Executor
                     w.Write(methodName);
                     if (positional)
                         w.Write("At");
-                    w.Write('<');
                     w.WriteTypeParams(arity);
-                    w.Write(">(this global::Xabbo.Messages.IPacket p, ");
+                    w.Write("(this global::Xabbo.Messages.IPacket p, ");
                     if (positional)
                         w.Write("int pos, ");
                     w.WriteTypeArgs(arity);
@@ -169,9 +167,8 @@ internal static partial class Executor
                     w.Write("public static void Modify");
                     if (positional)
                         w.Write("At");
-                    w.Write('<');
                     w.WriteTypeParams(arity);
-                    w.Write(">(this global::Xabbo.Messages.IPacket p, ");
+                    w.Write("(this global::Xabbo.Messages.IPacket p, ");
                     if (positional)
                         w.Write("int pos, ");
 
@@ -242,9 +239,8 @@ internal static partial class Executor
                         "/// </summary>"
                     ]);
                     w.Write("public static void Send");
-                    w.Write('<');
                     w.WriteTypeParams(arity);
-                    w.Write(">(this global::Xabbo.Connection.IConnection c, ");
+                    w.Write("(this global::Xabbo.Connection.IConnection c, ");
                     if (isHeader)
                         w.Write("global::Xabbo.Messages.Header header, ");
                     else
