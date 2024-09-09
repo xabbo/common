@@ -32,7 +32,13 @@ internal static partial class Executor
                     w.WriteLine("global::Xabbo.Messages.Header header = context.Interceptor.Messages.Resolve(identifier);");
                 w.WriteLine("using global::Xabbo.Messages.Packet packet = new(header);");
                 for (int i = 0; i < arity; i++)
-                    w.WriteLine($"packet.Write<T{i+1}>(arg{i+1});");
+                {
+                    w.Write("packet.Write<");
+                    w.WriteTypeParam(i, arity);
+                    w.Write(">(");
+                    w.WriteTypeArgName(i, arity);
+                    w.WriteLine(");");
+                }
                 w.WriteLine("context.Interceptor.Send(packet);");
             }
         }
