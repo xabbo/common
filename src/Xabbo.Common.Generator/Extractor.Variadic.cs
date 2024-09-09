@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.Operations;
 using Xabbo.Common.Generator.Diagnostics;
 using Xabbo.Common.Generator.Model;
 
+using static Xabbo.Common.Generator.Utility.AnalysisHelper;
+
 namespace Xabbo.Common.Generator;
 
 internal static partial class Extractor
@@ -37,151 +39,6 @@ internal static partial class Extractor
             _ => (InvocationKind)(-1)
         };
 
-        static bool IsIComposerInterface(INamedTypeSymbol symbol) => symbol is
-        {
-            TypeKind: TypeKind.Interface,
-            IsGenericType: false,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "IComposer"
-        };
-
-        static bool IsIParserInterface(INamedTypeSymbol symbol) => symbol is
-        {
-            TypeKind: TypeKind.Interface,
-            IsGenericType: true,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "IParser"
-        };
-
-        static bool IsIParserComposerInterface(INamedTypeSymbol symbol) => symbol is
-        {
-            TypeKind: TypeKind.Interface,
-            IsGenericType: true,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "IParserComposer"
-        };
-
-        static bool IsIPacketInterface(INamedTypeSymbol symbol) => symbol is
-        {
-            TypeKind: TypeKind.Interface,
-            IsGenericType: false,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "IPacket"
-        };
-
-
-        static bool IsIConnectionInterface(INamedTypeSymbol symbol) => symbol is
-        {
-            TypeKind: TypeKind.Interface,
-            IsGenericType: false,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Connection",
-            },
-            Name: "IConnection"
-        };
-
-        static bool IsHeaderType(ITypeSymbol? symbol) => symbol is
-        {
-            TypeKind: TypeKind.Struct,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "Header"
-        };
-
-        static bool IsIdentifierType(ITypeSymbol? symbol) => symbol is
-        {
-            TypeKind: TypeKind.Struct,
-            ContainingNamespace:
-            {
-                ContainingNamespace:
-                {
-                    ContainingNamespace.IsGlobalNamespace: true,
-                    Name: "Xabbo"
-                },
-                Name: "Messages",
-            },
-            Name: "Identifier"
-        };
-
-
-        public static bool ImplementsParser(ITypeSymbol? symbol) =>
-            symbol is { } type && type.AllInterfaces.Any(IsIParserInterface);
-
-        public static bool ImplementsComposer(ITypeSymbol? symbol) =>
-            symbol is { } type && type.AllInterfaces.Any(IsIComposerInterface);
-
-        public static bool IsPrimitivePacketType(ITypeSymbol? symbol)
-        {
-            if (symbol is null) return false;
-
-            if (symbol is
-                {
-                    ContainingNamespace:
-                    {
-                        ContainingNamespace.IsGlobalNamespace: true,
-                        Name: "System",
-                    },
-                    Name: "Boolean" or "Byte" or "Int16" or "Int32" or "Single" or "Int64" or "String",
-                }) return true;
-
-            if (symbol is
-                {
-                    ContainingNamespace:
-                    {
-                        ContainingNamespace.IsGlobalNamespace: true,
-                        Name: "Xabbo",
-                    },
-                    Name: "Id" or "Length"
-                }) return true;
-
-            return false;
-        }
-
         public static Result<VariadicInvocation?> ExtractVariadicInvocation(GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
         {
             var invocationExpression = (InvocationExpressionSyntax)ctx.Node;
@@ -198,7 +55,8 @@ internal static partial class Extractor
             bool isSend = (invocationKind & InvocationKind.Send) > 0;
 
             // Ensure the target implements IPacket or IConnection.
-            Func<INamedTypeSymbol, bool> checkInterface = isSend ? IsIConnectionInterface : IsIPacketInterface;
+            Func<INamedTypeSymbol, bool> checkInterface =
+                isSend ? IsIConnectionInterface : IsIPacketInterface;
             if (!checkInterface(memberType) && !memberType.AllInterfaces.Any(checkInterface))
                 return null;
 
@@ -289,8 +147,8 @@ internal static partial class Extractor
                 {
                     ITypeSymbol? typeSymbol = syntaxTypes[0].TypeSymbol;
                     // We need to know whether to generate a Send method for Identifier or Header first.
-                    if (IsHeaderType(typeSymbol)) invocationKind |= InvocationKind.Header;
-                    else if (IsIdentifierType(typeSymbol)) invocationKind |= InvocationKind.Identifier;
+                    if (IsHeader(typeSymbol)) invocationKind |= InvocationKind.Header;
+                    else if (IsIdentifier(typeSymbol)) invocationKind |= InvocationKind.Identifier;
                     else return null;
                 }
 
