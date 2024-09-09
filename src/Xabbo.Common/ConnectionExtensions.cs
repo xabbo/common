@@ -30,7 +30,7 @@ public static class ConnectionExtensions
     /// <summary>
     /// Sends a message to the client or server, specified by the direction of the message.
     /// </summary>
-    public static void Send<T>(this IConnection connection, IMessage<T> message)
+    public static void Send<T>(this IConnection connection, T message)
         where T : IMessage<T>
     {
         Identifier identifier = message.GetIdentifier(connection.Session.Client.Type);

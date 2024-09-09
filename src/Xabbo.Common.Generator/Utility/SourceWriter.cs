@@ -40,8 +40,13 @@ internal sealed class SourceWriter() : IndentedTextWriter(new StringWriter(), ne
     }
     public IDisposable NamespaceScope(string name) => BraceScope("namespace " + name);
 
-    public void WriteTypeParams(int n, string? prefix = null, string? suffix = null, int group = 10)
+    public void WriteTypeParams(int n, string? prefix = null, string? suffix = null, int group = 10, bool includeAngleBrackets = true)
     {
+        if (n == 0) return;
+
+        if (includeAngleBrackets)
+            Write('<');
+
         if (n > group)
         {
             WriteLine();
@@ -68,6 +73,9 @@ internal sealed class SourceWriter() : IndentedTextWriter(new StringWriter(), ne
             Indent--;
             WriteLine();
         }
+
+        if (includeAngleBrackets)
+            Write('>');
     }
 
     public void WriteTypeParam(int i, int arity) => Write(arity > 1 ? $"T{i + 1}" : "T");
