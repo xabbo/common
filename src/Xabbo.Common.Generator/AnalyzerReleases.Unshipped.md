@@ -17,3 +17,5 @@ XABBO010 | Xabbo | Error | DiagnosticDescriptors
 XABBO011 | Xabbo | Error | DiagnosticDescriptors
 XABBO012 | Xabbo | Error | DiagnosticDescriptors
 XABBO013 | Xabbo | Error | DiagnosticDescriptors
+XABBO014 | Xabbo | Error | DiagnosticDescriptors
+XABBO015 | Xabbo | Error | DiagnosticDescriptors

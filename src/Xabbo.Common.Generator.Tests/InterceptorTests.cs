@@ -27,4 +27,13 @@ public partial class SampleInterceptor
     [Intercepts(ClientType.Shockwave)]
     [InterceptIn("s:Objects")]
     void OnShockwaveObjects(Intercept e) { }
+
+    [Intercepts]
+    void OnTestMessage(TestMessage msg) { }
+
+    [Intercepts]
+    void OnTestInterceptMessage(Intercept<TestMessage> e) { }
+
+    [Intercepts]
+    void OnTestInterceptMessage2(Intercept e, TestMessage msg) { }
 }

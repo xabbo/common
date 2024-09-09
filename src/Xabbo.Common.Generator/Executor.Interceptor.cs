@@ -81,34 +81,45 @@ internal static partial class Executor
                     w.WriteLine(",");
 
                 // Write intercept handler
-                w.WriteLine("new InterceptHandler(");
-                using (w.IndentScope())
+                if (intercept.MessageType is not null)
                 {
-                    // Write target identifiers
-                    w.WriteLine("(ReadOnlySpan<Identifier>)[");
+                    w.Write("global::Xabbo.Messages.IMessage<");
+                    w.Write(intercept.MessageType);
+                    w.Write(">.CreateHandler(");
+                    w.Write(intercept.HandlerMethodName);
+                    w.Write(')');
+                }
+                else
+                {
+                    w.WriteLine("new InterceptHandler(");
                     using (w.IndentScope())
                     {
-                        for (int j = 0; j < intercept.Identifiers.Length; j++)
+                        // Write target identifiers
+                        w.WriteLine("(ReadOnlySpan<Identifier>)[");
+                        using (w.IndentScope())
                         {
-                            var identifier = intercept.Identifiers[j];
-                            if (j > 0)
-                                w.WriteLine(", ");
-                            w.Write("(ClientType.");
-                            w.Write(identifier.Client);
-                            w.Write(", Direction.");
-                            w.Write(identifier.Direction);
-                            w.Write(", \"");
-                            w.Write(identifier.Name);
-                            w.Write("\")");
+                            for (int j = 0; j < intercept.Identifiers.Length; j++)
+                            {
+                                var identifier = intercept.Identifiers[j];
+                                if (j > 0)
+                                    w.WriteLine(", ");
+                                w.Write("(ClientType.");
+                                w.Write(identifier.Client);
+                                w.Write(", Direction.");
+                                w.Write(identifier.Direction);
+                                w.Write(", \"");
+                                w.Write(identifier.Name);
+                                w.Write("\")");
+                            }
+                            w.WriteLine();
                         }
-                        w.WriteLine();
+                        w.WriteLine("],");
+                        w.WriteLine(intercept.HandlerMethodName);
                     }
-                    w.WriteLine("],");
-                    w.WriteLine(intercept.HandlerMethodName);
+                    w.Write(") { Target = ");
+                    w.Write(string.Join(" | ", intercept.TargetClients.ToString().Split(',').Select(clientName => $"ClientType.{clientName.Trim()}")));
+                    w.Write(" }");
                 }
-                w.Write(") { Target = ");
-                w.Write(string.Join(" | ", intercept.TargetClients.ToString().Split(',').Select(clientName => $"ClientType.{clientName.Trim()}")));
-                w.Write(" }");
             }
             w.WriteLine();
         }
