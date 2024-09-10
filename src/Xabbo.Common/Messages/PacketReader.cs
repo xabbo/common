@@ -174,6 +174,17 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     };
 
     /// <summary>
+    /// Reads an Id array from the current position and advances it.
+    /// </summary>
+    public Id[] ReadIdArray()
+    {
+        Id[] array = new Id[ReadLength()];
+        for (int i = 0; i < array.Length; i++)
+            array[i] = ReadId();
+        return array;
+    }
+
+    /// <summary>
     /// Reads a <see cref="Length"/> from the current position and advances it.
     /// <para/>
     /// Read as a <see cref="short"/> on Unity, or an <see cref="int"/> on Flash and Shockwave.

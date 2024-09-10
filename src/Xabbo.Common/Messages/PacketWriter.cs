@@ -233,6 +233,17 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     }
 
     /// <summary>
+    /// Writes an Id array to the current position and advances it.
+    /// </summary>
+    public void WriteIdArray(IEnumerable<Id> values)
+    {
+        Id[] array = (values as Id[]) ?? [.. values];
+        WriteLength(array.Length);
+        foreach (Id value in array)
+            WriteId(value);
+    }
+
+    /// <summary>
     /// Writes the specified <see cref="Length"/> value to the current position and advances it.
     /// <para/>
     /// Written as a <see cref="short"/> on Unity, or an <see cref="int"/> on Flash and Shockwave.
