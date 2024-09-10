@@ -258,26 +258,36 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestShockwaveContent()
     {
-        Packet packet = new((ClientType.Shockwave, Direction.None, 0))
-        {
-            Content = "hello, world"
-        };
+        Packet packet = new((ClientType.Shockwave, Direction.None, 0));
+        packet.WriteContent("hello, world");
 
         Assert.Equal(packet.Length, packet.Position);
-        Assert.Equal("hello, world", packet.Content);
+
+        // ReadContent should throw if Position > 0
+        Assert.ThrowsAny<Exception>(packet.ReadContent);
+
+        packet.Position = 0;
+        Assert.Equal("hello, world", packet.ReadContent());
         Assert.Equal(12, packet.Length);
 
-        packet.Content = "this is a test";
-        Assert.Equal("this is a test", packet.Content);
+        // WriteContent should throw if Position > 0
+        Assert.ThrowsAny<Exception>(() => packet.WriteContent(""));
+
+        packet.Position = 0;
+        packet.WriteContent("this is a test");
+
+        packet.Position = 0;
+        Assert.Equal("this is a test", packet.ReadContent());
         Assert.Equal(14, packet.Length);
 
-        packet.Content = "";
-        Assert.Equal("", packet.Content);
+        packet.Position = 0;
+        packet.WriteContent("");
+        Assert.Equal("", packet.ReadContent());
         Assert.Equal(0, packet.Length);
 
         packet.Header = packet.Header with { Client = ClientType.Flash };
-        Assert.Throws<UnsupportedClientException>(() => packet.Content);
-        Assert.Throws<UnsupportedClientException>(() => packet.Content = "test");
+        Assert.Throws<UnsupportedClientException>(packet.ReadContent);
+        Assert.Throws<UnsupportedClientException>(() => packet.WriteContent(""));
     }
 
 }

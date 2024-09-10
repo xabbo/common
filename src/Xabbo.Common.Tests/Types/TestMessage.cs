@@ -20,7 +20,7 @@ public sealed record MoveFloorItemMsg(Id Id, int X, int Y, int Direction) : IMes
                 p.WriteInt(Direction);
                 break;
             case ClientType.Shockwave:
-                p.Content = $"{Id} {X} {Y} {Direction}";
+                p.WriteContent($"{Id} {X} {Y} {Direction}");
                 break;
             default:
                 throw new UnsupportedClientException(p.Client);
