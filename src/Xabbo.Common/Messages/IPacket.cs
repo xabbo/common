@@ -52,12 +52,20 @@ public interface IPacket : IDisposable
     /// </summary>
     PacketWriter WriterAt(ref int pos);
 
-    /// <summary>
-    /// Gets or sets the contents of the packet as a string.
-    /// <para/>
-    /// Only supported on Shockwave.
-    /// </summary>
-    string Content { get; set; }
+    /// <inheritdoc cref="PacketWriter.Allocate(int)" />
+    Span<byte> Allocate(int n);
+
+    /// <inheritdoc cref="PacketReader.ReadSpan(int)" />
+    ReadOnlySpan<byte> ReadSpan(int n);
+
+    /// <inheritdoc cref="PacketWriter.WriteSpan(ReadOnlySpan{byte})" />
+    void WriteSpan(ReadOnlySpan<byte> bytes);
+
+    /// <inheritdoc cref="PacketReader.ReadContent" />
+    string ReadContent();
+
+    /// <inheritdoc cref="PacketWriter.WriteContent(string)" />
+    void WriteContent(string content);
 
     /// <summary>
     /// Clears the packet's buffer and resets its position.

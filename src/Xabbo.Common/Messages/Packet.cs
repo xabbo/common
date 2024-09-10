@@ -71,13 +71,9 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
     public PacketWriter Writer() => new(this, ref _position);
     public PacketWriter WriterAt(ref int pos) => new(this, ref pos);
 
-    public string Content
-    {
-        get => Reader().Content;
-        set => Writer().Content = value;
-    }
-
+    public Span<byte> Allocate(int n) => Writer().Allocate(n);
     public ReadOnlySpan<byte> ReadSpan(int n) => Reader().ReadSpan(n);
     public void WriteSpan(ReadOnlySpan<byte> span) => Writer().WriteSpan(span);
-    public Span<byte> Allocate(int n) => Writer().Allocate(n);
+    public string ReadContent() => Reader().ReadContent();
+    public void WriteContent(string content) => Writer().WriteContent(content);
 }

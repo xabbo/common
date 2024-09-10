@@ -21,29 +21,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 
     public PacketReader Reader() => new(Packet, ref Pos);
     public PacketReader ReaderAt(ref int pos) => new(Packet, ref pos);
-    public PacketWriter Writer() => new(Packet, ref Pos);
     public PacketWriter WriterAt(ref int pos) => new(Packet, ref pos);
-
-    /// <summary>
-    /// Gets the contents of the packet as a string.
-    /// <para/>
-    /// Only supported on Shockwave.
-    /// </summary>
-    public string Content
-    {
-        get
-        {
-            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
-            return Encoding.UTF8.GetString(Packet.Buffer.Span);
-        }
-
-        set
-        {
-            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
-            Pos = 0;
-            Encoding.UTF8.GetBytes(value, Writer().Resize(Length, Encoding.UTF8.GetByteCount(value)));
-        }
-    }
 
     /// <summary>
     /// Allocates the specified number of bytes from the current position
@@ -300,6 +278,21 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
     {
         UnsupportedClientException.ThrowIf(Client, ~ClientType.Shockwave);
         VL64.Encode(Allocate(VL64.EncodeLength(value)), value);
+    }
+
+    /// <summary>
+    /// Replaces the packet buffer with the specified content
+    /// and advances the position to the end of the packet.
+    /// The position must be at the start of the packet.
+    /// <para/>
+    /// Only supported on Shockwave.
+    /// </summary>
+    public void WriteContent(string content)
+    {
+        UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+        if (Pos != 0)
+            throw new Exception("Cannot write content: position must be at the start of the packet.");
+        Encoding.UTF8.GetBytes(content, Resize(Length, Encoding.UTF8.GetByteCount(content)));
     }
 
     /// <summary>

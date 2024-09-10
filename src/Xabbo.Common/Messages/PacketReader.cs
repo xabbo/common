@@ -21,20 +21,6 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     public PacketReader(IPacket packet) : this(packet, ref packet.Position) { }
 
     /// <summary>
-    /// Gets the contents of the packet as a string.
-    /// <para/>
-    /// Only supported on Shockwave.
-    /// </summary>
-    public string Content
-    {
-        get
-        {
-            UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
-            return Encoding.UTF8.GetString(Packet.Buffer.Span);
-        }
-    }
-
-    /// <summary>
     /// Reads a <see cref="Span{T}"/> of bytes of length <paramref name="n"/> from the current position and advances it.
     /// </summary>
     /// <param name="n">The number of bytes to read.</param>
@@ -223,6 +209,22 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
         ClientType.Unity or ClientType.Flash => throw new UnsupportedClientException(Client),
         _ => VL64.Decode(ReadSpan(VL64.DecodeLength(Span[Pos]))),
     };
+
+    /// <summary>
+    /// Reads the contents of the packet as a string
+    /// and advances the position to the end of the packet.
+    /// The position must be at the start of the packet.
+    /// <para/>
+    /// Only supported on Shockwave.
+    /// </summary>
+    public string ReadContent()
+    {
+        UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+        if (Pos != 0)
+            throw new Exception("Cannot read content: position must be at the start of the packet.");
+        Pos = Length;
+        return Encoding.UTF8.GetString(Packet.Buffer.Span);
+    }
 
     /// <summary>
     /// Parses a <typeparamref name="T"/> from the current position and advances it.
