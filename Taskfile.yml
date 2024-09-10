@@ -3,6 +3,9 @@
 version: '3'
 
 tasks:
+  init:
+    cmds:
+      - git config --local core.hooksPath .githooks/
   rebuild:
     cmds:
       - dotnet clean
