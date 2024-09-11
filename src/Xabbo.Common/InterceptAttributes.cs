@@ -8,10 +8,10 @@ namespace Xabbo;
 /// If no clients are specified, all clients are targeted.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class InterceptsAttribute(ClientType client) : Attribute
+public sealed class InterceptAttribute(ClientType client) : Attribute
 {
     public ClientType Client { get; } = client;
-    public InterceptsAttribute() : this(ClientType.All) { }
+    public InterceptAttribute() : this(ClientType.All) { }
 }
 
 /// <summary>

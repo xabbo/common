@@ -24,16 +24,16 @@ public partial class SampleInterceptor
     [InterceptIn("f:Objects")]
     void OnObjects(Intercept e) { }
 
-    [Intercepts(ClientType.Shockwave)]
+    [Intercept(ClientType.Shockwave)]
     [InterceptIn("s:Objects")]
     void OnShockwaveObjects(Intercept e) { }
 
-    [Intercepts]
+    [Intercept]
     void OnTestMessage(TestMessage msg) { }
 
-    [Intercepts]
+    [Intercept]
     void OnTestInterceptMessage(Intercept<TestMessage> e) { }
 
-    [Intercepts]
+    [Intercept]
     void OnTestInterceptMessage2(Intercept e, TestMessage msg) { }
 }

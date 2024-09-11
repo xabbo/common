@@ -79,7 +79,7 @@ public class TestInterceptor
         ]));
     }
 
-    [Intercepts]
+    [Intercept]
     void HandleMove(Intercept<WalkMsg> e)
     {
         e.Block();

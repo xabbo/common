@@ -35,15 +35,15 @@ public class Generator : IIncrementalGenerator
             Executor.Extension.Execute
         );
 
-        // Select classes marked with [Intercepts]
+        // Select classes marked with [Intercept]
         IncrementalValuesProvider<GeneratorAttributeSyntaxContext> interceptorContexts = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                Constants.InterceptsAttributeMetadataName,
+                Constants.InterceptAttributeMetadataName,
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: static (ctx, _) => ctx
             );
 
-        // Combine [Extension] and [Intercepts]
+        // Combine [Extension] and [Intercept]
         IncrementalValuesProvider<GeneratorAttributeSyntaxContext> interceptorAndExtensionContexts = interceptorContexts.Collect()
             .Combine(extensionContexts.Collect())
             .SelectMany((x, _) =>

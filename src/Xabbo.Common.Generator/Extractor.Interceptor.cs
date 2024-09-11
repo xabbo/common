@@ -52,7 +52,7 @@ internal static partial class Extractor
             Client targetClients = Client.All;
 
             var interceptsAttribute = @class.GetAttributes().FirstOrDefault(
-                x => x.AttributeClass?.ToDisplayString() == Constants.InterceptsAttributeMetadataName);
+                x => x.AttributeClass?.ToDisplayString() == Constants.InterceptAttributeMetadataName);
 
             if (interceptsAttribute is not null &&
                 interceptsAttribute.ConstructorArguments.Length > 0 &&
@@ -110,7 +110,7 @@ internal static partial class Extractor
                 if (attr.AttributeClass is null) continue;
                 string attributeName = attr.AttributeClass.ToDisplayString();
 
-                if (attributeName == Constants.InterceptsAttributeMetadataName)
+                if (attributeName == Constants.InterceptAttributeMetadataName)
                 {
                     interceptAttribute = attr;
                     hasInterceptAttribute = true;
