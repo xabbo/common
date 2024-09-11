@@ -37,7 +37,7 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
             if (!T.Match(in r)) return;
             pos = 0;
-            callback(new Intercept<T>(ref e, r.Parse<T>()));
+            callback(new Intercept<T>(ref e));
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers

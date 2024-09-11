@@ -5,49 +5,49 @@ using Xabbo.Messages;
 
 namespace Xabbo;
 
-public readonly ref struct Intercept<T>(ref Intercept inner, T msg)
+public ref struct Intercept<T>(ref Intercept inner)
     where T : IMessage<T>
 {
     /// <summary>
-    /// Wraps the targeted message intercept callback. The returned
-    /// <see cref="InterceptCallback"/> will parse the <typeparamref name="T"/>
-    /// and pass it to the wrapped callback.
+    /// Wraps the targeted message intercept callback.
     /// </summary>
     public static InterceptCallback Wrap(InterceptCallback<T> callback) => (intercept) => {
-        callback(new Intercept<T>(ref intercept, T.Parse(intercept.Packet.Reader())));
+        callback(new Intercept<T>(ref intercept));
     };
 
     private readonly Intercept _inner = inner;
 
+    private T? msg;
+
     /// <summary>
     /// Gets the parsed message for this intercept.
     /// </summary>
-    public readonly T Msg = msg;
+    public T Msg => msg ??= T.Parse(Packet.Reader());
 
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
     /// </summary>
-    public IInterceptor Interceptor => _inner.Interceptor;
+    public readonly IInterceptor Interceptor => _inner.Interceptor;
 
     /// <summary>
     /// Gets the time that the packet was intercepted.
     /// </summary>
-    public DateTime Timestamp => _inner.Timestamp;
+    public readonly DateTime Timestamp => _inner.Timestamp;
 
     /// <summary>
     /// Gets the direction of the packet.
     /// </summary>
-    public Direction Direction => _inner.Direction;
+    public readonly Direction Direction => _inner.Direction;
 
     /// <summary>
     /// Gets the sequence number of the intercepted packet.
     /// </summary>
-    public int Sequence => _inner.Sequence;
+    public readonly int Sequence => _inner.Sequence;
 
     /// <summary>
     /// Gets or replaces the intercepted packet.
     /// </summary>
-    public IPacket Packet
+    public readonly IPacket Packet
     {
         get => _inner.Packet;
         set => _inner.Packet = value;
@@ -56,15 +56,15 @@ public readonly ref struct Intercept<T>(ref Intercept inner, T msg)
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
     /// </summary>
-    public bool IsBlocked => _inner.IsBlocked;
+    public readonly bool IsBlocked => _inner.IsBlocked;
 
     /// <summary>
     /// Gets whether the intercepted packet's unmodified header matches any of the specified identifiers.
     /// </summary>
-    public bool Is(ReadOnlySpan<Identifier> identifiers) => _inner.Is(identifiers);
+    public readonly bool Is(ReadOnlySpan<Identifier> identifiers) => _inner.Is(identifiers);
 
     /// <summary>
     /// Flags the packet to be blocked from its destination by the interceptor.
     /// </summary>
-    public void Block() => _inner.Block();
+    public readonly void Block() => _inner.Block();
 }
