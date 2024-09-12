@@ -18,6 +18,11 @@ public interface IPacket : IDisposable
     ClientType Client { get; }
 
     /// <summary>
+    /// Gets the context this packet was intercepted in.
+    /// </summary>
+    IParserContext? Context { get; }
+
+    /// <summary>
     /// Gets the packet's buffer.
     /// </summary>
     PacketBuffer Buffer { get; }

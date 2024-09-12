@@ -8,6 +8,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
     public Header Header { get; set; } = header;
     public PacketBuffer Buffer { get; } = buffer;
     public ClientType Client => Header.Client;
+    public IParserContext? Context { get; set; }
 
     private int _position;
     public ref int Position => ref _position;
@@ -66,10 +67,10 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
     /// </summary>
     public void Dispose() => Buffer.Dispose();
 
-    public PacketReader Reader() => new(this, ref _position);
-    public PacketReader ReaderAt(ref int pos) => new(this, ref pos);
-    public PacketWriter Writer() => new(this, ref _position);
-    public PacketWriter WriterAt(ref int pos) => new(this, ref pos);
+    public PacketReader Reader() => new(this, ref _position, Context);
+    public PacketReader ReaderAt(ref int pos) => new(this, ref pos, Context);
+    public PacketWriter Writer() => new(this, ref _position, Context);
+    public PacketWriter WriterAt(ref int pos) => new(this, ref pos, Context);
 
     public Span<byte> Allocate(int n) => Writer().Allocate(n);
     public ReadOnlySpan<byte> ReadSpan(int n) => Reader().ReadSpan(n);

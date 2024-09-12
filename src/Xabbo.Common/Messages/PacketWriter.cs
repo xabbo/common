@@ -8,10 +8,11 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Provides primitive packet write operations.
 /// </summary>
-public readonly ref struct PacketWriter(IPacket packet, ref int pos)
+public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserContext? context = null)
 {
     private readonly IPacket Packet = packet;
     public readonly ref int Pos = ref pos;
+    public readonly IParserContext? Context = context;
     public Header Header => Packet.Header;
     public ClientType Client => Packet.Header.Client;
     public Span<byte> Span => Packet.Buffer.Span;
@@ -19,9 +20,9 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos)
 
     public PacketWriter(IPacket packet) : this(packet, ref packet.Position) { }
 
-    public PacketReader Reader() => new(Packet, ref Pos);
-    public PacketReader ReaderAt(ref int pos) => new(Packet, ref pos);
-    public PacketWriter WriterAt(ref int pos) => new(Packet, ref pos);
+    public PacketReader Reader() => new(Packet, ref Pos, Context);
+    public PacketReader ReaderAt(ref int pos) => new(Packet, ref pos, Context);
+    public PacketWriter WriterAt(ref int pos) => new(Packet, ref pos, Context);
 
     /// <summary>
     /// Allocates the specified number of bytes from the current position

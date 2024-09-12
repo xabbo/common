@@ -84,10 +84,8 @@ internal static partial class Executor
                     w.WriteLine(")");
                     using (w.BraceScope())
                     {
-                        w.Write("global::Xabbo.Messages.PacketReader r = new global::Xabbo.Messages.PacketReader(p");
-                        if (positional)
-                            w.Write(", ref pos");
-                        w.WriteLine(");");
+                        w.Write("global::Xabbo.Messages.PacketReader r = p.Reader");
+                        w.WriteLine(positional ? "At(ref pos);" : "();");
                         w.Write("return ");
                         if (arity > 1) w.Write('(');
                         w.WriteTypeParams(arity, "Read<", ">(in r)", group: 5, includeAngleBrackets: false);
@@ -130,10 +128,8 @@ internal static partial class Executor
                     w.WriteLine(')');
                     using (w.BraceScope())
                     {
-                        w.Write("global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p");
-                        if (positional)
-                            w.Write(", ref pos");
-                        w.WriteLine(");");
+                        w.Write("global::Xabbo.Messages.PacketWriter w = p.Writer");
+                        w.WriteLine(positional ? "At(ref pos);" : "();");
                         for (int arg = 0; arg < arity; arg++)
                         {
                             w.Write(methodName);
@@ -203,10 +199,8 @@ internal static partial class Executor
                     w.WriteLine(')');
                     using (w.BraceScope())
                     {
-                        w.Write("global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p");
-                        if (positional)
-                            w.Write(", ref pos");
-                        w.WriteLine(");");
+                        w.Write("global::Xabbo.Messages.PacketWriter w = p.Writer");
+                        w.WriteLine(positional ? "At(ref pos);" : "();");
                         for (int arg = 0; arg < arity; arg++)
                         {
                             w.Write("Modify(in w, ");
@@ -251,7 +245,7 @@ internal static partial class Executor
                     {
                         if (!isHeader)
                             w.WriteLine("global::Xabbo.Messages.Header header = c.Messages.Resolve(identifier);");
-                        w.WriteLine("using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header);");
+                        w.WriteLine("using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header) { Context = c };");
                         w.WriteLine("global::Xabbo.Messages.PacketWriter w = p.Writer();");
                         for (int arg = 0; arg < arity; arg++)
                         {
