@@ -19,6 +19,10 @@ namespace Xabbo
 
         global::System.Text.Json.Serialization.Metadata.JsonTypeInfo? global::System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver.GetTypeInfo(global::System.Type type, global::System.Text.Json.JsonSerializerOptions options)
         {
+            if (type == typeof(bool))
+            {
+                return Create_Boolean(options);
+            }
             if (type == typeof(global::System.Collections.Generic.List<global::Xabbo.Hotel>))
             {
                 return Create_ListHotel(options);

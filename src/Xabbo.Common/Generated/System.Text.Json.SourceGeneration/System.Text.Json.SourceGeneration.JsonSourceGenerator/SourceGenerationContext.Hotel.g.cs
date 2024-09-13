@@ -27,7 +27,7 @@ namespace Xabbo
                 var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::Xabbo.Hotel>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::Xabbo.Hotel((string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5]){ HostName = (string)args[6] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::Xabbo.Hotel((string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5], (bool)args[6]){ HostName = (string)args[7] },
                     PropertyMetadataInitializer = _ => HotelPropInit(options),
                     ConstructorParameterMetadataInitializer = HotelCtorParamInit,
                     SerializeHandler = HotelSerializeHandler
@@ -43,7 +43,7 @@ namespace Xabbo
 
         private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] HotelPropInit(global::System.Text.Json.JsonSerializerOptions options)
         {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[7];
+            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[8];
 
             var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
@@ -178,6 +178,25 @@ namespace Xabbo
             
             properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info6);
 
+            var info7 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<bool>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::Xabbo.Hotel),
+                Converter = null,
+                Getter = static obj => ((global::Xabbo.Hotel)obj).IsOrigins,
+                Setter = static (obj, value) => throw new global::System.InvalidOperationException("Setting init-only properties is not supported in source generation mode."),
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "IsOrigins",
+                JsonPropertyName = null
+            };
+            
+            properties[7] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<bool>(options, info7);
+
             return properties;
         }
 
@@ -200,13 +219,14 @@ namespace Xabbo
             writer.WriteString(PropName_HostName, ((global::Xabbo.Hotel)value).HostName);
             writer.WriteString(PropName_WebHost, ((global::Xabbo.Hotel)value).WebHost);
             writer.WriteString(PropName_GameHost, ((global::Xabbo.Hotel)value).GameHost);
+            writer.WriteBoolean(PropName_IsOrigins, ((global::Xabbo.Hotel)value).IsOrigins);
 
             writer.WriteEndObject();
         }
 
         private static global::System.Text.Json.Serialization.Metadata.JsonParameterInfoValues[] HotelCtorParamInit()
         {
-            var parameters = new global::System.Text.Json.Serialization.Metadata.JsonParameterInfoValues[7];
+            var parameters = new global::System.Text.Json.Serialization.Metadata.JsonParameterInfoValues[8];
 
             parameters[0] = new()
             {
@@ -264,9 +284,18 @@ namespace Xabbo
             
             parameters[6] = new()
             {
+                Name = "isOrigins",
+                ParameterType = typeof(bool),
+                Position = 6,
+                HasDefaultValue = true,
+                DefaultValue = false
+            };
+            
+            parameters[7] = new()
+            {
                 Name = "HostName",
                 ParameterType = typeof(string),
-                Position = 6,
+                Position = 7,
             };
             
             return parameters;

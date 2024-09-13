@@ -17,5 +17,6 @@ namespace Xabbo
         private static readonly global::System.Text.Json.JsonEncodedText PropName_HostName = global::System.Text.Json.JsonEncodedText.Encode("HostName");
         private static readonly global::System.Text.Json.JsonEncodedText PropName_WebHost = global::System.Text.Json.JsonEncodedText.Encode("WebHost");
         private static readonly global::System.Text.Json.JsonEncodedText PropName_GameHost = global::System.Text.Json.JsonEncodedText.Encode("GameHost");
+        private static readonly global::System.Text.Json.JsonEncodedText PropName_IsOrigins = global::System.Text.Json.JsonEncodedText.Encode("IsOrigins");
     }
 }
