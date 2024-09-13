@@ -11,11 +11,6 @@ namespace Xabbo.Extension;
 public interface IExtension : IInterceptor
 {
     /// <summary>
-    /// Invoked when the extension has been initialized by the interceptor.
-    /// </summary>
-    event Action<InitializedArgs>? Initialized;
-
-    /// <summary>
     /// Invoked when the extension is activated by the user.
     /// </summary>
     event Action? Activated;

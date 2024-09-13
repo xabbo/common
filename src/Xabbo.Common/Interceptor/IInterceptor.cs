@@ -1,6 +1,7 @@
-﻿using Xabbo.Connection;
+﻿using System;
 
 using Xabbo.Messages;
+using Xabbo.Connection;
 
 namespace Xabbo.Interceptor;
 
@@ -13,6 +14,11 @@ public interface IInterceptor : IConnection, IInterceptorContext
     /// Gets the message dispatcher associated with this interceptor.
     /// </summary>
     IMessageDispatcher Dispatcher { get; }
+
+    /// <summary>
+    /// Invoked when the interceptor has been initialized.
+    /// </summary>
+    event Action<InitializedArgs>? Initialized;
 
     IInterceptor IInterceptorContext.Interceptor => this;
 }
