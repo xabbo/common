@@ -9,6 +9,9 @@ using Xabbo.Interceptor;
 [assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnPingPong(Xabbo.Intercept)")]
 [assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnObjects(Xabbo.Intercept)")]
 [assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnShockwaveObjects(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnTestMessage(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnTestInterceptMessage(Xabbo.Intercept)")]
+[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Intercept handler methods should not be marked static.", Scope = "member", Target = "~M:Xabbo.Common.Generator.Tests.SampleInterceptor.OnTestInterceptMessage2(Xabbo.Intercept)")]
 
 namespace Xabbo.Common.Generator.Tests;
 
@@ -49,7 +52,10 @@ public partial class SampleInterceptor : IMessageHandler
                     (ClientType.Shockwave, Direction.In, "Objects")
                 ],
                 OnShockwaveObjects
-            ) { Target = ClientType.All }
+            ) { Target = ClientType.Shockwave },
+            global::Xabbo.Messages.IMessage<global::Xabbo.Common.Generator.Tests.TestMessage>.CreateHandler(OnTestMessage),
+            global::Xabbo.Messages.IMessage<global::Xabbo.Common.Generator.Tests.TestMessage>.CreateHandler(OnTestInterceptMessage),
+            global::Xabbo.Messages.IMessage<global::Xabbo.Common.Generator.Tests.TestMessage>.CreateHandler(OnTestInterceptMessage2)
         ]));
     }
 }

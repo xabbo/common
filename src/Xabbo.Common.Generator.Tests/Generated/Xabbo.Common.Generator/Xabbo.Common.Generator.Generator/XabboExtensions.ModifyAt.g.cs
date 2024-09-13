@@ -9,7 +9,7 @@
         global::System.Func<T9, T9> arg9
     )
     {
-        global::Xabbo.Messages.PacketWriter w = new global::Xabbo.Messages.PacketWriter(p, ref pos);
+        global::Xabbo.Messages.PacketWriter w = p.WriterAt(ref pos);
         Modify(in w, arg1);
         Modify(in w, arg2);
         Modify(in w, arg3);
