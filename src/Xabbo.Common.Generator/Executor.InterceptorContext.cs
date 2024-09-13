@@ -61,8 +61,8 @@ internal static partial class Executor
                 using (w.BraceScope($"partial class {info.Name}"))
                 {
                     w.WriteLine(@"
-        protected void Send<T>(T message) where T : global::Xabbo.Messages.IMessage<T>
-            => global::Xabbo.ConnectionExtensions.Send<T>(((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor, message);
+        protected void Send(IMessage message)
+            => global::Xabbo.ConnectionExtensions.Send(((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor, message);
 
         protected global::System.Threading.Tasks.Task<global::Xabbo.Messages.IPacket> ReceiveAsync(
             global::System.ReadOnlySpan<global::Xabbo.Messages.Header> headers,

@@ -30,12 +30,11 @@ public static class ConnectionExtensions
     /// <summary>
     /// Sends a message to the client or server, specified by the direction of the message.
     /// </summary>
-    public static void Send<T>(this IConnection connection, T message)
-        where T : IMessage<T>
+    public static void Send(this IConnection connection, IMessage message)
     {
         Identifier identifier = message.GetIdentifier(connection.Session.Client.Type);
         if (identifier == Identifier.Unknown)
-            throw new Exception($"No identifier for IMessage<{typeof(T).Name}>");
+            throw new Exception($"No identifier for IMessage({message.GetType().Name}).");
 
         using Packet packet = new(connection.Messages.Resolve(identifier));
         packet.Writer().Compose<IComposer>(message);

@@ -1,6 +1,8 @@
+using System.Runtime.CompilerServices;
+
 namespace Xabbo.Messages;
 
-public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
+public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T>
 {
     /// <summary>
     /// Gets the target identifiers for this message.
@@ -17,15 +19,12 @@ public interface IMessage<T> : IParserComposer<T> where T : IMessage<T>
     /// </summary>
     static abstract Identifier Identifier { get; }
 
+    Identifier IMessage.GetIdentifier(ClientType client) => T.Identifier;
+
     /// <summary>
     /// Checks whether the specified packet matches this message.
     /// </summary>
     static virtual bool Match(in PacketReader p) => true;
-
-    /// <summary>
-    /// Gets the identifier for this message instance.
-    /// </summary>
-    virtual Identifier GetIdentifier(ClientType client) => T.Identifier;
 
     /// <summary>
     /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptCallback{T}"/> .
