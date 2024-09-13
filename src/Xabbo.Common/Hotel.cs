@@ -47,7 +47,7 @@ public sealed record Hotel
             new("Brazil", identifier: "br", domain: "com.br"),
             new("Turkey", identifier: "tr", domain: "com.tr"),
             new("Sandbox", "s2", subdomain: "sandbox"),
-            new("Origins (US)", "ous", subdomain: "origins")
+            new("Origins (US)", "ous", subdomain: "origins", isOrigins: true)
         ];
 
         if (fileHotelsOverride.Exists)
@@ -105,6 +105,11 @@ public sealed record Hotel
     public string GameHost { get; init; } = string.Empty;
 
     /// <summary>
+    /// Gets whether this is an origins hotel.
+    /// </summary>
+    public bool IsOrigins { get; init; }
+
+    /// <summary>
     /// Creates a new hotel instance.
     /// </summary>
     private Hotel() { }
@@ -118,11 +123,13 @@ public sealed record Hotel
     /// <param name="domain">The top-level domain, e.g. "com", "com.br".</param>
     /// <param name="host">The hostname, e.g. "habbo".</param>
     /// <param name="gameHost">The game host, defaults to "game-{identifier}.habbo.com".</param>
+    /// <param name="isOrigins">Whether this is an Origins hotel.</param>
     [JsonConstructor]
     public Hotel(
         string name, string? identifier = null,
         string subdomain = "www", string domain = "com",
-        string host = "habbo", string? gameHost = null)
+        string host = "habbo", string? gameHost = null,
+        bool isOrigins = false)
     {
         identifier ??= domain;
         gameHost ??= $"game-{identifier}.{host}.com";
@@ -145,6 +152,7 @@ public sealed record Hotel
             WebHost += $"{Subdomain}.";
         WebHost += $"{HostName}.{Domain}";
         GameHost = gameHost;
+        IsOrigins = isOrigins;
     }
 
     public override string ToString() => Name;
