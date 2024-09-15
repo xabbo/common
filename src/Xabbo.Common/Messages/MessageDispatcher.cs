@@ -27,8 +27,21 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         public void Dispose() => dispatcher.Unregister(this);
     }
 
+    private sealed class Registration(MessageDispatcher dispatcher, Header header, InterceptHandler handler) : IDisposable
+    {
+        internal readonly MessageDispatcher _dispatcher = dispatcher;
+        internal readonly Header _header = header;
+        internal readonly InterceptHandler _handler = handler;
+        internal volatile bool _deregistered;
+        public void Dispose()
+        {
+            _deregistered = true;
+            _dispatcher.Deregister(this);
+        }
+    }
+
     private readonly SemaphoreSlim _lock = new(1, 1);
-    private readonly ConcurrentDictionary<Header, DispatchList> _handlers = [];
+    private readonly ConcurrentDictionary<Header, List<Registration?>> _handlers = [];
     private readonly Dictionary<Persistent, Transient?> _persistents = [];
     private ClientType _currentClient = ClientType.None;
 
@@ -36,10 +49,6 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
     /// Gets the interceptor associated with this dispatcher.
     /// </summary>
     public IInterceptor Interceptor { get; }
-
-    /// <summary>
-    /// Gets the message manager used by this dispatcher.
-    /// </summary>
     public IMessageManager Messages => Interceptor.Messages;
 
     public MessageDispatcher(IInterceptor interceptor)
@@ -47,6 +56,65 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         Interceptor = interceptor;
         Interceptor.Connected += OnGameConnected;
         Interceptor.Disconnected += OnGameDisconnected;
+    }
+
+    private Registration Register(Header header, InterceptHandler handler)
+    {
+        Registration registration = new(this, header, handler);
+        List<Registration?> list = _handlers.GetOrAdd(header, _ => []);
+        if (Monitor.IsEntered(list))
+            throw new LockRecursionException("Attempt to register an intercept within an intercept handler.");
+        lock (list) list.Add(registration);
+        return registration;
+    }
+
+    private void Dispatch(List<Registration?> list, Intercept intercept)
+    {
+        lock (list)
+        {
+            int keep = 0;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                Registration? registration = list[i];
+                if (registration is null)
+                    continue;
+
+                intercept.Packet.Position = 0;
+                try
+                {
+                    registration._handler.Callback.Invoke(intercept);
+                }
+                catch (Exception ex)
+                {
+                    throw new UnhandledInterceptException(registration._header, registration._handler, ex);
+                }
+
+                if (!registration._deregistered)
+                {
+                    if (keep < i)
+                    {
+                        list[keep] = list[i];
+                        list[i] = null;
+                    }
+                    keep++;
+                }
+            }
+
+            if (keep < list.Count)
+                list.RemoveRange(keep, list.Count - keep);
+        }
+    }
+
+    private void Deregister(Registration registration)
+    {
+        if (_handlers.TryGetValue(registration._header, out var registrations))
+        {
+            if (!Monitor.IsEntered(registrations))
+            {
+                lock (registrations) registrations.Remove(registration);
+            }
+        }
     }
 
     private void OnGameConnected(GameConnectedArgs e)
@@ -85,8 +153,6 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
     {
         Interceptor.Connected -= OnGameConnected;
     }
-
-    private DispatchList GetDispatchList(Header header) => _handlers.GetOrAdd(header, _ => new DispatchList());
 
     public IDisposable Register(InterceptGroup group)
     {
@@ -170,7 +236,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
             if (!headerMap.TryGetValue(handler, out var headers))
                 continue;
             foreach (var header in headers)
-                transients.Add(GetDispatchList(header).Register(handler));
+                transients.Add(Register(header, handler));
         }
 
         return new Transient([.. transients]);
@@ -182,10 +248,10 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
     public void Dispatch(Intercept intercept)
     {
         if (_handlers.TryGetValue(Header.All, out var listenAll))
-            listenAll.Dispatch(intercept);
+            Dispatch(listenAll, intercept);
 
         if (_handlers.TryGetValue(intercept.Packet.Header, out var list))
-            list.Dispatch(intercept);
+            Dispatch(list, intercept);
     }
 
     /// <summary>
