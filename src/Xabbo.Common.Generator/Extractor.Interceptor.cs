@@ -119,6 +119,12 @@ internal static partial class Extractor
 
                 Direction direction = GetDirectionForInterceptAttribute(attributeName);
                 if (direction == Direction.None) continue;
+
+                hasInterceptAttribute = true;
+
+                if (direction == Direction.In) interceptInAttribute = attr;
+                else if (direction == Direction.Out) interceptOutAttribute = attr;
+
                 if (attr.ConstructorArguments.Length != 1)
                     continue;
 
@@ -134,8 +140,6 @@ internal static partial class Extractor
                     ));
                     continue;
                 }
-
-                hasInterceptAttribute = true;
 
                 foreach (TypedConstant nameConstant in argument.Values)
                 {
@@ -175,9 +179,6 @@ internal static partial class Extractor
 
                     identifiers.Add(new Identifier(client, direction, name));
                 }
-
-                if (direction == Direction.In) interceptInAttribute = attr;
-                else if (direction == Direction.Out) interceptOutAttribute = attr;
             }
 
             if (!hasInterceptAttribute) return null;
@@ -216,51 +217,48 @@ internal static partial class Extractor
                 }
             }
 
-            if (interceptAttribute is not null)
+            if (messageHandlerType is not null)
             {
-                if (messageHandlerType is not null)
+                if (interceptAttribute is { ConstructorArguments.Length: > 0 })
                 {
-                    if (interceptAttribute is { ConstructorArguments.Length: > 0 })
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.ClientSpecifierOnMessageHandler,
-                            interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                        ));
-                    }
-                    if (interceptInAttribute is not null)
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
-                            interceptInAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                        ));
-                    }
-                    if (interceptOutAttribute is not null)
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
-                            interceptOutAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                        ));
-                    }
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.ClientSpecifierOnMessageHandler,
+                        interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    ));
                 }
-                else
+                if (interceptInAttribute is not null)
                 {
-                    if (interceptAttribute is { ConstructorArguments.Length: 0 })
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
+                        interceptInAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    ));
+                }
+                if (interceptOutAttribute is not null)
+                {
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
+                        interceptOutAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    ));
+                }
+            }
+            else
+            {
+                if (interceptAttribute is { ConstructorArguments.Length: 0 })
+                {
+                    diagnostics.Add(new DiagnosticInfo(
+                        DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
+                        interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    ));
+                }
+                else if (interceptAttribute is { ConstructorArguments: [ { Value: int clientTypeValue } ] })
+                {
+                    interceptsOn &= (Client)clientTypeValue;
+                    if (interceptsOn == Client.None && targetClients != Client.None)
                     {
                         diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
+                            DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
                             interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
                         ));
-                    }
-                    else if (interceptAttribute.ConstructorArguments is [ { Value: int clientTypeValue } ])
-                    {
-                        interceptsOn &= (Client)clientTypeValue;
-                        if (interceptsOn == Client.None && targetClients != Client.None)
-                        {
-                            diagnostics.Add(new DiagnosticInfo(
-                                DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
-                                interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                            ));
-                        }
                     }
                 }
             }
