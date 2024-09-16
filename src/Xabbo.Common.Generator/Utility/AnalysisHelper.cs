@@ -268,6 +268,24 @@ internal static class AnalysisHelper
         } && containingNamespace.Name == parentNs && symbol.Name == "";
     }
 
+    public static bool IsIEnumerable_1(this ISymbol? symbol) => symbol is INamedTypeSymbol
+    {
+        TypeKind: TypeKind.Interface,
+        IsGenericType: true,
+        Arity: 1,
+        ContainingNamespace: {
+            ContainingNamespace: {
+                ContainingNamespace: {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "System"
+                },
+                Name: "Collections"
+            },
+            Name: "Generic"
+        },
+        Name: "IEnumerable"
+    };
+
     public static (VariadicType Type, bool IsValid) ToVariadicType(InvocationKind invocationKind, ITypeSymbol? typeSymbol)
     {
         bool isValidType = false;
@@ -281,6 +299,11 @@ internal static class AnalysisHelper
         {
             isArray = true;
             typeSymbol = arrayType.ElementType;
+        }
+        else if (((invocationKind & InvocationKind.Send) > 0 || (invocationKind & InvocationKind.Write) > 0) &&
+            typeSymbol is INamedTypeSymbol iEnumerableType && iEnumerableType.IsIEnumerable_1())
+        {
+            typeSymbol = iEnumerableType.TypeArguments[0];
         }
 
         if (typeSymbol is INamedTypeSymbol namedType)
