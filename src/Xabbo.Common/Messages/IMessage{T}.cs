@@ -55,7 +55,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             if (!T.Match(in r)) return;
             pos = 0;
             T msg = T.Parse(in r);
-            T? modified = callback(msg);
+            IMessage? modified = callback(msg);
             if (modified is not null)
             {
                 e.Packet.Clear();
