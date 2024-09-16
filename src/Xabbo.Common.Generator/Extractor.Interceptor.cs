@@ -203,7 +203,8 @@ internal static partial class Extractor
                 {
                     messageHandlerType = method.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 }
-                else if (AnalysisHelper.IsMessageHandlerSignature(method))
+                else if (AnalysisHelper.IsMessageHandlerSignature(method) ||
+                    AnalysisHelper.IsModifyMessageHandlerSignature(method))
                 {
                     messageHandlerType = method.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 }

@@ -218,6 +218,31 @@ internal static class AnalysisHelper
         ]
     } && ImplementsIMessage(messageTypeSymbol);
 
+    public static bool IsModifyMessageHandlerSignature(IMethodSymbol method) => method is
+    {
+        ReturnType: INamedTypeSymbol
+        {
+            TypeKind: TypeKind.Interface,
+            IsGenericType: false,
+            ContainingNamespace:
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "Xabbo"
+                },
+                Name: "Messages"
+            },
+            Name: "IMessage"
+        },
+        Parameters: [
+            {
+                RefKind: RefKind.None,
+                Type: INamedTypeSymbol messageTypeSymbol
+            }
+        ]
+    } && ImplementsIMessage(messageTypeSymbol);
+
     public static bool ImplementsParser(ITypeSymbol? symbol) =>
         symbol is { } type && type.AllInterfaces.Any(IsIParserInterface);
 
