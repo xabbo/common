@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Xabbo.Messages;
@@ -37,6 +38,29 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             if (!T.Match(in r)) return;
             pos = 0;
             callback(new Intercept<T>(ref e));
+        })
+        {
+            UseTargetedIdentifiers = T.UseTargetedIdentifiers
+        };
+    }
+
+    /// <summary>
+    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="ModifyMessageCallback{T}"/> .
+    /// </summary>
+    static InterceptHandler CreateHandler(ModifyMessageCallback<T> callback)
+    {
+        return new InterceptHandler([.. T.Identifiers], (e) => {
+            int pos = 0;
+            PacketReader r = new(e.Packet, ref pos, e.Interceptor);
+            if (!T.Match(in r)) return;
+            pos = 0;
+            T msg = T.Parse(in r);
+            T? modified = callback(msg);
+            if (modified is not null)
+            {
+                e.Packet.Clear();
+                e.Packet.Writer().Compose(modified);
+            }
         })
         {
             UseTargetedIdentifiers = T.UseTargetedIdentifiers

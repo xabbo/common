@@ -34,6 +34,15 @@ public static class InterceptorExtensions
     }
 
     /// <summary>
+    /// Registers an intercept for the specified message with the provided <see cref="ModifyMessageCallback{T}"/>.
+    /// </summary>
+    public static IDisposable Intercept<T>(this IInterceptor interceptor, ModifyMessageCallback<T> callback)
+        where T : IMessage<T>
+    {
+        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<T>.CreateHandler(callback) ]) { Persistent = true });
+    }
+
+    /// <summary>
     /// Registers an intercept for the specified message with the provided <see cref="InterceptMessageCallback{T}"/>.
     /// </summary>
     public static IDisposable Intercept<T>(this IInterceptor interceptor, InterceptMessageCallback<T> callback)
