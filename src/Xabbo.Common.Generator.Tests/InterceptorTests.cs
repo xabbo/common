@@ -1,39 +1,77 @@
-using Xabbo.Messages;
-
 namespace Xabbo.Common.Generator.Tests;
 
-[Extension(
-    Name = "Extension title",
-    Description = "Extension description"
-)]
-public partial class SampleInterceptor
+public class InterceptorTests
 {
-    [InterceptIn("Chat", "Shout", "Whisper")]
-    void OnChat(Intercept e) { }
+    [Fact]
+    public Task TestBasicInterceptor() => TestHelper.Verify(TestType.Interceptor, @"
+        using Xabbo;
 
-    [InterceptOut("Move")]
-    void OnMove(Intercept e)
-    {
-        var (x, y) = e.Packet.Read<int, int>();
-        Console.WriteLine($"Moving to {x}, {y}");
-    }
+        [Intercept]
+        partial class BasicInterceptor
+        {
+            [InterceptIn(""Incoming"")]
+            void InterceptIncoming(Intercept e) { }
 
-    [InterceptIn("Ping"), InterceptOut("Pong")]
-    void OnPingPong(Intercept e) { }
+            [InterceptOut(""Outgoing"")]
+            void InterceptOutgoing(Intercept e) { }
 
-    [InterceptIn("f:Objects")]
-    void OnObjects(Intercept e) { }
+            [InterceptIn(""Incoming"")]
+            [InterceptOut(""Outgoing"")]
+            void InterceptBoth(Intercept e) { }
 
-    [Intercept(ClientType.Shockwave)]
-    [InterceptIn("s:Objects")]
-    void OnShockwaveObjects(Intercept e) { }
+            [InterceptIn(""Incoming1"", ""Incoming2"", ""Incoming3"")]
+            [InterceptOut(""Outgoing1"", ""Outgoing2"", ""Outgoing3"")]
+            void InterceptMultiple(Intercept e) { }
+        }
+    ");
 
-    [Intercept]
-    void OnTestMessage(TestMessage msg) { }
+    [Fact]
+    public Task TestTargetedInterceptor() => TestHelper.Verify(TestType.Interceptor, @"
+        using Xabbo;
 
-    [Intercept]
-    void OnTestInterceptMessage(Intercept<TestMessage> e) { }
+        // Not shockwave
+        [Intercept(~ClientType.Shockwave)]
+        partial class TargetedInterceptor
+        {
+            [InterceptIn(""Incoming"")]
+            void InterceptUnityAndFlash(Intercept e) { }
 
-    [Intercept]
-    void OnTestInterceptMessage2(Intercept e, TestMessage msg) { }
+            // Not Unity (nor Shockwave, inherited from class attribute)
+            [Intercept(~ClientType.Unity)]
+            [InterceptOut(""Outgoing"")]
+            void InterceptFlashOnly(Intercept e) { }
+        }
+    ");
+
+    [Fact]
+    public Task TestTargetedHandlers() => TestHelper.Verify(TestType.Interceptor, @"
+        using Xabbo;
+
+        [Intercept]
+        partial class TargetedHandlerInterceptor
+        {
+            [Intercept(ClientType.Shockwave)]
+            [InterceptIn(""Incoming"")]
+            void InterceptShockwave(Intercept e) { }
+
+            [Intercept(ClientType.Flash)]
+            [InterceptOut(""Outgiong"")]
+            void InterceptFlash(Intercept e) { }
+        }
+    ");
+
+    [Fact]
+    public Task TestTargetedIdentifiers() => TestHelper.Verify(TestType.Interceptor, @"
+        using Xabbo;
+
+        [Intercept]
+        partial class TargetedIdentifierInterceptor
+        {
+            [InterceptIn(""f:IncomingFlash"")]
+            void InterceptFlashIdentifier(Intercept e) { }
+
+            [InterceptIn(""s:IncomingShockwave"")]
+            void InterceptShockwaveIdentifier(Intercept e) { }
+        }
+    ");
 }
