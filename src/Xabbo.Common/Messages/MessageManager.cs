@@ -7,17 +7,23 @@ using System.Net.Http;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Xabbo.Messages;
 
 /// <summary>
 /// Manages messages between multiple clients using a mapping file.
 /// </summary>
-public sealed class MessageManager(string filePath) : IMessageManager
+public sealed class MessageManager(string? filePath = null, ILoggerFactory? loggerFactory = null) : IMessageManager
 {
     const string MessagesFileUrl = "https://raw.githubusercontent.com/xabbo/messages/next/messages.ini";
 
-    private readonly string _mapFilePath = filePath;
+    private readonly string _mapFilePath = filePath ??
+        Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "xabbo", "messages.ini");
+
+    private readonly ILogger Log = (ILogger?)loggerFactory?.CreateLogger<MessageManager>() ?? NullLogger.Instance;
+
     private readonly SemaphoreSlim _init = new(1);
     private readonly ReaderWriterLockSlim _lock = new();
 
@@ -33,6 +39,11 @@ public sealed class MessageManager(string filePath) : IMessageManager
     /// </summary>
     public bool Fetch { get; set; } = true;
 
+    /// <summary>
+    /// The maximum age of the message map file after which it is invalidated.
+    /// </summary>
+    public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(1);
+
     public bool Available { get; private set; }
     public event Action? Loaded;
 
@@ -41,30 +52,76 @@ public sealed class MessageManager(string filePath) : IMessageManager
         if (!_init.Wait(0, CancellationToken.None))
             throw new InvalidOperationException("InitializeAsync may only be called once.");
 
-        if (!File.Exists(_mapFilePath))
+        Log.LogInformation("Initializing message manager...");
+        Log.LogDebug("Map file path is '{MapFilePath}'.", _mapFilePath);
+
+        bool fetchMapFile = false;
+        FileInfo mapFileInfo = new(_mapFilePath);
+
+        if (!mapFileInfo.Exists)
         {
             if (!Fetch)
-                throw new FileNotFoundException($"Message map file not found: \"{_mapFilePath}\".");
+            {
+                Log.LogError("Map file does not exist and Fetch is false.");
+                throw new FileNotFoundException($"Message map file not found: '{_mapFilePath}'.");
+            }
+            Log.LogDebug("Map file does not exist.");
+            fetchMapFile = true;
+        }
+        else if ((DateTime.Now - mapFileInfo.LastWriteTime) >= MaxAge)
+        {
+            Log.LogDebug("Map file has reached max age {MaxAge}.", MaxAge);
+            fetchMapFile = true;
+        }
+        else if (mapFileInfo.Length == 0)
+        {
+            Log.LogDebug("Map file is empty.");
+            fetchMapFile = true;
+        }
 
-            bool success = false;
+        if (fetchMapFile)
+        {
             try
             {
+                mapFileInfo.Directory?.Create();
+
                 using HttpClient http = new();
+                Log.LogInformation("Fetching message map file from '{MapFileUrl}'...", MessagesFileUrl);
                 using Stream ins = await http.GetStreamAsync(MessagesFileUrl, cancellationToken);
                 using Stream outs = File.OpenWrite(_mapFilePath);
                 await ins.CopyToAsync(outs, cancellationToken).ConfigureAwait(false);
-                success = true;
             }
-            finally
+            catch (Exception ex)
             {
-                if (!success)
+                Log.LogError(ex, "Failed to fetch message map file: {Error}.", ex.Message);
+                try
+                {
                     File.Delete(_mapFilePath);
+                }
+                catch (Exception ex2) { Log.LogError("Failed to remove message map file: {Error}.", ex2.Message); }
+                throw;
             }
+        }
+        else
+        {
+            Log.LogDebug("Loading map file from disk.");
         }
 
         _lock.EnterWriteLock();
-        try { _messageMap = MessageMap.Load(_mapFilePath); }
-        finally { _lock.ExitWriteLock(); }
+        try
+        {
+            _messageMap = MessageMap.Load(_mapFilePath);
+            Log.LogInformation("Loaded {Count} identifiers from message map.", _messageMap.Count);
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Failed to load message map: {Error}.", ex.Message);
+            throw;
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public bool TryResolve(ReadOnlySpan<Identifier> identifiers,
@@ -120,6 +177,8 @@ public sealed class MessageManager(string filePath) : IMessageManager
         _headers.Clear();
         _headerNames.Clear();
         _identifierNames.Clear();
+
+        Log.LogDebug("Message map reset.");
     }
 
     public void LoadMessages(IEnumerable<ClientMessage> messages)
@@ -132,46 +191,71 @@ public sealed class MessageManager(string filePath) : IMessageManager
 
             Reset();
 
+            // First populate the Identifier -> HashSet<MessageNames> mapping from the message map file entries.
             foreach (var (identifier, names) in _messageMap)
             {
+                // Each identifier will have a single client per the message map file specification.
                 _identifierNames.Add(identifier, [names]);
-                if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existing))
-                    existing.Add(names);
-                else
+                // Also add a key with a non-client-targeted identifier.
+                if (!_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existingNameSet))
+                {
+                    // Add the current MessageNames instance if it does not already exist.
                     _identifierNames.Add(identifier with { Client = ClientType.None }, [names]);
+                }
+                else
+                {
+                    // Otherwise add the current MessageNames instance to the existing entry.
+                    existingNameSet.Add(names);
+                }
             }
 
+            // Iterate over the provided ClientMessage information.
             foreach (var message in messages)
             {
+                // Create an Identifier and Header for this ClientMessage.
                 Identifier identifier = (message.Client, message.Direction, message.Name);
                 Header header = new(message.Client, message.Direction, message.Header);
+
+                // Create a new HashSet<MessageNames> if it does not exist for this identifier.
                 if (!_identifierNames.TryGetValue(identifier, out var nameSet))
                 {
                     nameSet = [new MessageNames().WithName(message.Client, message.Name)];
-                    if (!_identifierNames.TryAdd(identifier, nameSet))
-                        throw new Exception("Failed to add client identifiers.");
+                    _identifierNames[identifier] = nameSet;
                 }
 
                 if (nameSet.Count > 1)
-                    throw new Exception("Multiple message names conflict");
+                    throw new Exception("Multiple message names conflict.");
 
+                // Create a two-way mapping between Header and Direction/MessageNames.
                 var names = nameSet.Single();
                 _headers[(message.Direction, names)] = header;
                 _headerNames[header] = names;
 
-                if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existing))
-                    existing.Add(names);
+                // Also add or merge this entry into the Identifer -> HashSet<MessageNames> map
+                // with a non-client-targeted identifier.
+                if (_identifierNames.TryGetValue(identifier with { Client = ClientType.None }, out var existingNameSet))
+                {
+                    existingNameSet.Add(names);
+                }
                 else
+                {
                     _identifierNames.Add(identifier with { Client = ClientType.None }, [names]);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Failed to load client messages: {Error}.", ex.Message);
+            throw;
         }
         finally
         {
-            Available = true;
             _lock.ExitWriteLock();
-
-            Loaded?.Invoke();
         }
+
+        Log.LogInformation("Loaded {Count} message headers.", _headers.Count);
+        Available = true;
+        Loaded?.Invoke();
     }
 
     public bool TryGetHeader(Identifier identifier, out Header header)
