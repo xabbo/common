@@ -212,7 +212,7 @@ internal static partial class Extractor
                 {
                     diagnostics.Add(new DiagnosticInfo(
                         DiagnosticDescriptors.InvalidInterceptMethodSignature,
-                        method?.DeclaringSyntaxReferences.First().GetSyntax().GetLocation()
+                        member.Locations[0]
                     ));
                     return null;
                 }
