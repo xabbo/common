@@ -113,7 +113,21 @@ internal static class AnalysisHelper
         Name: "IConnection"
     };
 
-    public static bool IsIMessageInterface(INamedTypeSymbol symbol) => symbol is
+    public static bool IsIMessageInterface(ISymbol? symbol) => symbol is INamedTypeSymbol
+    {
+        TypeKind: TypeKind.Interface,
+        IsGenericType: false,
+        ContainingNamespace: {
+            ContainingNamespace: {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "Xabbo"
+            },
+            Name: "Messages"
+        },
+        Name: "IMessage"
+    };
+
+    public static bool IsGenericIMessageInterface(INamedTypeSymbol symbol) => symbol is
     {
         TypeKind: TypeKind.Interface,
         IsGenericType: true,
@@ -250,7 +264,7 @@ internal static class AnalysisHelper
         symbol is { } type && type.AllInterfaces.Any(IsIComposerInterface);
 
     public static bool ImplementsIMessage(ITypeSymbol? symbol)
-        => symbol is { } type && type.AllInterfaces.Any(IsIMessageInterface);
+        => symbol is { } type && type.AllInterfaces.Any(IsGenericIMessageInterface);
 
     public static bool IsPrimitivePacketType(ITypeSymbol? symbol)
     {

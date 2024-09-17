@@ -2,20 +2,27 @@ using System.Collections.Immutable;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Xabbo.Common.Generator.Utility;
 
 namespace Xabbo.Common.Generator;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class InterceptorDiagnosticSuppressor : DiagnosticSuppressor
 {
-    public SuppressionDescriptor SuppressionDescriptor => new(
+    public SuppressionDescriptor SuppressNonStaticIntercept => new(
         id: "XABBOSPR0001",
         suppressedDiagnosticId: "CA1822",
         justification: "Intercept handlers should not be static."
     );
 
+    public SuppressionDescriptor SuppressInterceptReturnType => new(
+        id: "XABBOSPR0002",
+        suppressedDiagnosticId: "CA1859",
+        justification: "The method is converted to ModifyMessageCallback which returns an IMessage."
+    );
+
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
-        => ImmutableArray.Create(SuppressionDescriptor);
+        => ImmutableArray.Create(SuppressNonStaticIntercept, SuppressInterceptReturnType);
 
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
@@ -38,10 +45,18 @@ public sealed class InterceptorDiagnosticSuppressor : DiagnosticSuppressor
                             Name: "Xabbo"
                         },
                         Name: "InterceptAttribute" or "InterceptInAttribute" or "InterceptOutAttribute"
-                    })
+                    } interceptAttribute)
                     {
-                        context.ReportSuppression(Suppression.Create(SuppressionDescriptor, diagnostic));
-                        break;
+                        if (diagnostic.Id == SuppressNonStaticIntercept.SuppressedDiagnosticId)
+                        {
+                            context.ReportSuppression(Suppression.Create(SuppressNonStaticIntercept, diagnostic));
+                        }
+                        else if (diagnostic.Id == SuppressInterceptReturnType.SuppressedDiagnosticId &&
+                            interceptAttribute.Name == "InterceptAttribute" &&
+                            AnalysisHelper.IsIMessageInterface(methodSymbol.ReturnType))
+                        {
+                            context.ReportSuppression(Suppression.Create(SuppressInterceptReturnType, diagnostic));
+                        }
                     }
                 }
             }
