@@ -31,25 +31,6 @@ internal static partial class Executor
                 "",
             ]);
 
-            // generate suppressions for CA1822
-            foreach (InterceptInfo intercept in interceptor.Intercepts)
-            {
-                w.Write(
-                    "[assembly: global::System.Diagnostics.CodeAnalysis.SuppressMessage("
-                    + "\"Performance\", "
-                    + "\"CA1822\", "
-                    + "Justification = \"Intercept handler methods should not be marked static.\", "
-                    + "Scope = \"member\", Target = \"~M:"
-                );
-                if (interceptor.Namespace != "")
-                    w.Write(interceptor.Namespace + ".");
-                w.Write(interceptor.Name);
-                w.Write('.');
-                w.Write(intercept.HandlerMethodName);
-                w.WriteLine("(Xabbo.Intercept)\")]");
-            }
-            w.WriteLine();
-
             if (interceptor.Namespace != "")
                 w.WriteLines([$"namespace {interceptor.Namespace};", ""]);
 
