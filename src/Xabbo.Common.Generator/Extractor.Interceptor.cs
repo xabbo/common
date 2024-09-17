@@ -141,9 +141,13 @@ internal static partial class Extractor
                     continue;
                 }
 
-                foreach (TypedConstant nameConstant in argument.Values)
+                Location[]? attributeParamLocations = null;
+                if (attr.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attrSyntax)
+                    attributeParamLocations = attrSyntax.ArgumentList?.Arguments.Select(x => x.GetLocation()).ToArray();
+
+                for (int i = 0; i < argument.Values.Length; i++)
                 {
-                    if (nameConstant.Value is not string name) continue;
+                    if (argument.Values[i].Value is not string name) continue;
 
                     Client client = Client.None;
 
@@ -158,7 +162,9 @@ internal static partial class Extractor
                         {
                             diagnostics.Add(new DiagnosticInfo(
                                 DiagnosticDescriptors.InvalidSingleClientSpecifier,
-                                attr.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                                attributeParamLocations is null
+                                    ? attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                                    : attributeParamLocations[i],
                                 name[..(colonIndex + 1)]
                             ));
                             continue;
@@ -171,7 +177,9 @@ internal static partial class Extractor
                     {
                         diagnostics.Add(new DiagnosticInfo(
                             DiagnosticDescriptors.InvalidMessageIdentifier,
-                            attr.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                            attributeParamLocations is null
+                                ? attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                                : attributeParamLocations[i],
                             name
                         ));
                         continue;
