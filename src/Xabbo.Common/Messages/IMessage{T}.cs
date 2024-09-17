@@ -58,6 +58,8 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             IMessage? modified = callback(msg);
             if (modified is not null)
             {
+                e.Packet.Header = e.Interceptor.Messages.Resolve(
+                    modified.GetIdentifier(e.Interceptor.Session.Client.Type));
                 e.Packet.Clear();
                 e.Packet.Writer().Compose(modified);
             }
