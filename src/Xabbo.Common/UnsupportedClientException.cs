@@ -38,4 +38,22 @@ public sealed class UnsupportedClientException(ClientType client)
         if ((client & clients) != ClientType.None)
             throw new UnsupportedClientException(client);
     }
+
+    /// <summary>
+    /// Throws if the client is the Shockwave client.
+    /// </summary>
+    public static void ThrowIfOrigins(ClientType client)
+    {
+        if ((client & ClientType.Shockwave) != ClientType.None)
+            throw new UnsupportedClientException(client);
+    }
+
+    /// <summary>
+    /// Throws if the client is the Unity or Flash client.
+    /// </summary>
+    public static void ThrowIfModern(ClientType client)
+    {
+        if ((client & (ClientType.Unity | ClientType.Flash)) != ClientType.None)
+            throw new UnsupportedClientException(client);
+    }
 }
