@@ -30,6 +30,11 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     protected IInterceptor Interceptor { get; } = interceptor;
 
     /// <summary>
+    /// Gets the current session information.
+    /// </summary>
+    protected Session Session => Interceptor.Session;
+
+    /// <summary>
     /// Executes the task synchronously and returns the result.
     /// </summary>
     /// <param name="timeoutMs">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
