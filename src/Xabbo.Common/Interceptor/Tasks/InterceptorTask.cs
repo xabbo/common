@@ -20,6 +20,11 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     private CancellationTokenRegistration? _disconnectRegistration;
 
     /// <summary>
+    /// Gets the clients supported by this interceptor task.
+    /// </summary>
+    protected virtual ClientType SupportedClients => ClientType.All;
+
+    /// <summary>
     /// The interceptor that this task is attached to.
     /// </summary>
     protected IInterceptor Interceptor { get; } = interceptor;
@@ -44,7 +49,8 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     /// <param name="timeoutMs">The maximum time to wait for a result in milliseconds. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
     /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
-    public Task<TResult> ExecuteAsync(int timeoutMs, CancellationToken cancellationToken) => ExecuteAsync(TimeSpan.FromMilliseconds(timeoutMs), cancellationToken);
+    public Task<TResult> ExecuteAsync(int timeoutMs = 10000, CancellationToken cancellationToken = default)
+        => ExecuteAsync(TimeSpan.FromMilliseconds(timeoutMs), cancellationToken);
 
     /// <summary>
     /// Executes the task asynchronously and returns the result.
@@ -52,8 +58,10 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     /// <param name="timeout">The maximum time to wait for a result. Use <see cref="TimeSpan.Zero"/>  for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
     /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
-    public async Task<TResult> ExecuteAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task<TResult> ExecuteAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
     {
+        UnsupportedClientException.ThrowIf(Interceptor.Session.Client.Type, ~SupportedClients);
+
         if (!_executeOnce.Wait(0, cancellationToken))
             throw new InvalidOperationException("The interceptor task has already been executed.");
 
@@ -61,10 +69,10 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
         cts.Token.Register(() => SetCanceled());
         if (timeout > TimeSpan.Zero) cts.CancelAfter(timeout);
 
-        _disconnectRegistration = Interceptor.DisconnectToken.Register(OnDisconnected);
-
         try
         {
+            _disconnectRegistration = Interceptor.DisconnectToken.Register(OnDisconnected);
+
             _attachment = OnAttach();
             await OnExecuteAsync().ConfigureAwait(false);
             return await _completion.Task;
