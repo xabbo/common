@@ -116,4 +116,31 @@ public static class InterceptorExtensions
         );
         return T.Parse(packet.Reader());
     }
+
+    /// <summary>
+    /// Sends a request message and asynchronously captures its response.
+    /// </summary>
+    /// <typeparam name="TRequest">The type of the request message.</typeparam>
+    /// <typeparam name="TResponse">The type of the response message.</typeparam>
+    /// <param name="interceptor">The interceptor.</param>
+    /// <param name="request">The request message to send.</param>
+    /// <param name="timeout">The maximum time in milliseconds to wait for a message to be captured. <c>-1</c> specifies no timeout.</param>
+    /// <param name="cancellationToken">The token used to cancel this operation.</param>
+    public static Task<TResponse> RequestAsync<TRequest, TResponse>(
+        this IInterceptor interceptor,
+        IRequestMessage<TRequest, TResponse> request,
+        int timeout = -1, CancellationToken cancellationToken = default
+    )
+        where TRequest : IRequestMessage<TRequest, TResponse>
+        where TResponse : IMessage<TResponse>
+    {
+        Task<TResponse> task = interceptor.ReceiveAsync<TResponse>(
+            timeout: timeout,
+            block: true,
+            shouldCapture: request.MatchResponse,
+            cancellationToken: cancellationToken
+        );
+        interceptor.Send(request);
+        return task;
+    }
 }
