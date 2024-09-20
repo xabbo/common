@@ -28,4 +28,12 @@ public enum ClientType
     /// Represents all clients.
     /// </summary>
     All = Unity | Flash | Shockwave,
+    /// <summary>
+    /// Represents modern clients. (Unity or Flash)
+    /// </summary>
+    Modern = Unity | Flash,
+    /// <summary>
+    /// Represents the Origins client. (Shockwave)
+    /// </summary>
+    Origins = Shockwave
 }
