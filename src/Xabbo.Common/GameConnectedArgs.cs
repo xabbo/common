@@ -33,4 +33,11 @@ public sealed class GameConnectedArgs
     /// Gets a list of client-specific message information.
     /// </summary>
     public List<ClientMessage> Messages { get; init; } = [];
+
+    /// <summary>
+    /// Gets whether the connection was previously established at the time of initialization.
+    /// If this is true, it is likely safe to begin sending packets, otherwise the connection
+    /// could be in a pre-authenticated state and it may not be safe to send certain packets.
+    /// </summary>
+    public bool PreEstablished { get; set; }
 }
