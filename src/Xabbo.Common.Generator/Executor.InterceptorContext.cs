@@ -131,13 +131,14 @@ internal static partial class Executor
             where TResponse : global::Xabbo.Messages.IMessage<TResponse>
         {
             global::Xabbo.Interceptor.IInterceptor interceptor = ((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor;
-            global::System.Threading.Tasks.Task<TResponse> response = interceptor.ReceiveAsync<TResponse>(
+            global::System.Threading.Tasks.Task<TResponse> response = global::Xabbo.InterceptorExtensions.ReceiveAsync<TResponse>(
+                interceptor,
                 timeout: timeout,
                 block: true,
                 shouldCapture: request.MatchResponse,
                 cancellationToken: cancellationToken
             );
-            interceptor.Send(request);
+            global::Xabbo.ConnectionExtensions.Send(interceptor, request);
 
             return request.GetData(await response);
         }");
