@@ -12,6 +12,8 @@ namespace Xabbo.Interceptor.Tasks;
 /// <typeparam name="TResult">The result type of the task.</typeparam>
 public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
 {
+    const int DefaultTimeoutMs = 10000;
+
     private IDisposable? _attachment;
     private readonly SemaphoreSlim _executeOnce = new(1);
     private readonly TaskCompletionSource<TResult> _completion
@@ -39,14 +41,14 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     /// </summary>
     /// <param name="timeoutMs">The maximum number of milliseconds to wait for a result. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
-    public TResult Execute(int timeoutMs, CancellationToken cancellationToken) => ExecuteAsync(timeoutMs, cancellationToken).GetAwaiter().GetResult();
+    public TResult Execute(int? timeoutMs = null, CancellationToken cancellationToken = default) => ExecuteAsync(timeoutMs, cancellationToken).GetAwaiter().GetResult();
 
     /// <summary>
     /// Executes the task synchronously and returns the result.
     /// </summary>
     /// <param name="timeout">The maximum time to wait for a result. Use <see cref="TimeSpan.Zero"/> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
-    public TResult Execute(TimeSpan timeout, CancellationToken cancellationToken) => ExecuteAsync(timeout, cancellationToken).GetAwaiter().GetResult();
+    public TResult Execute(TimeSpan timeout, CancellationToken cancellationToken = default) => ExecuteAsync(timeout, cancellationToken).GetAwaiter().GetResult();
 
     /// <summary>
     /// Executes the task asynchronously and returns the result.
@@ -54,8 +56,8 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     /// <param name="timeoutMs">The maximum time to wait for a result in milliseconds. Use <c>-1</c> for no timeout.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the task.</param>
     /// <exception cref="TimeoutException">If the task fails to complete within the specified timeout.</exception>
-    public Task<TResult> ExecuteAsync(int timeoutMs = 10000, CancellationToken cancellationToken = default)
-        => ExecuteAsync(TimeSpan.FromMilliseconds(timeoutMs), cancellationToken);
+    public Task<TResult> ExecuteAsync(int? timeoutMs = null, CancellationToken cancellationToken = default)
+        => ExecuteAsync(TimeSpan.FromMilliseconds(timeoutMs ?? DefaultTimeoutMs), cancellationToken);
 
     /// <summary>
     /// Executes the task asynchronously and returns the result.

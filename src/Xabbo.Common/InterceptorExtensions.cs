@@ -62,7 +62,7 @@ public static class InterceptorExtensions
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a packet has been captured, or the operation times out.</returns>
     public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor, ReadOnlySpan<Header> headers,
-        int timeout = -1, bool block = false, Func<IPacket, bool>? shouldCapture = null,
+        int? timeout = null, bool block = false, Func<IPacket, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default)
     {
         return new CaptureMessageTask(interceptor, headers, block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
@@ -79,7 +79,7 @@ public static class InterceptorExtensions
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a packet has been captured, or the operation times out.</returns>
     public static Task<IPacket> ReceiveAsync(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers,
-        int timeout = -1, bool block = false, Func<IPacket, bool>? shouldCapture = null,
+        int? timeout = null, bool block = false, Func<IPacket, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default)
     {
         return new CaptureMessageTask(interceptor, [.. interceptor.Messages.Resolve(identifiers)], block, shouldCapture).ExecuteAsync(timeout, cancellationToken);
@@ -96,7 +96,7 @@ public static class InterceptorExtensions
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a message has been captured, or the operation times out.</returns>
     public static async Task<T> ReceiveAsync<T>(this IInterceptor interceptor,
-        int timeout = -1, bool block = false, Func<T, bool>? shouldCapture = null,
+        int? timeout = null, bool block = false, Func<T, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default
     )
         where T : IMessage<T>
@@ -130,7 +130,7 @@ public static class InterceptorExtensions
     public static async Task<TData> RequestAsync<TReq, TRes, TData>(
         this IInterceptor interceptor,
         IRequestMessage<TReq, TRes, TData> request,
-        int timeout = -1, CancellationToken cancellationToken = default
+        int? timeout = null, CancellationToken cancellationToken = default
     )
         where TReq : IRequestMessage<TReq, TRes, TData>
         where TRes : IMessage<TRes>

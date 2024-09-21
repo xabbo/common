@@ -77,7 +77,7 @@ internal static partial class Executor
         /// )"" />
         protected global::System.Threading.Tasks.Task<global::Xabbo.Messages.IPacket> ReceiveAsync(
             global::System.ReadOnlySpan<global::Xabbo.Messages.Header> headers,
-            int timeout = -1, bool block = false,
+            int? timeout = null, bool block = false,
             global::System.Func<global::Xabbo.Messages.IPacket, bool>? shouldCapture = null,
             global::System.Threading.CancellationToken cancellationToken = default
         ) => global::Xabbo.InterceptorExtensions.ReceiveAsync(
@@ -94,7 +94,7 @@ internal static partial class Executor
         /// )"" />
         protected global::System.Threading.Tasks.Task<global::Xabbo.Messages.IPacket> ReceiveAsync(
             global::System.ReadOnlySpan<global::Xabbo.Messages.Identifier> identifiers,
-            int timeout = -1, bool block = false,
+            int? timeout = null, bool block = false,
             global::System.Func<global::Xabbo.Messages.IPacket, bool>? shouldCapture = null,
             global::System.Threading.CancellationToken cancellationToken = default
         ) => global::Xabbo.InterceptorExtensions.ReceiveAsync(
@@ -109,7 +109,7 @@ internal static partial class Executor
         ///     global::System.Threading.CancellationToken
         /// )"" />
         protected global::System.Threading.Tasks.Task<T> ReceiveAsync<T>(
-            int timeout = -1, bool block = false,
+            int? timeout = null, bool block = false,
             global::System.Func<T, bool>? shouldCapture = null,
             global::System.Threading.CancellationToken cancellationToken = default
         ) where T : global::Xabbo.Messages.IMessage<T> => global::Xabbo.InterceptorExtensions.ReceiveAsync<T>(
@@ -125,7 +125,7 @@ internal static partial class Executor
         /// )"" />
         protected async global::System.Threading.Tasks.Task<TData> RequestAsync<TRequest, TResponse, TData>(
             global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData> request,
-            int timeout = -1, global::System.Threading.CancellationToken cancellationToken = default
+            int? timeout = null, global::System.Threading.CancellationToken cancellationToken = default
         )
             where TRequest : global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData>
             where TResponse : global::Xabbo.Messages.IMessage<TResponse>
