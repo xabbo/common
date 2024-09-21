@@ -3,9 +3,7 @@ namespace Xabbo.Common.Generator.Tests;
 public class InterceptorTests
 {
     [Fact]
-    public Task TestBasicInterceptor() => TestHelper.Verify(TestType.Interceptor, @"
-        using Xabbo;
-
+    public Task TestBasicInterceptor() => TestHelper.Verify(@"
         [Intercept]
         partial class BasicInterceptor
         {
@@ -22,13 +20,11 @@ public class InterceptorTests
             [InterceptIn(""Incoming1"", ""Incoming2"", ""Incoming3"")]
             [InterceptOut(""Outgoing1"", ""Outgoing2"", ""Outgoing3"")]
             void InterceptMultiple(Intercept e) { }
-        }
-    ");
+        }",
+        testType: TestType.Interceptor);
 
     [Fact]
-    public Task TestTargetedInterceptor() => TestHelper.Verify(TestType.Interceptor, @"
-        using Xabbo;
-
+    public Task TestTargetedInterceptor() => TestHelper.Verify(@"
         // Not shockwave
         [Intercept(~ClientType.Shockwave)]
         partial class TargetedInterceptor
@@ -40,13 +36,11 @@ public class InterceptorTests
             [Intercept(~ClientType.Unity)]
             [InterceptOut(""Outgoing"")]
             void InterceptFlashOnly(Intercept e) { }
-        }
-    ");
+        }",
+        testType: TestType.Interceptor);
 
     [Fact]
-    public Task TestTargetedHandlers() => TestHelper.Verify(TestType.Interceptor, @"
-        using Xabbo;
-
+    public Task TestTargetedHandlers() => TestHelper.Verify(@"
         [Intercept]
         partial class TargetedHandlerInterceptor
         {
@@ -57,13 +51,11 @@ public class InterceptorTests
             [Intercept(ClientType.Flash)]
             [InterceptOut(""Outgiong"")]
             void InterceptFlash(Intercept e) { }
-        }
-    ");
+        }",
+        testType: TestType.Interceptor);
 
     [Fact]
-    public Task TestTargetedIdentifiers() => TestHelper.Verify(TestType.Interceptor, @"
-        using Xabbo;
-
+    public Task TestTargetedIdentifiers() => TestHelper.Verify(@"
         [Intercept]
         partial class TargetedIdentifierInterceptor
         {
@@ -72,6 +64,6 @@ public class InterceptorTests
 
             [InterceptIn(""s:IncomingShockwave"")]
             void InterceptShockwaveIdentifier(Intercept e) { }
-        }
-    ");
+        }",
+        testType: TestType.Interceptor);
 }

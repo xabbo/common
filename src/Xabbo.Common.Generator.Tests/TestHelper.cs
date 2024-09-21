@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -6,22 +7,44 @@ namespace Xabbo.Common.Generator.Tests;
 
 public static class TestHelper
 {
-    static bool ShouldIgnore(TestType type, GeneratedSourceResult result)
+    static readonly string[] GlobalUsings = [
+        "System",
+        "System.Threading",
+        "System.Threading.Tasks",
+        "Xabbo",
+        "Xabbo.Messages",
+        "Xabbo.Interceptor"
+    ];
+
+    static readonly Dictionary<TestType, string> TestTypeSuffixes = new()
     {
-        if ((type & TestType.Extension) > 0 && result.HintName.EndsWith("Extension.g.cs"))
-            return false;
-        if ((type & TestType.Interceptor) > 0 && result.HintName.EndsWith("Interceptor.g.cs"))
-            return false;
-        if ((type & TestType.ReadImpl) > 0 && result.HintName.EndsWith("Read.Impl.g.cs"))
-            return false;
-        if ((type & TestType.ReplaceImpl) > 0 && result.HintName.EndsWith("Replace.Impl.g.cs"))
-            return false;
-        return true;
+        [TestType.Extension] = "Extension.g.cs",
+        [TestType.Interceptor] = "Interceptor.g.cs",
+        [TestType.InterceptorContext] = "InterceptorContext.g.cs",
+        [TestType.ReadImpl] = "Read.Impl.g.cs",
+        [TestType.ReplaceImpl] = "Replace.Impl.g.cs",
+    };
+    
+    static bool ShouldIgnore(TestType typesToTest, GeneratedSourceResult result)
+    {
+        foreach (var (testType, suffix) in TestTypeSuffixes)
+        {
+            if (result.HintName.EndsWith(suffix) && !typesToTest.HasFlag(testType))
+                return true;
+        }
+        return false;
     }
 
-    public static Task Verify(TestType testType, string source)
+    public static Task Verify(
+        string source,
+        TestType testType = TestType.All,
+        bool isScript = false,
+        bool checkCompilationErrors = true)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+
+        SyntaxTree globalUsings = CSharpSyntaxTree.ParseText(
+            string.Join('\n', GlobalUsings.Select(x => $"global using global::{x};")));
 
         List<MetadataReference> references = [
             // mscorlib
@@ -42,22 +65,29 @@ public static class TestHelper
 
         CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName: "Tests",
-            syntaxTrees: [syntaxTree],
+            syntaxTrees: [globalUsings, syntaxTree],
             references: references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            new CSharpCompilationOptions(
+                isScript ? OutputKind.ConsoleApplication : OutputKind.DynamicallyLinkedLibrary,
+                scriptClassName: "TestHelper"
+            )
         );
-
-        var error = compilation.GetDiagnostics().Where(x => x.Severity == DiagnosticSeverity.Error).ToList();
-        if (error.Count > 0)
-        {
-            throw new Exception(error[0].GetMessage());
-        }
 
         var generator = new Xabbo.Common.Generator.Generator();
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        driver = driver.RunGenerators(compilation);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation,
+            out Compilation generatedCompilation,
+            out ImmutableArray<Diagnostic> diagnostics);
+
+        var generatedDiagnostics = generatedCompilation.GetDiagnostics();
+        var errors = generatedDiagnostics
+            .Where(x => x.Severity == DiagnosticSeverity.Error)
+            .ToList();
+
+        if (checkCompilationErrors && errors.Count > 0)
+            throw new Exception(string.Join('\n', errors.Select(e => e.ToString())));
 
         var settings = new VerifySettings();
         settings.UseDirectory("Generated");

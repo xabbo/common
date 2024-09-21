@@ -8,4 +8,6 @@ public enum TestType
     InterceptorContext = 1 << 2,
     ReadImpl = 1 << 3,
     ReplaceImpl = 1 << 4,
+    All = unchecked((int)uint.MaxValue)
 }
+
