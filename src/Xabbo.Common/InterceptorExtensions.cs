@@ -120,22 +120,22 @@ public static class InterceptorExtensions
     /// <summary>
     /// Sends a request message and asynchronously captures its response.
     /// </summary>
-    /// <typeparam name="TRequest">The type of the request message.</typeparam>
-    /// <typeparam name="TResponse">The type of the response message.</typeparam>
+    /// <typeparam name="TReq">The type of the request message.</typeparam>
+    /// <typeparam name="TRes">The type of the response message.</typeparam>
     /// <typeparam name="TData">The type of the response data.</typeparam>
     /// <param name="interceptor">The interceptor.</param>
     /// <param name="request">The request message to send.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a message to be captured. <c>-1</c> specifies no timeout.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
-    public static async Task<TData> RequestAsync<TRequest, TResponse, TData>(
+    public static async Task<TData> RequestAsync<TReq, TRes, TData>(
         this IInterceptor interceptor,
-        IRequestMessage<TRequest, TResponse, TData> request,
+        IRequestMessage<TReq, TRes, TData> request,
         int timeout = -1, CancellationToken cancellationToken = default
     )
-        where TRequest : IRequestMessage<TRequest, TResponse, TData>
-        where TResponse : IMessage<TResponse>
+        where TReq : IRequestMessage<TReq, TRes, TData>
+        where TRes : IMessage<TRes>
     {
-        Task<TResponse> response = interceptor.ReceiveAsync<TResponse>(
+        Task<TRes> response = interceptor.ReceiveAsync<TRes>(
             timeout: timeout,
             block: true,
             shouldCapture: request.MatchResponse,
