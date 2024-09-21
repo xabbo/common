@@ -38,7 +38,7 @@ internal sealed class SourceWriter() : IndentedTextWriter(new StringWriter(), ne
             WriteLine(openingLine);
         return new IntentationBlock(this, "{", "}");
     }
-    public IDisposable NamespaceScope(string name) => BraceScope("namespace " + name);
+    public IDisposable? NamespaceScope(string? name) => name is null || name == "<global namespace>" ? null : BraceScope($"namespace {name}");
 
     public void WriteTypeParams(int n, string? prefix = null, string? suffix = null, int group = 10, bool includeAngleBrackets = true)
     {

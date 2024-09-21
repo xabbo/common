@@ -152,7 +152,11 @@ internal static partial class Executor
                 }
             }
 
-            context.AddSource($"{info.Namespace}.{info.Name}.InterceptorContext.g.cs", w.ToSourceText());
+            string ns = info.Namespace;
+            if (ns == "<global namespace>")
+                ns = "global";
+
+            context.AddSource($"{ns}.{info.Name}.InterceptorContext.g.cs", w.ToSourceText());
         }
     }
 }
