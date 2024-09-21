@@ -91,7 +91,26 @@ internal static partial class Executor
         ) where T : global::Xabbo.Messages.IMessage<T> => global::Xabbo.InterceptorExtensions.ReceiveAsync<T>(
             ((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor,
             timeout, block, shouldCapture, cancellationToken
-        );");
+        );
+
+        protected async global::System.Threading.Tasks.Task<TData> RequestAsync<TRequest, TResponse, TData>(
+            global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData> request,
+            int timeout = -1, global::System.Threading.CancellationToken cancellationToken = default
+        )
+            where TRequest : global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData>
+            where TResponse : global::Xabbo.Messages.IMessage<TResponse>
+        {
+            global::Xabbo.Interceptor.IInterceptor interceptor = ((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor;
+            global::System.Threading.Tasks.Task<TResponse> response = interceptor.ReceiveAsync<TResponse>(
+                timeout: timeout,
+                block: true,
+                shouldCapture: request.MatchResponse,
+                cancellationToken: cancellationToken
+            );
+            interceptor.Send(request);
+
+            return request.GetData(await response);
+        }");
 
                     w.WriteLine();
                     w.WriteLine($"// Generating {info.SendHeaderArities.Length} send header method(s)");
