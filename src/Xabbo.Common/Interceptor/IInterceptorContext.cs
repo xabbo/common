@@ -14,6 +14,7 @@ namespace Xabbo.Interceptor;
 /// <item><c>Task&lt;IPacket&gt; ReceiveAsync(Identifier, ...)</c></item>
 /// <item><c>Task&lt;IPacket&gt; ReceiveAsync(Header, ...)</c></item>
 /// <item><c>Task&lt;T&gt; ReceiveAsync&lt;T&gt;(...) where T : IMessage&lt;T&gt;</c></item>
+/// <item><c>Task&lt;TData&gt; RequestAsync&lt;TReq, TRes, TData&gt;(...) where T : IRequestMessage&lt;TReq, TRes, TData&gt;</c></item>
 /// </list>
 /// </summary>
 public interface IInterceptorContext
