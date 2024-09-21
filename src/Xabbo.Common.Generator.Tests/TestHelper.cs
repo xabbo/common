@@ -24,9 +24,13 @@ public static class TestHelper
         [TestType.ReadImpl] = "Read.Impl.g.cs",
         [TestType.ReplaceImpl] = "Replace.Impl.g.cs",
     };
-    
+
     static bool ShouldIgnore(TestType typesToTest, GeneratedSourceResult result)
     {
+        // Ignore static files
+        if (result.HintName.EndsWith("Base.g.cs"))
+            return true;
+
         foreach (var (testType, suffix) in TestTypeSuffixes)
         {
             if (result.HintName.EndsWith(suffix) && !typesToTest.HasFlag(testType))
