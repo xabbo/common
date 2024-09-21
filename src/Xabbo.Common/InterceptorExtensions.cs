@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.VisualBasic;
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 using Xabbo.Messages;
@@ -122,25 +122,27 @@ public static class InterceptorExtensions
     /// </summary>
     /// <typeparam name="TRequest">The type of the request message.</typeparam>
     /// <typeparam name="TResponse">The type of the response message.</typeparam>
+    /// <typeparam name="TData">The type of the response data.</typeparam>
     /// <param name="interceptor">The interceptor.</param>
     /// <param name="request">The request message to send.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a message to be captured. <c>-1</c> specifies no timeout.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
-    public static Task<TResponse> RequestAsync<TRequest, TResponse>(
+    public static async Task<TData> RequestAsync<TRequest, TResponse, TData>(
         this IInterceptor interceptor,
-        IRequestMessage<TRequest, TResponse> request,
+        IRequestMessage<TRequest, TResponse, TData> request,
         int timeout = -1, CancellationToken cancellationToken = default
     )
-        where TRequest : IRequestMessage<TRequest, TResponse>
+        where TRequest : IRequestMessage<TRequest, TResponse, TData>
         where TResponse : IMessage<TResponse>
     {
-        Task<TResponse> task = interceptor.ReceiveAsync<TResponse>(
+        Task<TResponse> response = interceptor.ReceiveAsync<TResponse>(
             timeout: timeout,
             block: true,
             shouldCapture: request.MatchResponse,
             cancellationToken: cancellationToken
         );
         interceptor.Send(request);
-        return task;
+
+        return request.GetData(await response);
     }
 }
