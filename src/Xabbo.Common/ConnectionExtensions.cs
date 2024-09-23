@@ -32,6 +32,8 @@ public static class ConnectionExtensions
     /// </summary>
     public static void Send(this IConnection connection, IMessage message)
     {
+        UnsupportedClientException.ThrowIf(connection.Session.Client.Type, ~message.GetSupportedClients());
+
         Identifier identifier = message.GetIdentifier(connection.Session.Client.Type);
         if (identifier == Identifier.Unknown)
             throw new Exception($"No identifier for IMessage({message.GetType().Name}).");

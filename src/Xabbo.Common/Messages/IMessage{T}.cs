@@ -1,6 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
-
 namespace Xabbo.Messages;
 
 public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T>
@@ -16,10 +13,15 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     static virtual bool UseTargetedIdentifiers => false;
 
     /// <summary>
+    /// Gets the clients that this message is supported on.
+    /// </summary>
+    static virtual ClientType SupportedClients => ClientType.All;
+    ClientType IMessage.GetSupportedClients() => T.SupportedClients;
+
+    /// <summary>
     /// Gets the identifier for this message.
     /// </summary>
     static abstract Identifier Identifier { get; }
-
     Identifier IMessage.GetIdentifier(ClientType client) => T.Identifier;
 
     /// <summary>
@@ -40,6 +42,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             callback(new Intercept<T>(ref e));
         })
         {
+            Target = T.SupportedClients,
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
         };
     }
@@ -65,6 +68,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             }
         })
         {
+            Target = T.SupportedClients,
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
         };
     }
@@ -83,6 +87,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             callback(r.Parse<T>());
         })
         {
+            Target = T.SupportedClients,
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
         };
     }
@@ -101,6 +106,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             callback(e, r.Parse<T>());
         })
         {
+            Target = T.SupportedClients,
             UseTargetedIdentifiers = T.UseTargetedIdentifiers
         };
     }

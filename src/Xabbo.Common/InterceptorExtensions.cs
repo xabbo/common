@@ -101,6 +101,8 @@ public static class InterceptorExtensions
     )
         where T : IMessage<T>
     {
+        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~T.SupportedClients);
+
         using IPacket packet = await ReceiveAsync(interceptor,
             [.. T.Identifiers],
             timeout,
@@ -135,6 +137,9 @@ public static class InterceptorExtensions
         where TReq : IRequestMessage<TReq, TRes, TData>
         where TRes : IMessage<TRes>
     {
+        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~TReq.SupportedClients);
+        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~TRes.SupportedClients);
+
         Task<TRes> response = interceptor.ReceiveAsync<TRes>(
             timeout: timeout,
             block: true,
