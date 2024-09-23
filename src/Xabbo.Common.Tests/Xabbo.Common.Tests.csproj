@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
@@ -13,8 +13,8 @@
   </Target>
 
   <ItemGroup Label="Exclude generated source files">
-    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**" />
-    <Content Include="$(CompilerGeneratedFilesOutputPath)/**" />
+    <Compile Remove="Generated/**" />
+    <Content Include="Generated/**" />
   </ItemGroup>
 
   <ItemGroup>
