@@ -4,7 +4,7 @@ public interface IRequestMessage<TReq, TRes, TData> : IMessage<TReq>, IRequestFo
     where TReq : IMessage<TReq>
     where TRes : IMessage<TRes>;
 
-public interface IRequestMessage<TReq, TRes> : IMessage<TReq>, IRequestFor<TRes>, IResponseData<TRes, TRes>
+public interface IRequestMessage<TReq, TRes> : IRequestMessage<TReq, TRes, TRes>
     where TReq : IMessage<TReq>
     where TRes : IMessage<TRes>
 {
