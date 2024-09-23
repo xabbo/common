@@ -128,21 +128,21 @@ public static class InterceptorExtensions
     /// <param name="interceptor">The interceptor.</param>
     /// <param name="request">The request message to send.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a message to be captured. <c>-1</c> specifies no timeout.</param>
+    /// <param name="block">Whether the captured message should be blocked from its destination.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     public static async Task<TData> RequestAsync<TReq, TRes, TData>(
         this IInterceptor interceptor,
         IRequestMessage<TReq, TRes, TData> request,
-        int? timeout = null, CancellationToken cancellationToken = default
+        int? timeout = null, bool block = true, CancellationToken cancellationToken = default
     )
         where TReq : IRequestMessage<TReq, TRes, TData>
         where TRes : IMessage<TRes>
     {
         UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~TReq.SupportedClients);
-        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~TRes.SupportedClients);
 
         Task<TRes> response = interceptor.ReceiveAsync<TRes>(
             timeout: timeout,
-            block: true,
+            block: block,
             shouldCapture: request.MatchResponse,
             cancellationToken: cancellationToken
         );
