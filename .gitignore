@@ -1,3 +1,5 @@
+# NuGet pkg folder
+pkg/
 
 # Exclude snapshot test output
 *.received.*

@@ -18,3 +18,6 @@ tasks:
       - dotnet clean
       - dotnet build-server shutdown
       - dotnet build
+  pack:
+    cmds:
+      - dotnet pack src/Xabbo.Common -c Release -o pkg
