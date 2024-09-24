@@ -22,7 +22,7 @@ public class MessagesFixture : IAsyncLifetime
 
     public MessagesFixture()
     {
-        Messages = new MessageManager(@"Resources/test_messages.ini") { Fetch = false };
+        Messages = new MessageManager(@"./Resources/test_messages.ini") { Fetch = false };
     }
 
     public async Task InitializeAsync()
