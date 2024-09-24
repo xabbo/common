@@ -67,7 +67,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
                 }
                 else
                 {
-                    UnsupportedClientException.ThrowIf(e.Interceptor.Session.Client.Type, modified.GetSupportedClients());
+                    UnsupportedClientException.ThrowIf(e.Interceptor.Session.Client.Type, ~modified.GetSupportedClients());
                     e.Packet.Header = e.Interceptor.Messages.Resolve(
                         modified.GetIdentifier(e.Interceptor.Session.Client.Type));
                     e.Packet.Clear();
