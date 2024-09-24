@@ -6,7 +6,7 @@ public class PacketTests
     // that the receiver type of invocations of Read, Write etc. implements IPacket,
     // however, ReceiveAsync is injected by the source generator, so there
     // is no return type associated with it during source generation.
-    [Fact(Skip = "Fails to generate case for MyParser in ReadImpl")]
+    [Fact]
     public Task TestInterceptorContextReadInlineAwaitedPacket() => TestHelper.Verify(
         @"
         [Intercept]

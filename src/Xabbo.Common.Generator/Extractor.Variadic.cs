@@ -16,7 +16,7 @@ internal static partial class Extractor
         {
             Expression: MemberAccessExpressionSyntax
             {
-                Name.Identifier.Value:
+                Name.Identifier.ValueText:
                     "Read" or "ReadAt" or
                     "Write" or "WriteAt" or
                     "Replace" or "ReplaceAt" or
@@ -49,16 +49,18 @@ internal static partial class Extractor
             if (invocationKind == (InvocationKind)(-1))
                 return null;
 
-            TypeInfo memberTypeInfo = ctx.SemanticModel.GetTypeInfo(memberAccess.Expression);
-            if (memberTypeInfo.Type is not INamedTypeSymbol memberType) return null;
-
             bool isSend = (invocationKind & InvocationKind.Send) > 0;
 
-            // Ensure the target implements IPacket or IConnection.
-            Func<INamedTypeSymbol, bool> checkInterface =
-                isSend ? IsIConnectionInterface : IsIPacketInterface;
-            if (!checkInterface(memberType) && !memberType.AllInterfaces.Any(checkInterface))
-                return null;
+            TypeInfo memberTypeInfo = ctx.SemanticModel.GetTypeInfo(memberAccess.Expression);
+            if (memberTypeInfo.Type is INamedTypeSymbol memberType &&
+                memberType.TypeKind != TypeKind.Error)
+            {
+                // Ensure the target implements IPacket or IConnection.
+                Func<INamedTypeSymbol, bool> checkInterface =
+                    isSend ? IsIConnectionInterface : IsIPacketInterface;
+                if (!checkInterface(memberType) && !memberType.AllInterfaces.Any(checkInterface))
+                    return null;
+            }
 
             bool hasArguments = (invocationKind & InvocationKind.HasArguments) > 0;
             bool requireParser = (invocationKind & InvocationKind.RequiresParser) > 0;
