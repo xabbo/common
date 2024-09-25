@@ -15,14 +15,55 @@ public static class InterceptorExtensions
     /// <summary>
     /// Registers an intercept for the specified headers with the provided <see cref="InterceptCallback"/>.
     /// </summary>
-    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Header> headers, InterceptCallback callback)
-        => interceptor.Dispatcher.Register(new([new(headers, callback)]) { Persistent = true });
+    /// <param name="interceptor">The interceptor to register the intercept for.</param>
+    /// <param name="headers">The message headers to intercept.</param>
+    /// <param name="callback">The function to call when a packet is intercepted.</param>
+    /// <param name="clients">Specifies which clients to intercept on.</param>
+    public static IDisposable Intercept(
+        this IInterceptor interceptor,
+        ReadOnlySpan<Header> headers,
+        InterceptCallback callback,
+        ClientType clients = ClientType.All)
+    {
+        return interceptor.Dispatcher.Register(
+            new InterceptGroup([
+                new InterceptHandler(headers, callback) { Target = clients }
+            ])
+            { Persistent = true }
+        );
+    }
 
     /// <summary>
     /// Registers an intercept for the specified identifiers with the provided <see cref="InterceptCallback"/>.
     /// </summary>
-    public static IDisposable Intercept(this IInterceptor interceptor, ReadOnlySpan<Identifier> identifiers, InterceptCallback callback)
-        => interceptor.Dispatcher.Register(new([new(identifiers, callback)]) { Persistent = true });
+    /// <param name="interceptor">The interceptor to register the intercept for.</param>
+    /// <param name="identifiers">The message identifiers to intercept.</param>
+    /// <param name="callback">The function to call when a packet is intercepted.</param>
+    /// <param name="clients">Specifies which clients to intercept on.</param>
+    /// <param name="targeted">
+    /// Whether to use client-targeted identifiers.
+    /// For example, if the client type of the message identifier is Flash,
+    /// then it will only intercept that identifier on the Flash client.
+    /// </param>
+    /// <returns></returns>
+    public static IDisposable Intercept(
+        this IInterceptor interceptor,
+        ReadOnlySpan<Identifier> identifiers,
+        InterceptCallback callback,
+        ClientType clients = ClientType.All,
+        bool targeted = false
+    )
+    {
+        return interceptor.Dispatcher.Register(
+            new InterceptGroup([
+                new InterceptHandler(identifiers, callback) {
+                    Target = clients,
+                    UseTargetedIdentifiers = targeted
+                }
+            ])
+            { Persistent = true }
+        );
+    }
 
     /// <summary>
     /// Registers an intercept for the specified message with the provided <see cref="MessageCallback{T}"/>.
