@@ -68,19 +68,22 @@ public sealed class MessageManager(string? filePath = null, ILoggerFactory? logg
             Log.LogDebug("Map file does not exist.");
             fetchMapFile = true;
         }
-        else if ((DateTime.Now - mapFileInfo.LastWriteTime) >= MaxAge)
+        else if (Fetch && (DateTime.Now - mapFileInfo.LastWriteTime) >= MaxAge)
         {
-            Log.LogDebug("Map file has reached max age {MaxAge}.", MaxAge);
+            Log.LogDebug("Map file has reached max age ({MaxAge}).", MaxAge);
             fetchMapFile = true;
         }
         else if (mapFileInfo.Length == 0)
         {
             Log.LogDebug("Map file is empty.");
-            fetchMapFile = true;
+            fetchMapFile = Fetch;
         }
 
         if (fetchMapFile)
         {
+            if (!Fetch)
+                throw new InvalidOperationException("Attempt to fetch map file when Fetch is false.");
+
             try
             {
                 mapFileInfo.Directory?.Create();
@@ -94,11 +97,13 @@ public sealed class MessageManager(string? filePath = null, ILoggerFactory? logg
             catch (Exception ex)
             {
                 Log.LogError(ex, "Failed to fetch message map file: {Error}.", ex.Message);
-                try
+
+                try { File.Delete(_mapFilePath); }
+                catch (Exception deleteException)
                 {
-                    File.Delete(_mapFilePath);
+                    Log.LogError("Failed to remove message map file: {Error}.", deleteException.Message);
                 }
-                catch (Exception ex2) { Log.LogError("Failed to remove message map file: {Error}.", ex2.Message); }
+
                 throw;
             }
         }
