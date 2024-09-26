@@ -23,6 +23,9 @@ namespace Xabbo;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class InterceptAttribute(ClientType client) : Attribute
 {
+    /// <summary>
+    /// The target clients to intercept packets for.
+    /// </summary>
     public ClientType Client { get; } = client;
     public InterceptAttribute() : this(ClientType.All) { }
 }
@@ -33,6 +36,9 @@ public sealed class InterceptAttribute(ClientType client) : Attribute
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class InterceptInAttribute(params string[] identifiers) : Attribute
 {
+    /// <summary>
+    /// The names of the identifiers to intercept.
+    /// </summary>
     public ImmutableArray<string> Identifiers { get; } = [.. identifiers];
 }
 
@@ -42,5 +48,8 @@ public sealed class InterceptInAttribute(params string[] identifiers) : Attribut
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class InterceptOutAttribute(params string[] identifiers) : Attribute
 {
+    /// <summary>
+    /// The names of the identifiers to intercept.
+    /// </summary>
     public ImmutableArray<string> Identifiers { get; } = [.. identifiers];
 }
