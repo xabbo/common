@@ -6,7 +6,7 @@ namespace Xabbo.Interceptor;
 /// <para/>
 /// The generator will inject the following methods into partial classes
 /// that implement this interface and are marked with
-/// an <c>[Extension]</c> or <c>[Intercept]</c> attribute:
+/// <see cref="ExtensionAttribute"/> or <see cref="InterceptAttribute"/>:
 /// <list type="bullet">
 /// <item><c>void Send&lt;T, ...&gt;(Identifier, T, ...)</c> <i>(variadic)</i></item>
 /// <item><c>void Send&lt;T, ...&gt;(Header, T, ...)</c> <i>(variadic)</i></item>

@@ -3,12 +3,16 @@
 namespace Xabbo;
 
 /// <summary>
-/// Represents a numeric identifier with client-specific serialization:
-/// <list type="bullet">
-/// <item>On Unity: as a <see cref="long"/>.</item>
-/// <item>On Flash/Shockwave: as an <see cref="int"/>.</item>
-/// </list>
+/// Represents a numeric identifier.
 /// </summary>
+/// <remarks>
+/// This type is represented as the following:
+/// <list type="bullet">
+/// <item>On Unity as a <see cref="long"/>.</item>
+/// <item>On Flash as an <see cref="int"/>.</item>
+/// <item>On Shockwave as a <see cref="Messages.VL64"/>.</item>
+/// </list>
+/// </remarks>
 public readonly struct Id(long value)
 {
     public long Value { get; } = value;

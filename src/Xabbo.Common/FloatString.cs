@@ -3,7 +3,7 @@
 namespace Xabbo;
 
 /// <summary>
-/// Represents a float that is parsed/composed as a string.
+/// Represents a float that is parsed and composed as a string.
 /// </summary>
 public readonly struct FloatAsString(float value)
 {

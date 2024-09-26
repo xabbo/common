@@ -11,7 +11,7 @@ namespace Xabbo.Connection;
 public interface IConnection : IParserContext
 {
     /// <summary>
-    /// Gets if the connection is established.
+    /// Gets whether a connection to the game is currently established.
     /// </summary>
     bool IsConnected { get; }
 
@@ -31,7 +31,7 @@ public interface IConnection : IParserContext
     event Action<GameConnectedArgs>? Connected;
 
     /// <summary>
-    /// Invoked when the connection to the game ends.
+    /// Invoked when a connection to the game ends.
     /// </summary>
     event Action? Disconnected;
 

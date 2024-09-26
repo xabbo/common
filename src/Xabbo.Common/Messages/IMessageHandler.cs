@@ -7,6 +7,12 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a message handler that can be attached to an interceptor.
 /// </summary>
+/// <remarks>
+/// The source generator will implement this interface on partial classes marked with
+/// <see cref="InterceptAttribute"/> or <see cref="ExtensionAttribute"/>.
+/// Intercept handlers will be generated for methods marked with <see cref="InterceptAttribute"/>,
+/// <see cref="InterceptInAttribute"/> or <see cref="InterceptOutAttribute"/>.
+/// </remarks>
 public interface IMessageHandler
 {
     /// <summary>

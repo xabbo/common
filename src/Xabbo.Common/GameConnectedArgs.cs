@@ -5,7 +5,7 @@ using Xabbo.Messages;
 namespace Xabbo;
 
 /// <summary>
-/// Provides data for the <see cref="Connection.IConnection.Connected"/> event.
+/// Provides event arguments for the <see cref="Connection.IConnection.Connected"/> event.
 /// </summary>
 public sealed class GameConnectedArgs
 {
@@ -36,8 +36,10 @@ public sealed class GameConnectedArgs
 
     /// <summary>
     /// Gets whether the connection was previously established at the time of initialization.
-    /// If this is true, it is likely safe to begin sending packets, otherwise the connection
-    /// could be in a pre-authenticated state and it may not be safe to send certain packets.
     /// </summary>
+    /// <remarks>
+    /// If this is true, it is likely safe to begin sending packets. Otherwise, the connection
+    /// could be in a pre-authenticated state and it may not be safe to send certain packets.
+    /// </remarks>
     public bool PreEstablished { get; set; }
 }

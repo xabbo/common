@@ -3,7 +3,7 @@ using System;
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Defines a set of headers with an intercept callback.
+/// Associates a set of <see cref="Identifier"/>s and/or <see cref="Header"/>s with an <see cref="InterceptCallback"/>.
 /// </summary>
 public sealed class InterceptHandler(ReadOnlySpan<Header> headers, ReadOnlySpan<Identifier> identifiers, InterceptCallback callback)
 {
@@ -12,7 +12,7 @@ public sealed class InterceptHandler(ReadOnlySpan<Header> headers, ReadOnlySpan<
 
     /// <summary>
     /// Specifies which clients this handler should be registered for.
-    /// The handler will only be attached on the specified clients.
+    /// The handler will only be attached on the specified client sessions.
     /// </summary>
     public ClientType Target { get; init; } = ClientType.All;
 

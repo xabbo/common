@@ -7,7 +7,7 @@ using Xabbo.Messages;
 namespace Xabbo.Interceptor.Tasks;
 
 /// <summary>
-/// A base class used to implement an asynchronous task that intercepts packets returns a result.
+/// A base class used to implement an asynchronous task that intercepts packets and returns a result.
 /// </summary>
 /// <typeparam name="TResult">The result type of the task.</typeparam>
 public abstract class InterceptorTask<TResult>(IInterceptor interceptor)

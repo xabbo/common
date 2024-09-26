@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualBasic;
+
 using Xabbo.Interceptor;
 using Xabbo.Interceptor.Tasks;
 using Xabbo.Messages;

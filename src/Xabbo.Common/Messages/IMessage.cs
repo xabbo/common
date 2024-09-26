@@ -2,10 +2,13 @@ using System;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a message with an associated identifier that can be composed to a packet.
+/// </summary>
 public interface IMessage : IComposer
 {
     /// <summary>
-    /// Blocks the packet when returned from a <see cref="ModifyMessageCallback{T}"/>.
+    /// Blocks the packet when it is returned from a <see cref="ModifyMessageCallback{T}"/>.
     /// </summary>
     public static readonly IMessage Block = new BlockMessage();
 

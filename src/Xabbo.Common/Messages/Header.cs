@@ -3,7 +3,7 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Specifies a client, direction and header value.
+/// Specifies a client type, direction, and header value.
 /// </summary>
 public readonly record struct Header(ClientType Client, Direction Direction, short Value)
 {

@@ -3,8 +3,11 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a client type, direction and message name.
+/// Represents a client type, direction, and message name.
 /// </summary>
+/// <remarks>
+/// Used to associate a message name with a <see cref="Header"/> that is resolved at runtime.
+/// </remarks>
 public readonly record struct Identifier(ClientType Client, Direction Direction, string Name)
 {
     public static readonly Identifier Unknown = new();

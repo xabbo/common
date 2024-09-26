@@ -3,6 +3,9 @@ using System.Buffers;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a packet of data with a message header.
+/// </summary>
 public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
 {
     public Header Header { get; set; } = header;

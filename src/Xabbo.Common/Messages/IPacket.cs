@@ -3,7 +3,7 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a packet of binary data with a message header.
+/// Represents a packet of data with a message header.
 /// </summary>
 public interface IPacket : IDisposable
 {

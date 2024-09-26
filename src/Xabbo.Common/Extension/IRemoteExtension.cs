@@ -9,7 +9,7 @@ namespace Xabbo.Extension;
 public interface IRemoteExtension : IExtension
 {
     /// <summary>
-    /// Gets the port that the remote interceptor is currently connected on.
+    /// Gets the port that is currently being used to connect to the remote interceptor.
     /// </summary>
     int Port { get; }
 

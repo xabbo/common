@@ -3,7 +3,7 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a base64-encoded integer.
+/// Represents a fixed-length base64-encoded integer.
 /// </summary>
 public readonly record struct B64(short Value)
 {

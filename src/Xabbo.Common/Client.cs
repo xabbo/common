@@ -1,7 +1,7 @@
 ﻿namespace Xabbo;
 
 /// <summary>
-/// Specifies a client type, identifier and version.
+/// Represents a client type, identifier and version.
 /// </summary>
 public readonly record struct Client(ClientType Type, string Identifier, string Version)
 {

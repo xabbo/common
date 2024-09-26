@@ -1,5 +1,8 @@
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a message with an associated identifier that can be parsed from and composed to a packet.
+/// </summary>
 public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T>
 {
     /// <summary>
@@ -8,7 +11,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     static virtual Identifier[] Identifiers => [T.Identifier];
 
     /// <summary>
-    /// Gets whether each of the identifiers should target their specified client.
+    /// Gets whether each of the identifiers should target their respective clients.
     /// </summary>
     static virtual bool UseTargetedIdentifiers => false;
 

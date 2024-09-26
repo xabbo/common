@@ -155,6 +155,9 @@ public sealed record Hotel
         IsOrigins = isOrigins;
     }
 
+    /// <summary>
+    /// Returns the name of the hotel.
+    /// </summary>
     public override string ToString() => Name;
 
     /// <summary>

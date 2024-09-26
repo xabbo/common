@@ -3,7 +3,7 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a service that routes intercepted messages to the relevant registered intercept handlers.
+/// Represents a service that routes intercepted messages to registered intercept handlers.
 /// </summary>
 public interface IMessageDispatcher
 {
@@ -13,7 +13,7 @@ public interface IMessageDispatcher
     IMessageManager Messages { get; }
 
     /// <summary>
-    /// Routes the specified <see cref="Intercept"/> to all handlers attached to this dispatcher.
+    /// Routes the specified <see cref="Intercept"/> to all handlers currently attached to this dispatcher.
     /// </summary>
     void Dispatch(Intercept intercept);
 

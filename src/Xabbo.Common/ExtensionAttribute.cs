@@ -2,6 +2,9 @@ using System;
 
 namespace Xabbo;
 
+/// <summary>
+/// Defines information about an extension.
+/// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ExtensionAttribute : Attribute
 {

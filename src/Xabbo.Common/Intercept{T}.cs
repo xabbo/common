@@ -5,6 +5,11 @@ using Xabbo.Messages;
 
 namespace Xabbo;
 
+/// <summary>
+/// Contains the event arguments of an intercepted message.
+/// </summary>
+/// <typeparam name="T">The type of the message.</typeparam>
+/// <param name="inner">The inner intercept instance to wrap.</param>
 public ref struct Intercept<T>(ref Intercept inner)
     where T : IMessage<T>
 {
@@ -25,22 +30,22 @@ public ref struct Intercept<T>(ref Intercept inner)
     public T Msg => msg ??= T.Parse(_inner.Packet.Reader());
 
     /// <summary>
-    /// Gets the interceptor that intercepted this packet.
+    /// Gets the interceptor that intercepted this message.
     /// </summary>
     public readonly IInterceptor Interceptor => _inner.Interceptor;
 
     /// <summary>
-    /// Gets the time that the packet was intercepted.
+    /// Gets the time that the message was intercepted.
     /// </summary>
     public readonly DateTime Timestamp => _inner.Timestamp;
 
     /// <summary>
-    /// Gets the direction of the packet.
+    /// Gets the direction of the message.
     /// </summary>
     public readonly Direction Direction => _inner.Direction;
 
     /// <summary>
-    /// Gets the sequence number of the intercepted packet.
+    /// Gets the sequence number of the intercepted message.
     /// </summary>
     public readonly int Sequence => _inner.Sequence;
 

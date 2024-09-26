@@ -4,6 +4,10 @@ using System.Text;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Thrown when a set of <see cref="Identifier"/>s fail to resolve to their respective <see cref="Header"/>s.
+/// </summary>
+/// <param name="identifiers">The identifiers that failed to resolve.</param>
 public sealed class UnresolvedIdentifiersException(Identifiers identifiers)
     : Exception(ConstructMessage(identifiers))
 {
