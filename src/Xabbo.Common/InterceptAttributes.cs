@@ -14,9 +14,10 @@ namespace Xabbo;
 /// attributes are specified, then the method is considered to be a message handler,
 /// and must have one of the following function signatures:
 /// <list type="bullet">
-/// <item>void(<see cref="Intercept{T}"/>)</item>
-/// <item>void(<see cref="Messages.IMessage{T}"/>)</item>
-/// <item><see cref="Messages.IMessage"/>(<see cref="Messages.IMessage{T}"/>)</item>
+/// <item>void (<see cref="Intercept{T}"/>)</item>
+/// <item>void (<see cref="Intercept"/>, <see cref="Messages.IMessage{T}"/>)</item>
+/// <item>void (<see cref="Messages.IMessage{T}"/>)</item>
+/// <item><see cref="Messages.IMessage"/>? (<see cref="Messages.IMessage{T}"/>)</item>
 /// </list>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
