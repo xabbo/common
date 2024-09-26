@@ -22,7 +22,7 @@ public ref struct Intercept<T>(ref Intercept inner)
     /// <summary>
     /// Gets the parsed message for this intercept.
     /// </summary>
-    public T Msg => msg ??= T.Parse(Packet.Reader());
+    public T Msg => msg ??= T.Parse(_inner.Packet.Reader());
 
     /// <summary>
     /// Gets the interceptor that intercepted this packet.
@@ -43,15 +43,6 @@ public ref struct Intercept<T>(ref Intercept inner)
     /// Gets the sequence number of the intercepted packet.
     /// </summary>
     public readonly int Sequence => _inner.Sequence;
-
-    /// <summary>
-    /// Gets or replaces the intercepted packet.
-    /// </summary>
-    public readonly IPacket Packet
-    {
-        get => _inner.Packet;
-        set => _inner.Packet = value;
-    }
 
     /// <summary>
     /// Gets if the packet is to be blocked by the interceptor.
