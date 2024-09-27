@@ -7,6 +7,9 @@ namespace Xabbo.Messages;
 /// </summary>
 public readonly record struct Header(ClientType Client, Direction Direction, short Value)
 {
+    /// <summary>
+    /// Constructs a new header with the specified direction and value, and <see cref="Client"/> set to <see cref="ClientType.None"/>.
+    /// </summary>
     public Header(Direction direction, short value) : this(ClientType.None, direction, value) { }
 
     /// <summary>
@@ -17,6 +20,9 @@ public readonly record struct Header(ClientType Client, Direction Direction, sho
     /// <summary>
     /// Represents a header that matches all messages.
     /// </summary>
+    /// <remarks>
+    /// This can be used to intercept all packets with <see cref="InterceptorExtensions.Intercept(Interceptor.IInterceptor, ReadOnlySpan{Header}, InterceptCallback, ClientType)"/>.
+    /// </remarks>
     public static readonly Header All = new(ClientType.All, Direction.Both, 0);
 
     public static implicit operator Header((ClientType client, Direction direction, short value) x) => new(x.client, x.direction, x.value);

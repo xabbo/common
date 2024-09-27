@@ -8,7 +8,7 @@ namespace Xabbo.Messages;
 public interface IMessage : IComposer
 {
     /// <summary>
-    /// Blocks the packet when it is returned from a <see cref="ModifyMessageCallback{T}"/>.
+    /// A message instance that blocks the packet if it is returned from a <see cref="ModifyMessageCallback{T}"/>.
     /// </summary>
     public static readonly IMessage Block = new BlockMessage();
 
@@ -18,7 +18,7 @@ public interface IMessage : IComposer
     abstract Identifier GetIdentifier(ClientType client);
 
     /// <summary>
-    /// Gets the clients that this message is supported on.
+    /// Gets the clients that this message supports.
     /// </summary>
     abstract ClientType GetSupportedClients();
 }

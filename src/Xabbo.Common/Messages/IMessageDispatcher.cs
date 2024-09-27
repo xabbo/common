@@ -13,7 +13,7 @@ public interface IMessageDispatcher
     IMessageManager Messages { get; }
 
     /// <summary>
-    /// Routes the specified <see cref="Intercept"/> to all handlers currently attached to this dispatcher.
+    /// Routes the specified <see cref="Intercept"/> to the relevant handlers currently attached to this dispatcher.
     /// </summary>
     void Dispatch(Intercept intercept);
 

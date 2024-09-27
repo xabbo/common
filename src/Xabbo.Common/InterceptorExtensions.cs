@@ -9,7 +9,7 @@ using Xabbo.Messages;
 
 namespace Xabbo;
 
-[EditorBrowsable(EditorBrowsableState.Never)]
+[EditorBrowsable(EditorBrowsableState.Advanced)]
 public static class InterceptorExtensions
 {
     /// <summary>
