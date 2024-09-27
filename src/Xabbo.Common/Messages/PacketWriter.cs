@@ -138,7 +138,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
         switch (Client)
         {
             case ClientType.Flash or ClientType.Shockwave:
-                WriteString((FloatAsString)value);
+                WriteString((FloatString)value);
                 break;
             default:
                 BinaryPrimitives.WriteSingleBigEndian(Allocate(4), value);
@@ -346,7 +346,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void ReplaceFloat(float value)
     {
         if (Client is ClientType.Flash or ClientType.Shockwave)
-            ReplaceString((FloatAsString)value);
+            ReplaceString((FloatString)value);
         else
             WriteFloat(value);
     }
