@@ -11,12 +11,12 @@ namespace Xabbo.Extension;
 public interface IExtension : IInterceptor
 {
     /// <summary>
-    /// Invoked when the extension is activated by the user.
+    /// Occurs when the extension is activated by the user.
     /// </summary>
     event Action? Activated;
 
     /// <summary>
-    /// Invoked when a packet has been intercepted.
+    /// Occurs when a packet has been intercepted.
     /// </summary>
     event InterceptCallback? Intercepted;
 }

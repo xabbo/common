@@ -26,12 +26,12 @@ public interface IConnection : IParserContext
     Session Session { get; }
 
     /// <summary>
-    /// Invoked when a connection to the game is established.
+    /// Occurs when a connection to the game is established.
     /// </summary>
     event Action<GameConnectedArgs>? Connected;
 
     /// <summary>
-    /// Invoked when a connection to the game ends.
+    /// Occurs when a connection to the game ends.
     /// </summary>
     event Action? Disconnected;
 

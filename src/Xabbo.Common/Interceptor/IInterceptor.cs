@@ -16,7 +16,7 @@ public interface IInterceptor : IConnection, IInterceptorContext
     IMessageDispatcher Dispatcher { get; }
 
     /// <summary>
-    /// Invoked when the interceptor has been initialized.
+    /// Occurs when the interceptor has been initialized.
     /// </summary>
     event Action<InitializedArgs>? Initialized;
 
