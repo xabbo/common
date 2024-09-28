@@ -8,15 +8,21 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     /// <summary>
     /// Gets the target identifiers for this message.
     /// </summary>
+    /// <remarks>
+    /// The default implementation returns an array containing the single <see cref="Identifier"/>.
+    /// </remarks>
     static virtual Identifier[] Identifiers => [T.Identifier];
 
     /// <summary>
-    /// Gets whether each of the identifiers should target their respective clients.
+    /// Gets whether each of the identifiers should only intercept on their respective client types.
     /// </summary>
+    /// <remarks>
+    /// The default implementation returns false.
+    /// </remarks>
     static virtual bool UseTargetedIdentifiers => false;
 
     /// <summary>
-    /// Gets the clients that this message is supported on.
+    /// Gets the client types that this message supports.
     /// </summary>
     static virtual ClientType SupportedClients => ClientType.All;
     ClientType IMessage.GetSupportedClients() => T.SupportedClients;
@@ -25,11 +31,19 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     /// Gets the identifier for this message.
     /// </summary>
     static abstract Identifier Identifier { get; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The default implementation returns the static <see cref="Identifier"/>.
+    /// </remarks>
     Identifier IMessage.GetIdentifier(ClientType client) => T.Identifier;
 
     /// <summary>
     /// Checks whether the specified packet matches this message.
     /// </summary>
+    /// <remarks>
+    /// The default implementation returns true.
+    /// </remarks>
     static virtual bool Match(in PacketReader p) => true;
 
     /// <summary>
