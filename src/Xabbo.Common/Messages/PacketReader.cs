@@ -13,7 +13,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     public readonly ref int Pos = ref pos;
     public IParserContext? Context => context;
     public Header Header => Packet.Header;
-    public ClientType Client => Packet.Header.Client;
+    public ClientType Client => Packet.Client;
     public ReadOnlySpan<byte> Span => Packet.Buffer.Span;
     public int Length => Packet.Length;
     public int Available => Packet.Length - Pos;
@@ -230,7 +230,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// </summary>
     public string ReadContent()
     {
-        UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+        UnsupportedClientException.ThrowIfNoneOr(Client, ~ClientType.Shockwave);
         if (Pos != 0)
             throw new Exception("Cannot read content: position must be at the start of the packet.");
         Pos = Length;

@@ -30,7 +30,7 @@ internal static partial class Executor
                 w.WriteLine("global::Xabbo.Interceptor.IInterceptorContext context = (global::Xabbo.Interceptor.IInterceptorContext)this;");
                 if ((kind & InvocationKind.Identifier) > 0)
                     w.WriteLine("global::Xabbo.Messages.Header header = context.Interceptor.Messages.Resolve(identifier);");
-                w.WriteLine("using global::Xabbo.Messages.Packet packet = new(header);");
+                w.WriteLine("using global::Xabbo.Messages.Packet packet = new(header, context.Interceptor.Session.Client.Type);");
                 for (int i = 0; i < arity; i++)
                 {
                     w.Write("packet.Write<");

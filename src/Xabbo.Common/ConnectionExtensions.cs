@@ -14,7 +14,7 @@ public static class ConnectionExtensions
     /// </summary>
     public static void Send(this IConnection connection, Header header)
     {
-        using Packet packet = new(header);
+        using Packet packet = new(header, connection.Session.Client.Type);
         connection.Send(packet);
     }
 
@@ -23,7 +23,10 @@ public static class ConnectionExtensions
     /// </summary>
     public static void Send(this IConnection connection, Identifier identifier)
     {
-        using Packet packet = new(connection.Messages.Resolve(identifier));
+        using Packet packet = new(
+            connection.Messages.Resolve(identifier),
+            connection.Session.Client.Type
+        );
         connection.Send(packet);
     }
 
@@ -38,7 +41,10 @@ public static class ConnectionExtensions
         if (identifier == Identifier.Unknown)
             throw new Exception($"No identifier for IMessage({message.GetType().Name}).");
 
-        using Packet packet = new(connection.Messages.Resolve(identifier));
+        using Packet packet = new(
+            connection.Messages.Resolve(identifier),
+            connection.Session.Client.Type
+        );
         packet.Writer().Compose<IComposer>(message);
         connection.Send(packet);
     }

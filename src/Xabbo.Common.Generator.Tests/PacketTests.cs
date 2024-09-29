@@ -16,7 +16,7 @@ public class PacketTests
 
             async Task Test()
             {
-                Header header = (ClientType.Flash, Direction.In, 0);
+                Header header = (Direction.In, 0);
                 (await ReceiveAsync(header)).Read<MyParser>();
             }
         }

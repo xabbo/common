@@ -245,7 +245,7 @@ internal static partial class Executor
                     {
                         if (!isHeader)
                             w.WriteLine("global::Xabbo.Messages.Header header = c.Messages.Resolve(identifier);");
-                        w.WriteLine("using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header) { Context = c };");
+                        w.WriteLine("using global::Xabbo.Messages.Packet p = new global::Xabbo.Messages.Packet(header, c.Session.Client.Type) { Context = c };");
                         w.WriteLine("global::Xabbo.Messages.PacketWriter w = p.Writer();");
                         for (int arg = 0; arg < arity; arg++)
                         {

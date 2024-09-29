@@ -14,7 +14,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public readonly ref int Pos = ref pos;
     public readonly IParserContext? Context = context;
     public Header Header => Packet.Header;
-    public ClientType Client => Packet.Header.Client;
+    public ClientType Client => Packet.Client;
     public Span<byte> Span => Packet.Buffer.Span;
     public int Length => Packet.Length;
 
@@ -301,7 +301,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     /// </summary>
     public void WriteContent(string content)
     {
-        UnsupportedClientException.ThrowIfNoneOr(Header.Client, ~ClientType.Shockwave);
+        UnsupportedClientException.ThrowIfNoneOr(Client, ~ClientType.Shockwave);
         if (Pos != 0)
             throw new Exception("Cannot write content: position must be at the start of the packet.");
         Encoding.UTF8.GetBytes(content, Resize(Length, Encoding.UTF8.GetByteCount(content)));

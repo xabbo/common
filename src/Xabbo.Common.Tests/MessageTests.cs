@@ -10,11 +10,6 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
 {
     private readonly IMessageManager Messages = fixture.Messages;
 
-    [Fact(DisplayName = "Identifier resolves to header with correct client type")]
-    public void TestResolveClient() => Assert.Equal(
-        ClientType.Flash, Messages.Resolve((ClientType.Unity, Direction.In, "AddItem")).Client
-    );
-
     [Fact(DisplayName = "Unity identifier resolves to correct header value")]
     public void TestResolveUnityIdentifier() => Assert.Equal(
         MessagesFixture.ItemAdd, Messages.Resolve((ClientType.Unity, Direction.In, "AddItem")).Value
@@ -48,7 +43,6 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
         ]),
         header =>
         {
-            Assert.Equal(ClientType.Flash, header.Client);
             Assert.Equal(Direction.In, header.Direction);
             Assert.Equal(MessagesFixture.ItemAdd, header.Value);
         }
@@ -60,8 +54,8 @@ public class MessageTests(MessagesFixture fixture) : IClassFixture<MessagesFixtu
             (ClientType.Flash, Direction.In, "ItemAdd"),
             (ClientType.Flash, Direction.Out, "MoveAvatar"),
         ]).OrderBy(x => x.Value),
-        header => Assert.Equal(header, (ClientType.Flash, Direction.In, MessagesFixture.ItemAdd)),
-        header => Assert.Equal(header, (ClientType.Flash, Direction.Out, MessagesFixture.MoveAvatar))
+        header => Assert.Equal(header, (Direction.In, MessagesFixture.ItemAdd)),
+        header => Assert.Equal(header, (Direction.Out, MessagesFixture.MoveAvatar))
     );
 
     [Fact(DisplayName = "Identifier with incorrect client fails to resolve")]

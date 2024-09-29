@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Buffers;
 
 namespace Xabbo.Messages;
 
 /// <summary>
 /// Represents a packet of data with a message header.
 /// </summary>
-public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
+public sealed class Packet(Header header, ClientType client = ClientType.None, PacketBuffer? buffer = null) : IPacket
 {
     public Header Header { get; set; } = header;
-    public PacketBuffer Buffer { get; } = buffer;
-    public ClientType Client => Header.Client;
+    public ClientType Client { get; set; } = client;
+    public PacketBuffer Buffer { get; } = buffer ?? new PacketBuffer();
     public IParserContext? Context { get; set; }
 
     private int _position;
@@ -18,45 +17,7 @@ public sealed class Packet(Header header, PacketBuffer buffer) : IPacket
     public int Length => Buffer.Length;
     public int Available => Buffer.Length - Position;
 
-    /// <summary>
-    /// Constructs a new packet with the specified header and initial capacity.
-    /// </summary>
-    /// <param name="header">The message header.</param>
-    /// <param name="capacity">The initial capacity in bytes.</param>
-    public Packet(Header header, int capacity)
-        : this(header, new PacketBuffer(capacity))
-    { }
-
-    /// <summary>
-    /// Constructs a new packet with the specified header and data.
-    /// </summary>
-    public Packet(Header header, ReadOnlySpan<byte> data)
-        : this(header, new PacketBuffer(data))
-    { }
-
-    /// <summary>
-    /// Constructs a new packet with the specified header and data.
-    /// </summary>
-    public Packet(Header header, in ReadOnlySequence<byte> data)
-        : this(header, new PacketBuffer(in data))
-    { }
-
-    /// <summary>
-    /// Constructs a new packet with the specified header.
-    /// </summary>
-    /// <param name="header">The message header.</param>
-    public Packet(Header header)
-        : this(header, new PacketBuffer())
-    { }
-
-    /// <summary>
-    /// Constructs a new packet.
-    /// </summary>
-    public Packet()
-        : this(Header.Unknown, new PacketBuffer())
-    { }
-
-    public Packet Copy() => new(Header, Buffer.Copy());
+    public Packet Copy() => new(Header, Client, Buffer.Copy());
     IPacket IPacket.Copy() => Copy();
 
     public void Clear()

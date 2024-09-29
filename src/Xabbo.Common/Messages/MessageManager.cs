@@ -219,7 +219,7 @@ public sealed class MessageManager(string? filePath = null, ILoggerFactory? logg
             {
                 // Create an Identifier and Header for this ClientMessage.
                 Identifier identifier = (message.Client, message.Direction, message.Name);
-                Header header = new(message.Client, message.Direction, message.Header);
+                Header header = new(message.Direction, message.Header);
 
                 // Create a new HashSet<MessageNames> if it does not exist for this identifier.
                 if (!_identifierNames.TryGetValue(identifier, out var nameSet))

@@ -137,12 +137,12 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
         var registration = Ext.Intercept(Header.All, callback);
 
         for (int i = 0; i < expectedInvocations; i++)
-            Dispatch((ClientType.Flash, Direction.In, (short)i));
+            Dispatch((Direction.In, (short)i));
 
         registration.Dispose();
 
         for (int i = 0; i < expectedInvocations; i++)
-            Dispatch((ClientType.Flash, Direction.In, (short)i));
+            Dispatch((Direction.In, (short)i));
 
         Assert.Equal(actualInvocations, expectedInvocations);
     }

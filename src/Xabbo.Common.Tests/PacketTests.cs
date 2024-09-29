@@ -18,7 +18,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void Clear()
     {
-        var packet = new Packet((ClientType.Flash, Direction.Out, 0));
+        var packet = new Packet((Direction.Out, 0));
 
         for (int i = 0; i < 3; i++)
         {
@@ -39,7 +39,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWriteString(ClientType client, Direction direction)
     {
-        var packet = new Packet(new Header(client, direction, 0));
+        var packet = new Packet(new Header(direction, 0), client);
         packet.Write("hello, world");
         packet.Position = 0;
         Assert.Equal("hello, world", packet.Read<string>());
@@ -49,7 +49,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWriteStruct(ClientType client, Direction direction)
     {
-        var packet = new Packet(new Header(client, direction, 0));
+        var packet = new Packet(new Header(direction, 0), client);
         Tile tile = new(1, 2, 3.4f);
         packet.Write(tile);
         packet.Position = 0;
@@ -60,7 +60,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReadWrite(ClientType client, Direction direction)
     {
-        var packet = new Packet(new Header(client, direction, 0));
+        var packet = new Packet(new Header(direction, 0), client);
 
         packet.Write(true);
         packet.Write(false);
@@ -92,7 +92,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void Read_Write_Generic()
     {
-        IPacket packet = new Packet((ClientType.Unity, Direction.Out, 0));
+        IPacket packet = new Packet((Direction.Out, 0), ClientType.Unity);
 
         packet.Write(true, false, (byte)254, (short)31337, -123456789, 3.14f, 9876543210, "hello, world");
 
@@ -108,7 +108,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestParserComposer(ClientType client, Direction direction)
     {
-        Packet packet = new(new Header(client, direction, 0));
+        Packet packet = new(new Header(direction, 0), client);
 
         packet.Write(new Tile(1, 2, 3.4f));
 
@@ -126,7 +126,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         int valueByteCount = Encoding.UTF8.GetByteCount(value);
         int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
 
-        var packet = new Packet((client, direction, 0));
+        var packet = new Packet((direction, 0), client);
 
         packet.Write(Canary);
         packet.Write(value);
@@ -155,7 +155,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Matrix<Clients, Directions>))]
     public void TestReplaceStruct(ClientType client, Direction direction)
     {
-        Packet p = new(new Header(client, direction, 0));
+        Packet p = new(new Header(direction, 0), client);
 
         p.Write(Canary);
         p.Write(new Tile(1, 2, 3));
@@ -182,7 +182,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     {
         int[] writeArray = Enumerable.Range(1, 10).ToArray();
 
-        var packet = new Packet(new Header(client, direction, 0));
+        var packet = new Packet(new Header(direction, 0), client);
         packet.Write(writeArray);
 
         int[] readArray = packet.ReadAt<int[]>(0);
@@ -196,7 +196,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     {
         Tile[] array1 = [new(1, 2, 3), new(4, 5, 6), new(7, 8, 9)];
 
-        var packet = new Packet(new Header(client, direction, 0));
+        var packet = new Packet(new Header(direction, 0), client);
         packet.Write(array1);
 
         packet.Position = 0;
@@ -209,7 +209,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Clients))]
     public void TestReadWriteLength(ClientType client)
     {
-        var packet = new Packet(Header.Unknown with { Client = client });
+        var packet = new Packet(Header.Unknown, client);
         packet.Write<Length>(0);
 
         int expectedBytes = client switch
@@ -234,7 +234,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [ClassData(typeof(Clients))]
     public void TestReadWriteId(ClientType client)
     {
-        var packet = new Packet(Header.Unknown with { Client = client });
+        var packet = new Packet(Header.Unknown, client);
         packet.Write<Id>(0);
 
         int expectedBytes = client switch
@@ -258,7 +258,7 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public void TestShockwaveContent()
     {
-        Packet packet = new((ClientType.Shockwave, Direction.None, 0));
+        Packet packet = new((Direction.None, 0), ClientType.Shockwave);
         packet.WriteContent("hello, world");
 
         Assert.Equal(packet.Length, packet.Position);
@@ -285,7 +285,8 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         Assert.Equal("", packet.ReadContent());
         Assert.Equal(0, packet.Length);
 
-        packet.Header = packet.Header with { Client = ClientType.Flash };
+        packet.Header = packet.Header;
+        packet.Client = ClientType.Flash;
         Assert.Throws<UnsupportedClientException>(packet.ReadContent);
         Assert.Throws<UnsupportedClientException>(() => packet.WriteContent(""));
     }
