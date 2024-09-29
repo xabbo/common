@@ -17,7 +17,7 @@ namespace Xabbo.Messages;
 /// </summary>
 public sealed class MessageManager(string? filePath = null, ILoggerFactory? loggerFactory = null) : IMessageManager
 {
-    const string MessagesFileUrl = "https://raw.githubusercontent.com/xabbo/messages/next/messages.ini";
+    const string MessagesFileUrl = "https://raw.githubusercontent.com/xabbo/messages/main/messages.ini";
 
     private readonly string _mapFilePath = filePath ??
         Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "xabbo", "messages.ini");
