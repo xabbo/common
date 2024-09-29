@@ -42,7 +42,7 @@ public sealed class MessageManager(string? filePath = null, ILoggerFactory? logg
     /// <summary>
     /// The maximum age of the message map file after which it is invalidated.
     /// </summary>
-    public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(1);
+    public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(7);
 
     public bool Available { get; private set; }
     public event Action? Loaded;
