@@ -69,30 +69,30 @@ public static class InterceptorExtensions
     }
 
     /// <summary>
-    /// Registers an intercept for the specified message with the provided <see cref="MessageCallback{T}"/>.
+    /// Registers an intercept for the specified message with the provided <see cref="MessageCallback{TMsg}"/>.
     /// </summary>
-    public static IDisposable Intercept<T>(this IInterceptor interceptor, MessageCallback<T> callback)
-        where T : IMessage<T>
+    public static IDisposable Intercept<TMsg>(this IInterceptor interceptor, MessageCallback<TMsg> callback)
+        where TMsg : IMessage<TMsg>
     {
-        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<T>.CreateHandler(callback) ]) { Persistent = true });
+        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<TMsg>.CreateHandler(callback) ]) { Persistent = true });
     }
 
     /// <summary>
-    /// Registers an intercept for the specified message with the provided <see cref="ModifyMessageCallback{T}"/>.
+    /// Registers an intercept for the specified message with the provided <see cref="ModifyMessageCallback{TMsg}"/>.
     /// </summary>
-    public static IDisposable Intercept<T>(this IInterceptor interceptor, ModifyMessageCallback<T> callback)
-        where T : IMessage<T>
+    public static IDisposable Intercept<TMsg>(this IInterceptor interceptor, ModifyMessageCallback<TMsg> callback)
+        where TMsg : IMessage<TMsg>
     {
-        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<T>.CreateHandler(callback) ]) { Persistent = true });
+        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<TMsg>.CreateHandler(callback) ]) { Persistent = true });
     }
 
     /// <summary>
-    /// Registers an intercept for the specified message with the provided <see cref="InterceptMessageCallback{T}"/>.
+    /// Registers an intercept for the specified message with the provided <see cref="InterceptMessageCallback{TMsg}"/>.
     /// </summary>
-    public static IDisposable Intercept<T>(this IInterceptor interceptor, InterceptMessageCallback<T> callback)
-        where T : IMessage<T>
+    public static IDisposable Intercept<TMsg>(this IInterceptor interceptor, InterceptMessageCallback<TMsg> callback)
+        where TMsg : IMessage<TMsg>
     {
-        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<T>.CreateHandler(callback) ]) { Persistent = true });
+        return interceptor.Dispatcher.Register(new InterceptGroup([ IMessage<TMsg>.CreateHandler(callback) ]) { Persistent = true });
     }
 
     /// <summary>
@@ -132,35 +132,35 @@ public static class InterceptorExtensions
     /// <summary>
     /// Asynchronously captures the first intercepted matching message.
     /// </summary>
-    /// <typeparam name="T">The type of message to capture.</typeparam>
+    /// <typeparam name="TMsg">The type of message to capture.</typeparam>
     /// <param name="interceptor">The interceptor.</param>
     /// <param name="timeout">The maximum time in milliseconds to wait for a message to be captured. <c>-1</c> specifies no timeout.</param>
     /// <param name="block">Whether the captured message should be blocked from its destination.</param>
     /// <param name="shouldCapture">A callback that inspects an intercepted message and return whether the message should be captured or not.</param>
     /// <param name="cancellationToken">The token used to cancel this operation.</param>
     /// <returns>A task that completes once a message has been captured, or the operation times out.</returns>
-    public static async Task<T> ReceiveAsync<T>(this IInterceptor interceptor,
-        int? timeout = null, bool block = false, Func<T, bool>? shouldCapture = null,
+    public static async Task<TMsg> ReceiveAsync<TMsg>(this IInterceptor interceptor,
+        int? timeout = null, bool block = false, Func<TMsg, bool>? shouldCapture = null,
         CancellationToken cancellationToken = default
     )
-        where T : IMessage<T>
+        where TMsg : IMessage<TMsg>
     {
-        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~T.SupportedClients);
+        UnsupportedClientException.ThrowIf(interceptor.Session.Client.Type, ~TMsg.SupportedClients);
 
         using IPacket packet = await ReceiveAsync(interceptor,
-            [.. T.Identifiers],
+            [.. TMsg.Identifiers],
             timeout,
             block,
             (packet) => {
                 int pos = 0;
                 PacketReader r = new(packet, ref pos, interceptor);
-                if (!T.Match(in r)) return false;
+                if (!TMsg.Match(in r)) return false;
                 pos = 0;
-                return shouldCapture?.Invoke(T.Parse(in r)) ?? true;
+                return shouldCapture?.Invoke(TMsg.Parse(in r)) ?? true;
             },
             cancellationToken
         );
-        return T.Parse(packet.Reader());
+        return TMsg.Parse(packet.Reader());
     }
 
     /// <summary>

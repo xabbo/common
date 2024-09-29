@@ -3,7 +3,7 @@ namespace Xabbo.Messages;
 /// <summary>
 /// Represents a message with an associated identifier that can be parsed from and composed to a packet.
 /// </summary>
-public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T>
+public interface IMessage<TMsg> : IMessage, IParserComposer<TMsg> where TMsg : IMessage<TMsg>
 {
     /// <summary>
     /// Gets the target identifiers for this message.
@@ -11,7 +11,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     /// <remarks>
     /// The default implementation returns an array containing the single <see cref="Identifier"/>.
     /// </remarks>
-    static virtual Identifier[] Identifiers => [T.Identifier];
+    static virtual Identifier[] Identifiers => [TMsg.Identifier];
 
     /// <summary>
     /// Gets whether each of the identifiers should only intercept on their respective client types.
@@ -25,7 +25,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     /// Gets the client types that this message supports.
     /// </summary>
     static virtual ClientType SupportedClients => ClientType.All;
-    ClientType IMessage.GetSupportedClients() => T.SupportedClients;
+    ClientType IMessage.GetSupportedClients() => TMsg.SupportedClients;
 
     /// <summary>
     /// Gets the identifier for this message.
@@ -36,7 +36,7 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     /// <remarks>
     /// The default implementation returns the static <see cref="Identifier"/>.
     /// </remarks>
-    Identifier IMessage.GetIdentifier(ClientType client) => T.Identifier;
+    Identifier IMessage.GetIdentifier(ClientType client) => TMsg.Identifier;
 
     /// <summary>
     /// Checks whether the specified packet matches this message.
@@ -47,34 +47,34 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
     static virtual bool Match(in PacketReader p) => true;
 
     /// <summary>
-    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptCallback{T}"/> .
+    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptCallback{TMsg}"/> .
     /// </summary>
-    static InterceptHandler CreateHandler(InterceptCallback<T> callback)
+    static InterceptHandler CreateHandler(InterceptCallback<TMsg> callback)
     {
-        return new InterceptHandler([.. T.Identifiers], (e) => {
+        return new InterceptHandler([.. TMsg.Identifiers], (e) => {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Match(in r)) return;
+            if (!TMsg.Match(in r)) return;
             pos = 0;
-            callback(new Intercept<T>(ref e));
+            callback(new Intercept<TMsg>(ref e));
         })
         {
-            Target = T.SupportedClients,
-            UseTargetedIdentifiers = T.UseTargetedIdentifiers
+            Target = TMsg.SupportedClients,
+            UseTargetedIdentifiers = TMsg.UseTargetedIdentifiers
         };
     }
 
     /// <summary>
-    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="ModifyMessageCallback{T}"/> .
+    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="ModifyMessageCallback{TMsg}"/> .
     /// </summary>
-    static InterceptHandler CreateHandler(ModifyMessageCallback<T> callback)
+    static InterceptHandler CreateHandler(ModifyMessageCallback<TMsg> callback)
     {
-        return new InterceptHandler([.. T.Identifiers], (e) => {
+        return new InterceptHandler([.. TMsg.Identifiers], (e) => {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Match(in r)) return;
+            if (!TMsg.Match(in r)) return;
             pos = 0;
-            T msg = T.Parse(in r);
+            TMsg msg = TMsg.Parse(in r);
             IMessage? modified = callback(msg);
             if (modified is not null)
             {
@@ -93,46 +93,46 @@ public interface IMessage<T> : IMessage, IParserComposer<T> where T : IMessage<T
             }
         })
         {
-            Target = T.SupportedClients,
-            UseTargetedIdentifiers = T.UseTargetedIdentifiers
+            Target = TMsg.SupportedClients,
+            UseTargetedIdentifiers = TMsg.UseTargetedIdentifiers
         };
     }
 
     /// <summary>
-    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="MessageCallback{T}"/> .
+    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="MessageCallback{TMsg}"/> .
     /// </summary>
-    static InterceptHandler CreateHandler(MessageCallback<T> callback)
+    static InterceptHandler CreateHandler(MessageCallback<TMsg> callback)
     {
-        return new InterceptHandler([.. T.Identifiers], (e) =>
+        return new InterceptHandler([.. TMsg.Identifiers], (e) =>
         {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Match(in r)) return;
+            if (!TMsg.Match(in r)) return;
             pos = 0;
-            callback(r.Parse<T>());
+            callback(r.Parse<TMsg>());
         })
         {
-            Target = T.SupportedClients,
-            UseTargetedIdentifiers = T.UseTargetedIdentifiers
+            Target = TMsg.SupportedClients,
+            UseTargetedIdentifiers = TMsg.UseTargetedIdentifiers
         };
     }
 
     /// <summary>
-    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptMessageCallback{T}"/> .
+    /// Creates an <see cref="InterceptHandler"/> for the specified <see cref="InterceptMessageCallback{TMsg}"/> .
     /// </summary>
-    static InterceptHandler CreateHandler(InterceptMessageCallback<T> callback)
+    static InterceptHandler CreateHandler(InterceptMessageCallback<TMsg> callback)
     {
-        return new InterceptHandler([.. T.Identifiers], e =>
+        return new InterceptHandler([.. TMsg.Identifiers], e =>
         {
             int pos = 0;
             PacketReader r = new(e.Packet, ref pos, e.Interceptor);
-            if (!T.Match(in r)) return;
+            if (!TMsg.Match(in r)) return;
             pos = 0;
-            callback(e, r.Parse<T>());
+            callback(e, r.Parse<TMsg>());
         })
         {
-            Target = T.SupportedClients,
-            UseTargetedIdentifiers = T.UseTargetedIdentifiers
+            Target = TMsg.SupportedClients,
+            UseTargetedIdentifiers = TMsg.UseTargetedIdentifiers
         };
     }
 }

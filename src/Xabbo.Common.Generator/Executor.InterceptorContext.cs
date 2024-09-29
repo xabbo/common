@@ -102,17 +102,17 @@ internal static partial class Executor
             identifiers, timeout, block, shouldCapture, cancellationToken
         );
 
-        /// <inheritdoc cref=""global::Xabbo.InterceptorExtensions.ReceiveAsync{T}(
+        /// <inheritdoc cref=""global::Xabbo.InterceptorExtensions.ReceiveAsync{TMsg}(
         ///     global::Xabbo.Interceptor.IInterceptor,
         ///     int, bool,
-        ///     global::System.Func{T, bool}?,
+        ///     global::System.Func{TMsg, bool}?,
         ///     global::System.Threading.CancellationToken
         /// )"" />
-        protected global::System.Threading.Tasks.Task<T> ReceiveAsync<T>(
+        protected global::System.Threading.Tasks.Task<TMsg> ReceiveAsync<TMsg>(
             int? timeout = null, bool block = false,
-            global::System.Func<T, bool>? shouldCapture = null,
+            global::System.Func<TMsg, bool>? shouldCapture = null,
             global::System.Threading.CancellationToken cancellationToken = default
-        ) where T : global::Xabbo.Messages.IMessage<T> => global::Xabbo.InterceptorExtensions.ReceiveAsync<T>(
+        ) where TMsg : global::Xabbo.Messages.IMessage<TMsg> => global::Xabbo.InterceptorExtensions.ReceiveAsync<TMsg>(
             ((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor,
             timeout, block, shouldCapture, cancellationToken
         );
@@ -123,15 +123,15 @@ internal static partial class Executor
         ///     int,
         ///     global::System.Threading.CancellationToken
         /// )"" />
-        protected async global::System.Threading.Tasks.Task<TData> RequestAsync<TRequest, TResponse, TData>(
-            global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData> request,
+        protected async global::System.Threading.Tasks.Task<TData> RequestAsync<TReq, TRes, TData>(
+            global::Xabbo.Messages.IRequestMessage<TReq, TRes, TData> request,
             int? timeout = null, global::System.Threading.CancellationToken cancellationToken = default
         )
-            where TRequest : global::Xabbo.Messages.IRequestMessage<TRequest, TResponse, TData>
-            where TResponse : global::Xabbo.Messages.IMessage<TResponse>
+            where TReq : global::Xabbo.Messages.IRequestMessage<TReq, TRes, TData>
+            where TRes : global::Xabbo.Messages.IMessage<TRes>
         {
             global::Xabbo.Interceptor.IInterceptor interceptor = ((global::Xabbo.Interceptor.IInterceptorContext)this).Interceptor;
-            global::System.Threading.Tasks.Task<TResponse> response = global::Xabbo.InterceptorExtensions.ReceiveAsync<TResponse>(
+            global::System.Threading.Tasks.Task<TRes> response = global::Xabbo.InterceptorExtensions.ReceiveAsync<TRes>(
                 interceptor,
                 timeout: timeout,
                 block: true,
