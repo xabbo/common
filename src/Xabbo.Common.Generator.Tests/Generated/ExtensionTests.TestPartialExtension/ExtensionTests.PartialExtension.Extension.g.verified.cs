@@ -1,13 +1,10 @@
 ﻿//HintName: ExtensionTests.PartialExtension.Extension.g.cs
-using System;
-
-using Xabbo.Extension;
-
-namespace ExtensionTests;
-
-public partial class PartialExtension : IExtensionInfoInit
+namespace ExtensionTests
 {
-    ExtensionInfo IExtensionInfoInit.Info => new(
-        Name: "Name"
-    );
+    partial class PartialExtension : global::Xabbo.Extension.IExtensionInfoInit
+    {
+        global::Xabbo.Extension.ExtensionInfo global::Xabbo.Extension.IExtensionInfoInit.Info => new global::Xabbo.Extension.ExtensionInfo(
+            Name: "Name"
+        );
+    }
 }

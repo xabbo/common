@@ -1,11 +1,7 @@
 ﻿//HintName: GlobalExtension.Extension.g.cs
-using System;
-
-using Xabbo.Extension;
-
-public partial class GlobalExtension : IExtensionInfoInit
+partial class GlobalExtension : global::Xabbo.Extension.IExtensionInfoInit
 {
-    ExtensionInfo IExtensionInfoInit.Info => new(
+    global::Xabbo.Extension.ExtensionInfo global::Xabbo.Extension.IExtensionInfoInit.Info => new global::Xabbo.Extension.ExtensionInfo(
         Name: "Name"
     );
 }

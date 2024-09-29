@@ -22,30 +22,21 @@ internal static partial class Executor
         {
             var w = new SourceWriter();
 
-            w.WriteLines([
-                "using System;",
-                "",
-                "using Xabbo;",
-                "using Xabbo.Messages;",
-                "using Xabbo.Interceptor;",
-                "",
-            ]);
-
-            if (interceptor.Namespace != "")
-                w.WriteLines([$"namespace {interceptor.Namespace};", ""]);
-
-            w.WriteLine($"public partial class {interceptor.Name} : IMessageHandler");
-            using (w.BraceScope())
+            using (w.NamespaceScope(interceptor.Namespace))
             {
-                w.WriteLine("IDisposable IMessageHandler.Attach(IInterceptor interceptor)");
+                w.WriteLine($"partial class {interceptor.Name} : global::Xabbo.Messages.IMessageHandler");
                 using (w.BraceScope())
                 {
-                    w.WriteLine("return interceptor.Dispatcher.Register(new InterceptGroup([");
-                    using (w.IndentScope())
+                    w.WriteLine("global::System.IDisposable global::Xabbo.Messages.IMessageHandler.Attach(global::Xabbo.Interceptor.IInterceptor interceptor)");
+                    using (w.BraceScope())
                     {
-                        GenerateInterceptsFor(w, interceptor);
+                        w.WriteLine("return interceptor.Dispatcher.Register(new global::Xabbo.Messages.InterceptGroup([");
+                        using (w.IndentScope())
+                        {
+                            GenerateInterceptsFor(w, interceptor);
+                        }
+                        w.WriteLine("]));");
                     }
-                    w.WriteLine("]));");
                 }
             }
 
@@ -72,11 +63,11 @@ internal static partial class Executor
                 }
                 else
                 {
-                    w.WriteLine("new InterceptHandler(");
+                    w.WriteLine("new global::Xabbo.Messages.InterceptHandler(");
                     using (w.IndentScope())
                     {
                         // Write target identifiers
-                        w.WriteLine("(ReadOnlySpan<Identifier>)[");
+                        w.WriteLine("(global::System.ReadOnlySpan<global::Xabbo.Messages.Identifier>)[");
                         using (w.IndentScope())
                         {
                             for (int j = 0; j < intercept.Identifiers.Length; j++)
@@ -84,9 +75,9 @@ internal static partial class Executor
                                 var identifier = intercept.Identifiers[j];
                                 if (j > 0)
                                     w.WriteLine(", ");
-                                w.Write("(ClientType.");
+                                w.Write("new global::Xabbo.Messages.Identifier(global::Xabbo.ClientType.");
                                 w.Write(identifier.Client);
-                                w.Write(", Direction.");
+                                w.Write(", global::Xabbo.Direction.");
                                 w.Write(identifier.Direction);
                                 w.Write(", \"");
                                 w.Write(identifier.Name);
@@ -95,15 +86,15 @@ internal static partial class Executor
                             w.WriteLine();
                         }
                         w.WriteLine("],");
+                        // w.Write("this.");
                         w.WriteLine(intercept.HandlerMethodName);
                     }
                     w.Write(") { Target = ");
-                    w.Write(string.Join(" | ", intercept.TargetClients.ToString().Split(',').Select(clientName => $"ClientType.{clientName.Trim()}")));
+                    w.Write(string.Join(" | ", intercept.TargetClients.ToString().Split(',').Select(clientName => $"global::Xabbo.ClientType.{clientName.Trim()}")));
                     w.Write(" }");
                 }
             }
             w.WriteLine();
         }
-
     }
 }

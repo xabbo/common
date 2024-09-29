@@ -25,47 +25,34 @@ internal static partial class Executor
         {
             using var w = new SourceWriter();
 
-            w.WriteLines([
-                "using System;",
-                "",
-                "using Xabbo.Extension;",
-                "",
-            ]);
-
-            if (extension.Namespace != "")
-                w.WriteLines([$"namespace {extension.Namespace};", ""]);
-
-            w.WriteLines([
-                $"public partial class {extension.ClassName} : IExtensionInfoInit",
-                "{"
-            ]);
-
-            using (w.IndentScope())
+            using (w.NamespaceScope(extension.Namespace))
             {
-                w.WriteLine("ExtensionInfo IExtensionInfoInit.Info => new(");
-                using (w.IndentScope())
+                using (w.BraceScope($"partial class {extension.ClassName} : global::Xabbo.Extension.IExtensionInfoInit"))
                 {
-                    var properties = new List<string>(4);
-                    if (extension.Name is not null)
-                        properties.Add($"{nameof(ExtensionInfo.Name)}: {SymbolDisplay.FormatLiteral(extension.Name, true)}");
-                    if (extension.Description is not null)
-                        properties.Add($"{nameof(ExtensionInfo.Description)}: {SymbolDisplay.FormatLiteral(extension.Description, true)}");
-                    if (extension.Author is not null)
-                        properties.Add($"{nameof(ExtensionInfo.Author)}: {SymbolDisplay.FormatLiteral(extension.Author, true)}");
-                    if (extension.Version is not null)
-                        properties.Add($"{nameof(ExtensionInfo.Version)}: {SymbolDisplay.FormatLiteral(extension.Version, true)}");
-
-                    for (int i = 0; i < properties.Count; i++)
+                    w.WriteLine("global::Xabbo.Extension.ExtensionInfo global::Xabbo.Extension.IExtensionInfoInit.Info => new global::Xabbo.Extension.ExtensionInfo(");
+                    using (w.IndentScope())
                     {
-                        w.Write(properties[i]);
-                        if (i < (properties.Count - 1))
-                            w.Write(',');
-                        w.WriteLine();
+                        var properties = new List<string>(4);
+                        if (extension.Name is not null)
+                            properties.Add($"{nameof(ExtensionInfo.Name)}: {SymbolDisplay.FormatLiteral(extension.Name, true)}");
+                        if (extension.Description is not null)
+                            properties.Add($"{nameof(ExtensionInfo.Description)}: {SymbolDisplay.FormatLiteral(extension.Description, true)}");
+                        if (extension.Author is not null)
+                            properties.Add($"{nameof(ExtensionInfo.Author)}: {SymbolDisplay.FormatLiteral(extension.Author, true)}");
+                        if (extension.Version is not null)
+                            properties.Add($"{nameof(ExtensionInfo.Version)}: {SymbolDisplay.FormatLiteral(extension.Version, true)}");
+
+                        for (int i = 0; i < properties.Count; i++)
+                        {
+                            w.Write(properties[i]);
+                            if (i < (properties.Count - 1))
+                                w.Write(',');
+                            w.WriteLine();
+                        }
                     }
+                    w.WriteLine(");");
                 }
-                w.WriteLine(");");
             }
-            w.WriteLine("}");
 
             return w.ToSourceText();
         }

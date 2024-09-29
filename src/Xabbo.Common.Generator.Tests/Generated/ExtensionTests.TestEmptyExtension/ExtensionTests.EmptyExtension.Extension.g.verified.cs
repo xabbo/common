@@ -1,12 +1,9 @@
 ﻿//HintName: ExtensionTests.EmptyExtension.Extension.g.cs
-using System;
-
-using Xabbo.Extension;
-
-namespace ExtensionTests;
-
-public partial class EmptyExtension : IExtensionInfoInit
+namespace ExtensionTests
 {
-    ExtensionInfo IExtensionInfoInit.Info => new(
-    );
+    partial class EmptyExtension : global::Xabbo.Extension.IExtensionInfoInit
+    {
+        global::Xabbo.Extension.ExtensionInfo global::Xabbo.Extension.IExtensionInfoInit.Info => new global::Xabbo.Extension.ExtensionInfo(
+        );
+    }
 }

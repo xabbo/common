@@ -1,27 +1,21 @@
 ﻿//HintName: TargetedHandlerInterceptor.Interceptor.g.cs
-using System;
-
-using Xabbo;
-using Xabbo.Messages;
-using Xabbo.Interceptor;
-
-public partial class TargetedHandlerInterceptor : IMessageHandler
+partial class TargetedHandlerInterceptor : global::Xabbo.Messages.IMessageHandler
 {
-    IDisposable IMessageHandler.Attach(IInterceptor interceptor)
+    global::System.IDisposable global::Xabbo.Messages.IMessageHandler.Attach(global::Xabbo.Interceptor.IInterceptor interceptor)
     {
-        return interceptor.Dispatcher.Register(new InterceptGroup([
-            new InterceptHandler(
-                (ReadOnlySpan<Identifier>)[
-                    (ClientType.None, Direction.In, "Incoming")
+        return interceptor.Dispatcher.Register(new global::Xabbo.Messages.InterceptGroup([
+            new global::Xabbo.Messages.InterceptHandler(
+                (global::System.ReadOnlySpan<global::Xabbo.Messages.Identifier>)[
+                    new global::Xabbo.Messages.Identifier(global::Xabbo.ClientType.None, global::Xabbo.Direction.In, "Incoming")
                 ],
                 InterceptShockwave
-            ) { Target = ClientType.Shockwave },
-            new InterceptHandler(
-                (ReadOnlySpan<Identifier>)[
-                    (ClientType.None, Direction.Out, "Outgiong")
+            ) { Target = global::Xabbo.ClientType.Shockwave },
+            new global::Xabbo.Messages.InterceptHandler(
+                (global::System.ReadOnlySpan<global::Xabbo.Messages.Identifier>)[
+                    new global::Xabbo.Messages.Identifier(global::Xabbo.ClientType.None, global::Xabbo.Direction.Out, "Outgiong")
                 ],
                 InterceptFlash
-            ) { Target = ClientType.Flash }
+            ) { Target = global::Xabbo.ClientType.Flash }
         ]));
     }
 }
