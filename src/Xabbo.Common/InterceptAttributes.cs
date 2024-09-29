@@ -22,12 +22,17 @@ namespace Xabbo;
 /// </list>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class InterceptAttribute(ClientType clients = ClientType.All) : Attribute
+public sealed class InterceptAttribute(ClientType clients) : Attribute
 {
     /// <summary>
     /// The target clients on which to intercept packets.
     /// </summary>
     public ClientType Clients { get; } = clients;
+
+    /// <summary>
+    /// Constructs a new intercept attribute targeting all clients.
+    /// </summary>
+    public InterceptAttribute() : this(ClientType.All) { }
 }
 
 /// <summary>

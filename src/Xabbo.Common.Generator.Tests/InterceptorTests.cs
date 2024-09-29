@@ -66,4 +66,22 @@ public class InterceptorTests
             void InterceptShockwaveIdentifier(Intercept e) { }
         }",
         testType: TestType.Interceptor);
+
+    [Fact]
+    public Task TestMessageInterceptGeneric() => TestHelper.Verify(@"
+        [Intercept]
+        partial class TestMessageInterceptGeneric
+        {
+            [Intercept]
+            void InterceptMsg(Intercept<Msg> e) { }
+        }
+
+        class Msg : IMessage<Msg>
+        {
+            static Identifier IMessage<Msg>.Identifier => default;
+            static Msg IParser<Msg>.Parse(in PacketReader p) => throw new NotImplementedException();
+            void IComposer.Compose(in PacketWriter p) { }
+        }
+        ",
+        testType: TestType.Interceptor);
 }
