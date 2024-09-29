@@ -23,6 +23,8 @@ public static class TestHelper
         [TestType.InterceptorContext] = "InterceptorContext.g.cs",
         [TestType.ReadImpl] = "Read.Impl.g.cs",
         [TestType.ReplaceImpl] = "Replace.Impl.g.cs",
+        [TestType.SendHeader] = "SendHeader.g.cs",
+        [TestType.SendIdentifier] = "SendIdentifier.g.cs",
     };
 
     static bool ShouldIgnore(TestType typesToTest, GeneratedSourceResult result)

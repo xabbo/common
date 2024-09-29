@@ -72,7 +72,7 @@ internal static partial class Extractor
             VariadicType[] types;
             List<DiagnosticInfo> diagnostics = [];
 
-            List<(SyntaxNode Node, ITypeSymbol? TypeSymbol)> syntaxTypes = [];
+            List<(SyntaxNode Node, TypeInfo TypeInfo)> syntaxTypes = [];
 
             var methodArgs = invocationExpression.ArgumentList.Arguments;
 
@@ -80,9 +80,11 @@ internal static partial class Extractor
             {
                 // Get the types from the generic name syntax if we have it.
                 if ((isSend || isPositional) && methodArgs.Count > 0)
-                    syntaxTypes.Add((methodArgs[0], ctx.SemanticModel.GetTypeInfo(methodArgs[0].Expression).ConvertedType));
+                {
+                    syntaxTypes.Add((methodArgs[0], ctx.SemanticModel.GetTypeInfo(methodArgs[0].Expression)));
+                }
                 foreach (var typeSyntax in genericName.TypeArgumentList.Arguments)
-                    syntaxTypes.Add((typeSyntax, ctx.SemanticModel.GetTypeInfo(typeSyntax).ConvertedType));
+                    syntaxTypes.Add((typeSyntax, ctx.SemanticModel.GetTypeInfo(typeSyntax)));
             }
             else
             {
@@ -91,52 +93,15 @@ internal static partial class Extractor
                 {
                     var argumentSyntax = invocationExpression.ArgumentList.Arguments[i];
 
-                    ITypeSymbol? typeSymbol = ctx.SemanticModel.GetTypeInfo(argumentSyntax.Expression).ConvertedType;
+                    TypeInfo typeInfo = ctx.SemanticModel.GetTypeInfo(argumentSyntax.Expression);
 
                     if (i == 0 && (isPositional || isSend))
                     {
-                        syntaxTypes.Add((argumentSyntax, typeSymbol));
+                        syntaxTypes.Add((argumentSyntax, typeInfo));
                         continue;
                     }
 
-                    // If this is a modifier, extract the parameter type from the Func<T, T> or method symbol
-                    if (isModify)
-                    {
-                        if (typeSymbol is INamedTypeSymbol
-                        {
-                            ContainingNamespace: {
-                                ContainingNamespace.IsGlobalNamespace: true,
-                                Name: "System",
-                            },
-                            Name: "Func",
-                            IsGenericType: true,
-                            TypeParameters.Length: 2
-                        } funcTypeSymbol)
-                        {
-                            typeSymbol = funcTypeSymbol.TypeArguments[0];
-                        }
-                        else
-                        {
-                            var operation = ctx.SemanticModel.GetOperation(argumentSyntax.Expression);
-                            if (operation is IAnonymousFunctionOperation anonymousFunction)
-                            {
-                                if (anonymousFunction.Symbol.Parameters.Length > 0)
-                                {
-                                    typeSymbol = anonymousFunction.Symbol.Parameters[0].Type;
-                                }
-                            }
-                            else
-                            {
-                                // ?
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // ?
-                    }
-
-                    syntaxTypes.Add((argumentSyntax, typeSymbol));
+                    syntaxTypes.Add((argumentSyntax, typeInfo));
                 }
             }
 
@@ -147,10 +112,15 @@ internal static partial class Extractor
 
                 if (isSend)
                 {
-                    ITypeSymbol? typeSymbol = syntaxTypes[0].TypeSymbol;
+                    TypeInfo typeInfo = syntaxTypes[0].TypeInfo;
+                    ITypeSymbol? typeSymbol = typeInfo.Type;
+                    ITypeSymbol? convertedTypeSymbol = typeInfo.ConvertedType;
+
                     // We need to know whether to generate a Send method for Identifier or Header first.
-                    if (IsHeader(typeSymbol)) invocationKind |= InvocationKind.Header;
-                    else if (IsIdentifier(typeSymbol)) invocationKind |= InvocationKind.Identifier;
+                    if (IsHeader(convertedTypeSymbol) || IsImplicitHeaderTuple(typeSymbol))
+                        invocationKind |= InvocationKind.Header;
+                    else if (IsIdentifier(typeSymbol) || IsImplicitIdentifierTuple(typeSymbol))
+                        invocationKind |= InvocationKind.Identifier;
                     else return null;
                 }
 
@@ -160,7 +130,14 @@ internal static partial class Extractor
             types = new VariadicType[syntaxTypes.Count];
             for (int i = 0; i < types.Length; i++)
             {
-                var (syntax, typeSymbol) = syntaxTypes[i];
+                var (syntax, typeInfo) = syntaxTypes[i];
+
+                ITypeSymbol? typeSymbol = typeInfo.ConvertedType;
+
+                // If this is a modifier, attempt to extract the parameter type from the Func<T, T> or method symbol
+                if (isModify)
+                    typeSymbol = ExtractModifyInnerType(ctx.SemanticModel, syntax, typeInfo);
+
                 var (type, isValidType) = ToVariadicType(invocationKind, typeSymbol);
 
                 if (!isValidType)
@@ -183,5 +160,41 @@ internal static partial class Extractor
                 diagnostics.ToEquatableArray()
             );
         }
+    }
+
+    static ITypeSymbol? ExtractModifyInnerType(SemanticModel semanticModel, SyntaxNode syntax, TypeInfo typeInfo)
+    {
+        ITypeSymbol? typeSymbol = typeInfo.ConvertedType;
+
+        if (typeSymbol is INamedTypeSymbol
+        {
+            ContainingNamespace: {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "System",
+            },
+            Name: "Func",
+            IsGenericType: true,
+            TypeParameters.Length: 2
+        } funcTypeSymbol)
+        {
+            typeSymbol = funcTypeSymbol.TypeArguments[0];
+        }
+        else if (syntax is ArgumentSyntax argumentSyntax)
+        {
+            var operation = semanticModel.GetOperation(argumentSyntax.Expression);
+            if (operation is IAnonymousFunctionOperation anonymousFunction)
+            {
+                if (anonymousFunction.Symbol.Parameters.Length > 0)
+                {
+                    typeSymbol = anonymousFunction.Symbol.Parameters[0].Type;
+                }
+            }
+            else
+            {
+                // ?
+            }
+        }
+
+        return typeSymbol;
     }
 }

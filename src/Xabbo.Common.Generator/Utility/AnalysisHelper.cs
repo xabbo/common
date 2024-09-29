@@ -20,6 +20,29 @@ internal static class AnalysisHelper
         Name: "Header"
     };
 
+    public static bool IsImplicitHeaderTuple(ITypeSymbol? typeSymbol) => typeSymbol is INamedTypeSymbol
+    {
+        Name: "ValueTuple",
+        TypeArguments: [
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "Xabbo"
+                },
+                Name: "Direction"
+            },
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "System"
+                },
+                Name: "Int32"
+            }
+        ]
+    };
+
     public static bool IsIdentifier(ITypeSymbol? typeSymbol) => typeSymbol is
     {
         TypeKind: TypeKind.Struct,
@@ -33,6 +56,36 @@ internal static class AnalysisHelper
         Name: "Identifier"
     };
 
+    public static bool IsImplicitIdentifierTuple(ITypeSymbol? typeSymbol) => typeSymbol is INamedTypeSymbol
+    {
+        Name: "ValueTuple",
+        TypeArguments: [
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "Xabbo"
+                },
+                Name: "ClientType"
+            },
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "Xabbo"
+                },
+                Name: "Direction"
+            },
+            {
+                ContainingNamespace:
+                {
+                    ContainingNamespace.IsGlobalNamespace: true,
+                    Name: "System"
+                },
+                Name: "String"
+            },
+        ]
+    };
     public static bool IsIComposerInterface(INamedTypeSymbol symbol) => symbol is
     {
         TypeKind: TypeKind.Interface,
