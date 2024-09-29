@@ -37,7 +37,7 @@ jobs:
       run: dotnet test --configuration Release --no-build --verbosity normal
     - name: Pack
       if: github.event_name == 'release'
-      run: dotnet pack --configuration Release --no-build --output ${{ env.PackageDirectory }}
+      run: dotnet pack src/Xabbo.Common --configuration Release --no-build --output ${{ env.PackageDirectory }}
     - uses: actions/upload-artifact@v4
       if: github.event_name == 'release'
       with:
