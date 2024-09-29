@@ -18,7 +18,7 @@ public interface IInterceptor : IConnection, IInterceptorContext
     /// <summary>
     /// Occurs when the interceptor has been initialized.
     /// </summary>
-    event Action<InitializedArgs>? Initialized;
+    event Action<InitializedEventArgs>? Initialized;
 
     IInterceptor IInterceptorContext.Interceptor => this;
 }

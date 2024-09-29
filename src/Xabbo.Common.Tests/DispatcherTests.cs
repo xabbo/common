@@ -67,7 +67,7 @@ public class DispatcherTests : IClassFixture<MessagesFixture>
     {
         Session session = new(Hotel.None, new Client(client, "", ""));
         ExtMock.Setup(x => x.Session).Returns(session);
-        ExtMock.Raise(x => x.Connected += null, new GameConnectedArgs { Session = session });
+        ExtMock.Raise(x => x.Connected += null, new ConnectedEventArgs { Session = session });
     }
 
     private void SimulateReconnect(ClientType client = ClientType.Flash)

@@ -5,9 +5,9 @@ using Xabbo.Messages;
 namespace Xabbo;
 
 /// <summary>
-/// Provides event arguments for the <see cref="Connection.IConnection.Connected"/> event.
+/// Provides data for the <see cref="Connection.IConnection.Connected"/> event.
 /// </summary>
-public sealed class GameConnectedArgs
+public sealed record ConnectedEventArgs
 {
     /// <summary>
     /// Gets the host for the current game connection.

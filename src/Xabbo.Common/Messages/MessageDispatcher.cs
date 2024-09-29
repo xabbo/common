@@ -117,7 +117,7 @@ public sealed class MessageDispatcher : IMessageDispatcher, IDisposable
         }
     }
 
-    private void OnGameConnected(GameConnectedArgs e)
+    private void OnGameConnected(ConnectedEventArgs e)
     {
         _lock.Wait();
         try

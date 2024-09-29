@@ -6,4 +6,4 @@
 /// <param name="IsGameConnected">
 /// Gets whether the game is already connected at the time of extension initialization.
 /// </param>
-public readonly record struct InitializedArgs(bool? IsGameConnected = null);
+public sealed record InitializedEventArgs(bool? IsGameConnected = null);

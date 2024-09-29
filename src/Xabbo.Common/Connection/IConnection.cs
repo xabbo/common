@@ -28,7 +28,7 @@ public interface IConnection : IParserContext
     /// <summary>
     /// Occurs when a connection to the game is established.
     /// </summary>
-    event Action<GameConnectedArgs>? Connected;
+    event Action<ConnectedEventArgs>? Connected;
 
     /// <summary>
     /// Occurs when a connection to the game ends.
