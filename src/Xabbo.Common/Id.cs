@@ -28,8 +28,8 @@ public readonly struct Id
     private readonly long _value;
     private Id(long value) => _value = value;
 
-    public static implicit operator Id(long value) => new(value);
     public static implicit operator long(Id id) => id._value;
+    public static implicit operator Id(long value) => new(value);
 
     public static explicit operator Id(string s)
     {
@@ -38,6 +38,12 @@ public readonly struct Id
         return new Id(value);
     }
 
+    /// <summary>
+    /// Parses a string representation of an Id to its value and
+    /// returns whether the conversion was successful.
+    /// </summary>
+    /// <param name="s">The string to parse.</param>
+    /// <param name="id">The parsed <see cref="Id"/>.</param>
     public static bool TryParse(string? s, out Id id)
     {
         if (!long.TryParse(s, out long value))
@@ -52,5 +58,8 @@ public readonly struct Id
         }
     }
 
+    /// <summary>
+    /// Returns the value of this <see cref="Id"/> as a string.
+    /// </summary>
     public override string ToString() => _value.ToString();
 }

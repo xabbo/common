@@ -20,5 +20,8 @@ public readonly record struct Length
     public static implicit operator Length(ushort value) => new(value);
     public static explicit operator Length(int value) => new(checked((ushort)value));
 
+    /// <summary>
+    /// Returns the value of this <see cref="Length"/> as a string.
+    /// </summary>
     public override string ToString() => _value.ToString();
 }
