@@ -5,7 +5,7 @@ using System.Text;
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a set of <see cref="Header"/>s.
+/// Represents a set of <see cref="Header"/>.
 /// </summary>
 public sealed class Headers : HashSet<Header>
 {

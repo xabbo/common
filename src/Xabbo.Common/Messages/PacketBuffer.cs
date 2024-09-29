@@ -3,6 +3,11 @@ using System.Buffers;
 
 namespace Xabbo.Messages;
 
+/// <summary>
+/// Represents a resizable buffer backed by a rented memory span
+/// of <see cref="byte"/> from a <see cref="MemoryPool{T}"/> .
+/// </summary>
+/// <param name="minimumCapacity">The initial minimum capacity of the rented span of bytes.</param>
 public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapacity) : IDisposable
 {
     const int InitialCapacity = 32;
@@ -10,9 +15,20 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     private volatile bool _disposed;
     private IMemoryOwner<byte> _owner = MemoryPool<byte>.Shared.Rent(minimumCapacity);
 
+    /// <summary>
+    /// Gets the length of the buffer.
+    /// </summary>
     public int Length { get; private set; }
+
+    /// <summary>
+    /// Gets the memory of the buffer as a <see cref="Span{T}"/>.
+    /// </summary>
     public Span<byte> Span => _owner.Memory.Span[..Length];
 
+    /// <summary>
+    /// Constructs a new buffer and copies the specified <see cref="ReadOnlySpan{T}"/> into its internal memory.
+    /// </summary>
+    /// <param name="data">The data to copy into this buffer.</param>
     public PacketBuffer(ReadOnlySpan<byte> data)
         : this(data.Length)
     {
@@ -20,6 +36,10 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
         data.CopyTo(Span);
     }
 
+    /// <summary>
+    /// Constructs a new buffer and copies the specified <see cref="ReadOnlySequence{T}"/> into its internal memory.
+    /// </summary>
+    /// <param name="data">The data to copy into this buffer.</param>
     public PacketBuffer(in ReadOnlySequence<byte> data)
         : this((int)data.Length)
     {
@@ -28,7 +48,7 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     }
 
     /// <summary>
-    /// Grows the buffer to the specified length, if the current length is insufficient.
+    /// Grows the buffer to the specified length if the current length is insufficient.
     /// </summary>
     public void Grow(int min)
     {
@@ -51,13 +71,13 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     }
 
     /// <summary>
-    /// Allocates `<paramref name="length"/>` bytes from the `<paramref name="start"/>` position
+    /// Allocates <paramref name="length"/> bytes from the <paramref name="start"/> position
     /// and returns the allocated range as a <see cref="Span{T}"/> of bytes.
     /// <para/>
-    /// If `<paramref name="start"/>+<paramref name="length"/>` is greater than the packet's length,
+    /// If <paramref name="start"/>+<paramref name="length"/> is greater than the buffer length,
     /// the buffer is grown to support the new length.
     /// <para/>
-    /// `<paramref name="start"/>` may not be greater than the current packet length.
+    /// <paramref name="start"/> may not be greater than the current length.
     /// </summary>
     public Span<byte> Allocate(int start, int length)
     {
@@ -71,11 +91,14 @@ public sealed class PacketBuffer(int minimumCapacity = PacketBuffer.InitialCapac
     }
 
     /// <summary>
-    /// Resizes a specified range of the buffer to the specified length and returns the resized range as a <see cref="Span{T}"/> of bytes.
+    /// Resizes the specified range of the buffer to the specified length and returns
+    /// the resized range as a <see cref="Span{T}"/> of bytes.
     /// <para/>
-    /// The tail portion of the buffer after the end of the range will be shifted into the correct position.
+    /// The tail portion of the buffer after the end of the range will be copied into
+    /// the correct position.
     /// <para/>
-    /// The expanded portion of the range is not cleared, so it is the caller's responsibility to write valid data to the resulting span.
+    /// If the range grows in length, the expanded portion of the range is not cleared,
+    /// so it is the caller's responsibility to write valid data to the resulting span.
     /// </summary>
     public Span<byte> Resize(Range range, int length)
     {

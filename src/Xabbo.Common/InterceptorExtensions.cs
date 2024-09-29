@@ -9,6 +9,9 @@ using Xabbo.Messages;
 
 namespace Xabbo;
 
+/// <summary>
+/// Provides extensions for <see cref="IInterceptor"/>.
+/// </summary>
 [EditorBrowsable(EditorBrowsableState.Advanced)]
 public static class InterceptorExtensions
 {

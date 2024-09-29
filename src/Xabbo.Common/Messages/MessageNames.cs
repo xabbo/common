@@ -70,7 +70,7 @@ public readonly record struct MessageNames(string? Unity = null, string? Flash =
 
             if (result.Length > 0)
                 result += " ";
-            result += $"{current.Short()}:{name}";
+            result += $"{current.ToShortString()}:{name}";
         }
 
         return result;

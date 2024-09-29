@@ -9,7 +9,7 @@ public static class EnumExtensions
     /// Returns a short string representation of the specified direction.
     /// </summary>
     /// <returns><c>in</c>, <c>out</c> or <c>both</c>.</returns>
-    public static string Short(this Direction dir) => dir switch
+    public static string ToShortString(this Direction dir) => dir switch
     {
         Direction.None => "",
         Direction.In => "in",
@@ -22,7 +22,7 @@ public static class EnumExtensions
     /// Returns a short string representation of the specified client.
     /// </summary>
     /// <returns><c>u</c>, <c>f</c>, <c>s</c> or a combination representing which client flags are set.</returns>
-    public static string Short(this ClientType client) => client switch
+    public static string ToShortString(this ClientType client) => client switch
     {
         ClientType.None => "",
         ClientType.Unity => "u",

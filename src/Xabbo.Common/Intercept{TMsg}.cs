@@ -8,26 +8,26 @@ namespace Xabbo;
 /// <summary>
 /// Contains the event arguments of an intercepted message.
 /// </summary>
-/// <typeparam name="T">The type of the message.</typeparam>
+/// <typeparam name="TMsg">The type of the message.</typeparam>
 /// <param name="inner">The inner intercept instance to wrap.</param>
-public ref struct Intercept<T>(ref Intercept inner)
-    where T : IMessage<T>
+public ref struct Intercept<TMsg>(ref Intercept inner)
+    where TMsg : IMessage<TMsg>
 {
     /// <summary>
     /// Wraps the targeted message intercept callback.
     /// </summary>
-    public static InterceptCallback Wrap(InterceptCallback<T> callback) => (intercept) => {
-        callback(new Intercept<T>(ref intercept));
+    public static InterceptCallback Wrap(InterceptCallback<TMsg> callback) => (intercept) => {
+        callback(new Intercept<TMsg>(ref intercept));
     };
 
     private readonly Intercept _inner = inner;
 
-    private T? msg;
+    private TMsg? msg;
 
     /// <summary>
     /// Gets the parsed message for this intercept.
     /// </summary>
-    public T Msg => msg ??= T.Parse(_inner.Packet.Reader());
+    public TMsg Msg => msg ??= TMsg.Parse(_inner.Packet.Reader());
 
     /// <summary>
     /// Gets the interceptor that intercepted this message.
@@ -50,7 +50,7 @@ public ref struct Intercept<T>(ref Intercept inner)
     public readonly int Sequence => _inner.Sequence;
 
     /// <summary>
-    /// Gets if the packet is to be blocked by the interceptor.
+    /// Gets whether the packet will be blocked by the interceptor.
     /// </summary>
     public readonly bool IsBlocked => _inner.IsBlocked;
 

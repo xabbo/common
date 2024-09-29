@@ -6,7 +6,7 @@ using Xabbo.Messages;
 namespace Xabbo.Extension;
 
 /// <summary>
-/// Represents an extension interface provided by an interceptor service.
+/// Represents an extension interface provided by a packet interceptor service.
 /// </summary>
 public interface IExtension : IInterceptor
 {

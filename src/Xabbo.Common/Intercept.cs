@@ -44,7 +44,7 @@ public readonly ref struct Intercept(IInterceptor interceptor, ref IPacket packe
     }
 
     /// <summary>
-    /// Gets if the packet is to be blocked by the interceptor.
+    /// Gets whether the packet will be blocked by the interceptor.
     /// </summary>
     public bool IsBlocked => _blocked;
 

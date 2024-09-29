@@ -5,7 +5,7 @@ using System.Text;
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a set of <see cref="Identifier"/>s.
+/// Represents a set of <see cref="Identifier"/>.
 /// </summary>
 public sealed class Identifiers : HashSet<Identifier>
 {

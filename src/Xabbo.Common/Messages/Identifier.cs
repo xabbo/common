@@ -27,9 +27,9 @@ public readonly record struct Identifier(ClientType Client, Direction Direction,
     {
         string result = "";
         if (includeDirection && Direction != Direction.None)
-            result += Direction.Short() + ":";
+            result += Direction.ToShortString() + ":";
         if (Client != ClientType.None)
-            result += Client.Short() + ":";
+            result += Client.ToShortString() + ":";
         return result + Name;
     }
 

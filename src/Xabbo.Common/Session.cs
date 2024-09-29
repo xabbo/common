@@ -4,7 +4,7 @@ namespace Xabbo;
 /// Represents a connection session.
 /// </summary>
 /// <param name="Hotel">The hotel of the current session.</param>
-/// <param name="Client">The client type of the current session.</param>
+/// <param name="Client">The client of the current session.</param>
 public sealed record Session(Hotel Hotel, Client Client)
 {
     /// <summary>

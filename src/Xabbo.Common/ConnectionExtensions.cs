@@ -6,6 +6,9 @@ using Xabbo.Messages;
 
 namespace Xabbo;
 
+/// <summary>
+/// Provides extensions methods for <see cref="IConnection"/>.
+/// </summary>
 [EditorBrowsable(EditorBrowsableState.Advanced)]
 public static class ConnectionExtensions
 {
