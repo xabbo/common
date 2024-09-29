@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Collections.Immutable;
-using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 
 namespace Xabbo;
@@ -28,10 +27,7 @@ public sealed record Hotel
 
     private static ImmutableDictionary<string, Hotel> LoadHotels()
     {
-        string basePath = Environment.ExpandEnvironmentVariables(
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? @"%LOCALAPPDATA%\xabbo"
-            : @"%HOME%/.local/xabbo");
+        string basePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "xabbo");
 
         FileInfo fileHotelsOverride = new(Path.Join(basePath, "hotels.override.json"));
         FileInfo fileHotels = new(Path.Join(basePath, "hotels.json"));
