@@ -27,4 +27,24 @@ public class PacketTests
         }",
         testType: TestType.ReadImpl
     );
+
+    [Fact(DisplayName = "Packet.Read<int[]>() should generate a type switch case for int[]")]
+    public Task TestReadArray() => TestHelper.Verify(
+        @"((IPacket)null!).Read<int[]>();",
+        testType: TestType.ReadImpl,
+        isScript: true
+    );
+
+    [Fact(DisplayName = "Packet.Read<Parser[]>() should generate type switch cases for Parser and Parser[]")]
+    public Task TestReadArrayOfParser() => TestHelper.Verify(
+        @"
+        ((IPacket)null!).Read<Parser[]>();
+
+        class Parser : IParser<Parser> {
+            public static Parser Parse(in PacketReader p) => throw new NotImplementedException();
+        }
+        ",
+        testType: TestType.ReadImpl,
+        isScript: true
+    );
 }
