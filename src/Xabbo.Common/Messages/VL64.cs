@@ -4,12 +4,22 @@ using System.Numerics;
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a variable length base64-encoded integer.
+/// Represents a signed variable length base64-encoded integer.
 /// </summary>
-public readonly record struct VL64(int Value)
+public readonly record struct VL64
 {
-    public static readonly VL64 MinValue = new(-0x7fffffff);
-    public static readonly VL64 MaxValue = new(0x7fffffff);
+    /// <summary>
+    /// The minimum value of a <see cref="VL64"/>.
+    /// </summary>
+    public const int MinValue = -0x7fffffff;
+
+    /// <summary>
+    /// The maximum value of a <see cref="VL64"/>.
+    /// </summary>
+    public const int MaxValue = 0x7fffffff;
+
+    private readonly int _value;
+    private VL64(int value) => _value = value;
 
     /// <summary>
     /// Returns the number of bytes required to represent the specified VL64.
@@ -57,5 +67,7 @@ public readonly record struct VL64(int Value)
     }
 
     public static implicit operator VL64(int value) => new(value);
-    public static implicit operator int(VL64 vl64) => vl64.Value;
+    public static implicit operator int(VL64 vl64) => vl64._value;
+
+    public override string ToString() => _value.ToString();
 }

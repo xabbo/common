@@ -63,7 +63,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// </summary>
     public short ReadShort() => Client switch
     {
-        ClientType.Shockwave => ReadB64(),
+        ClientType.Shockwave => (short)(ushort)ReadB64(),
         _ => BinaryPrimitives.ReadInt16BigEndian(ReadSpan(2)),
     };
 
@@ -192,8 +192,8 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// <exception cref="UnsupportedClientException">If the client type is invalid.</exception>
     public Length ReadLength() => Client switch
     {
-        ClientType.Unity => ReadShort(),
-        ClientType.Flash or ClientType.Shockwave => ReadInt(),
+        ClientType.Unity => (Length)ReadShort(),
+        ClientType.Flash or ClientType.Shockwave => (Length)ReadInt(),
         _ => throw new UnsupportedClientException(Client),
     };
 

@@ -3,12 +3,22 @@
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a fixed-length base64-encoded integer.
+/// Represents an unsigned fixed-length base64-encoded integer.
 /// </summary>
-public readonly record struct B64(short Value)
+public readonly record struct B64
 {
-    public static readonly B64 MinValue = new(0);
-    public static readonly B64 MaxValue = new(0x0fff);
+    /// <summary>
+    /// The minimum value of a <see cref="B64"/>.
+    /// </summary>
+    public const ushort MinValue = 0;
+
+    /// <summary>
+    /// The maximum value of a <see cref="B64"/>.
+    /// </summary>
+    public const ushort MaxValue = 0x0fff;
+
+    private readonly ushort _value;
+    private B64(ushort value) => _value = value;
 
     public static void Encode(Span<byte> buf, B64 value)
     {
@@ -29,9 +39,12 @@ public readonly record struct B64(short Value)
     {
         if (buf.Length < 2)
             throw new ArgumentOutOfRangeException(nameof(buf), "Not enough bytes to decode B64.");
-        return (short)(((buf[0] & 0x3f) << 6) | (buf[1] & 0x3f));
+        return (B64)(((buf[0] & 0x3f) << 6) | (buf[1] & 0x3f));
     }
 
-    public static implicit operator B64(short value) => new((short)(value & 0x0fff));
-    public static implicit operator short(B64 b64) => b64.Value;
+    public static implicit operator ushort(B64 b64) => b64._value;
+    public static implicit operator B64(ushort value) => new((ushort)(value & 0x0fff));
+    public static explicit operator B64(int value) => new((ushort)(value & 0x0fff));
+
+    public override string ToString() => _value.ToString();
 }

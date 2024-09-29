@@ -36,7 +36,7 @@ internal static partial class XabboExtensions
                     Write<object>(in w, v);
                     n++;
                 }
-                w.WriterAt(ref start).ReplaceLength(n);
+                checked { w.WriterAt(ref start).ReplaceLength((global::Xabbo.Length)n); }
                 break;
             default: throw new global::System.NotSupportedException($"Cannot write value of type '{typeof(T)}'.");
         }

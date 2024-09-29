@@ -13,12 +13,23 @@ namespace Xabbo;
 /// <item>On Shockwave as a <see cref="Messages.VL64"/>.</item>
 /// </list>
 /// </remarks>
-public readonly struct Id(long value)
+public readonly struct Id
 {
-    public long Value { get; } = value;
+    /// <summary>
+    /// The minimum value of and <see cref="Id"/>.
+    /// </summary>
+    public const long MinValue = long.MinValue;
+
+    /// <summary>
+    /// The maximum value of an <see cref="Id"/>.
+    /// </summary>
+    public const long MaxValue = long.MaxValue;
+
+    private readonly long _value;
+    private Id(long value) => _value = value;
 
     public static implicit operator Id(long value) => new(value);
-    public static implicit operator long(Id id) => id.Value;
+    public static implicit operator long(Id id) => id._value;
 
     public static explicit operator Id(string s)
     {
@@ -41,5 +52,5 @@ public readonly struct Id(long value)
         }
     }
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => _value.ToString();
 }

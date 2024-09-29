@@ -88,7 +88,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void WriteShort(short value)
     {
         if (Client == ClientType.Shockwave)
-            WriteB64(value);
+            WriteB64((B64)value);
         else
             BinaryPrimitives.WriteInt16BigEndian(Allocate(2), value);
     }
@@ -99,7 +99,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void WriteShortArray(IEnumerable<short> values)
     {
         short[] array = (values as short[]) ?? [.. values];
-        WriteLength(array.Length);
+        WriteLength((Length)array.Length);
         foreach (short value in array)
             WriteShort(value);
     }
@@ -123,7 +123,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void WriteIntArray(IEnumerable<int> values)
     {
         int[] array = (values as int[]) ?? [.. values];
-        WriteLength(array.Length);
+        WriteLength((Length)array.Length);
         foreach (int value in array)
             WriteInt(value);
     }
@@ -206,7 +206,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void WriteStringArray(IEnumerable<string> values)
     {
         string[] array = (values as string[]) ?? [.. values];
-        WriteLength(array.Length);
+        WriteLength((Length)array.Length);
         foreach (string value in array)
             WriteString(value);
     }
@@ -239,7 +239,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void WriteIdArray(IEnumerable<Id> values)
     {
         Id[] array = (values as Id[]) ?? [.. values];
-        WriteLength(array.Length);
+        WriteLength((Length)array.Length);
         foreach (Id value in array)
             WriteId(value);
     }
@@ -258,9 +258,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
         switch (Client)
         {
             case ClientType.Unity:
-                if (value > ushort.MaxValue)
-                    throw new Exception("Cannot write Length on Unity: exceeds ushort.MaxValue");
-                WriteShort((short)value);
+                WriteShort((short)(ushort)value);
                 break;
             default:
                 WriteInt(value);
@@ -318,7 +316,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public void ComposeArray<T>(IEnumerable<T> values) where T : IComposer
     {
         T[] array = (values as T[]) ?? [.. values];
-        WriteLength(array.Length);
+        WriteLength((Length)array.Length);
         foreach (T value in array)
             Compose(value);
     }

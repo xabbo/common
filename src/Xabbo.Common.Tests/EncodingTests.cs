@@ -94,7 +94,7 @@ public class EncodingTests
     public void TestB64Encode(short value, string encoded)
     {
         Span<byte> buf = stackalloc byte[2];
-        B64.Encode(buf, value);
+        B64.Encode(buf, (B64)value);
 
         Assert.Equal(encoded, Encoding.UTF8.GetString(buf));
     }
@@ -104,6 +104,6 @@ public class EncodingTests
     public void TestB64Decode(short value, string encoded)
     {
         Span<byte> buf = Encoding.UTF8.GetBytes(encoded);
-        Assert.Equal(value, (short)B64.Decode(buf));
+        Assert.Equal(value, (short)(ushort)B64.Decode(buf));
     }
 }

@@ -11,12 +11,14 @@
 /// <item>On Shockwave as a <see cref="Messages.VL64"/>.</item>
 /// </list>
 /// </remarks>
-public readonly struct Length(int value)
+public readonly record struct Length
 {
-    public int Value { get; } = value;
+    private readonly ushort _value;
+    private Length(ushort value) => _value = value;
 
-    public static implicit operator Length(int value) => new(value);
-    public static implicit operator int(Length legacyShort) => legacyShort.Value;
+    public static implicit operator ushort(Length length) => length._value;
+    public static implicit operator Length(ushort value) => new(value);
+    public static explicit operator Length(int value) => new(checked((ushort)value));
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => _value.ToString();
 }
