@@ -25,6 +25,8 @@ public static class TestHelper
         [TestType.ReplaceImpl] = "Replace.Impl.g.cs",
         [TestType.SendHeader] = "SendHeader.g.cs",
         [TestType.SendIdentifier] = "SendIdentifier.g.cs",
+        [TestType.Read] = "Read.g.cs",
+        [TestType.Write] = "Write.g.cs",
     };
 
     static bool ShouldIgnore(TestType typesToTest, GeneratedSourceResult result)

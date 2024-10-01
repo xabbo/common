@@ -1,4 +1,4 @@
-﻿namespace Xabbo.Common.Generator.Tests;
+namespace Xabbo.Common.Generator.Tests;
 
 public class PacketTests
 {
@@ -45,6 +45,17 @@ public class PacketTests
         }
         ",
         testType: TestType.ReadImpl,
+        isScript: true
+    );
+
+    [Fact(DisplayName = "Writing a deconstructed var should not emit an error diagnostic")]
+    public Task TestReadWriteTuple() => TestHelper.Verify(
+        @"
+        IPacket packet = null!;
+        var (x, y) = packet.Read<int, int>();
+        packet.Write(x, y);
+        ",
+        testType: TestType.Read | TestType.Write,
         isScript: true
     );
 }
