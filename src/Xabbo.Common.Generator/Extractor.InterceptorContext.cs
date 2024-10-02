@@ -53,9 +53,9 @@ internal static partial class Extractor
                         ITypeSymbol? firstArgType = context.SemanticModel.GetTypeInfo(args[0].Expression).ConvertedType;
 
                         InvocationKind invocationKind;
-                        if (IsHeader(firstArgType))
+                        if (IsHeader(firstArgType) || IsImplicitHeaderTuple(firstArgType))
                             invocationKind = InvocationKind.SendHeader;
-                        else if (IsIdentifier(firstArgType))
+                        else if (IsIdentifier(firstArgType) || IsImplicitIdentifierTuple(firstArgType))
                             invocationKind = InvocationKind.SendIdentifier;
                         else
                             continue;
