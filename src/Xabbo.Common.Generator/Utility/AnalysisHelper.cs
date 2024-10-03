@@ -1,12 +1,59 @@
 using Microsoft.CodeAnalysis;
-
 using Xabbo.Common.Generator.Diagnostics;
 using Xabbo.Common.Generator.Model;
 
 namespace Xabbo.Common.Generator.Utility;
 
-internal static class AnalysisHelper
+internal static partial class AnalysisHelper
 {
+    public static InvocationKind GetInvocationKind(string methodName) => methodName switch
+    {
+        "Read" => InvocationKind.Read,
+        "ReadAt" => InvocationKind.ReadAt,
+        "Write" => InvocationKind.Write,
+        "WriteAt" => InvocationKind.WriteAt,
+        "Replace" => InvocationKind.Replace,
+        "ReplaceAt" => InvocationKind.ReplaceAt,
+        "Modify" => InvocationKind.Modify,
+        "ModifyAt" => InvocationKind.ModifyAt,
+        "Send" => InvocationKind.Send,
+        _ => (InvocationKind)(-1)
+    };
+
+    public static bool IsInterceptAttribute(ITypeSymbol? type) => type is INamedTypeSymbol
+    {
+        ContainingNamespace:
+        {
+            ContainingNamespace.IsGlobalNamespace: true,
+            Name: "Xabbo"
+        },
+        Name: "InterceptAttribute"
+    };
+
+    public static bool IsDirectionalInterceptAttribute(ITypeSymbol? type) => type is INamedTypeSymbol
+    {
+        ContainingNamespace:
+        {
+            ContainingNamespace.IsGlobalNamespace: true,
+            Name: "Xabbo"
+        },
+        Name: "InterceptInAttribute" or "InterceptOutAttribute"
+    };
+
+    public static bool IsExtensionAttribute(ITypeSymbol? type) => type is INamedTypeSymbol
+    {
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "Xabbo"
+            },
+            Name: "Extension"
+        },
+        Name: "ExtensionAttribute"
+    };
+
     public static bool IsHeader(ITypeSymbol? typeSymbol) => typeSymbol is
     {
         TypeKind: TypeKind.Struct,
@@ -86,7 +133,7 @@ internal static class AnalysisHelper
             },
         ]
     };
-    public static bool IsIComposerInterface(INamedTypeSymbol symbol) => symbol is
+    public static bool IsIComposerInterface(this INamedTypeSymbol symbol) => symbol is
     {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
@@ -102,7 +149,7 @@ internal static class AnalysisHelper
         Name: "IComposer"
     };
 
-    public static bool IsIParserInterface(INamedTypeSymbol symbol) => symbol is
+    public static bool IsIParserInterface(this INamedTypeSymbol symbol) => symbol is
     {
         TypeKind: TypeKind.Interface,
         IsGenericType: true,
@@ -134,7 +181,7 @@ internal static class AnalysisHelper
         Name: "IParserComposer"
     };
 
-    public static bool IsIPacketInterface(INamedTypeSymbol symbol) => symbol is
+    public static bool IsIPacketInterface(ITypeSymbol? symbol) => symbol is INamedTypeSymbol
     {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
@@ -150,7 +197,24 @@ internal static class AnalysisHelper
         Name: "IPacket"
     };
 
-    public static bool IsIConnectionInterface(INamedTypeSymbol symbol) => symbol is
+    public static bool IsIInterceptorContext(ITypeSymbol? symbol) => symbol is INamedTypeSymbol
+    {
+        TypeKind: TypeKind.Interface,
+        IsGenericType: false,
+        ContainingNamespace:
+        {
+            ContainingNamespace:
+            {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "Xabbo"
+            },
+            Name: "Interceptor",
+        },
+        Name: "IInterceptorContext"
+    };
+
+
+    public static bool IsIConnectionInterface(ITypeSymbol? symbol) => symbol is INamedTypeSymbol
     {
         TypeKind: TypeKind.Interface,
         IsGenericType: false,
@@ -378,55 +442,138 @@ internal static class AnalysisHelper
         Name: "IEnumerable"
     };
 
-    public static (VariadicType Type, bool IsValid) ToVariadicType(InvocationKind invocationKind, ITypeSymbol? typeSymbol)
+    public static bool ImplementsInterface(this INamedTypeSymbol type, Func<INamedTypeSymbol, bool> predicate)
+        => type is INamedTypeSymbol namedType && namedType.AllInterfaces.Any(predicate);
+
+    public static bool IsOrImplementsInterface(this INamedTypeSymbol type, Func<INamedTypeSymbol, bool> predicate)
+        => type is INamedTypeSymbol namedType && (predicate(namedType) || ImplementsInterface(namedType, predicate));
+
+    public static bool ImplementsInterface(this ITypeSymbol? type, Func<INamedTypeSymbol, bool> predicate)
+        => type is INamedTypeSymbol namedType && ImplementsInterface(namedType, predicate);
+
+    public static bool IsOrImplementsInterface(this ITypeSymbol? type, Func<INamedTypeSymbol, bool> predicate)
+        => type is INamedTypeSymbol namedType && IsOrImplementsInterface(namedType, predicate);
+
+    public static INamedTypeSymbol? GetInterfaceOrSelf(
+        this INamedTypeSymbol type,
+        Func<INamedTypeSymbol, bool> predicate)
     {
-        bool isValidType = false;
-        bool isArray = false;
-        bool isParser = false;
-        bool isComposer = false;
+        if (predicate(type))
+            return type;
+        return type.AllInterfaces.FirstOrDefault(predicate);
+    }
 
-        if (typeSymbol is IArrayTypeSymbol arrayType &&
-            (invocationKind & InvocationKind.Replace) == 0 &&
-            (invocationKind & InvocationKind.Modify) == 0)
+    public static ExtractedType ExtractPacketType(
+        InvocationKind invocationKind,
+        ITypeSymbol? type,
+        bool isGenericTypeArg)
+    {
+        ExtractedType extracted = new(
+            InnerType: type,
+            OuterType: type
+        );
+
+        if ((invocationKind & InvocationKind.Modify) > 0 && !isGenericTypeArg)
         {
-            isArray = true;
-            typeSymbol = arrayType.ElementType;
+            if (type is not null && ExtractInnerTypeModify(type) is { } modifyType)
+            {
+                type = modifyType;
+                extracted = extracted with {
+                    IsInFunc = true,
+                    InnerType = modifyType
+                };
+            }
         }
-        else if (((invocationKind & InvocationKind.Send) > 0 || (invocationKind & InvocationKind.Write) > 0) &&
-            typeSymbol is INamedTypeSymbol iEnumerableType && iEnumerableType.IsIEnumerable_1())
+
+        if (type is IArrayTypeSymbol arrayType)
         {
-            typeSymbol = iEnumerableType.TypeArguments[0];
+            extracted = extracted with {
+                IsInArray = true,
+                InnerType = arrayType.ElementType
+            };
         }
-
-        if (typeSymbol is INamedTypeSymbol namedType)
+        else if ((invocationKind & InvocationKind.SupportsEnumerable) > 0 &&
+            type is INamedTypeSymbol namedType)
         {
-            isValidType = IsPrimitivePacketType(namedType) || (
-                !(((invocationKind & InvocationKind.RequiresComposer) > 0) && !ImplementsComposer(namedType)) &&
-                !(((invocationKind & InvocationKind.RequiresParser) > 0) && !ImplementsParser(namedType)));
-
-            isParser = ImplementsParser(typeSymbol);
-            isComposer = ImplementsComposer(typeSymbol);
+            if (!IsPrimitivePacketType(type) && !ImplementsComposer(type))
+            {
+                INamedTypeSymbol? enumerableType = namedType.GetInterfaceOrSelf(IsIEnumerable_1);
+                if (enumerableType is not null)
+                {
+                    extracted = extracted with {
+                        IsInEnumerable = true,
+                        InnerType = enumerableType.TypeArguments[0]
+                    };
+                }
+            }
         }
 
-        return (
-            new VariadicType(
-                FullyQualifiedName: typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "?",
-                IsArray: isArray,
-                IsParser: isParser,
-                IsComposer: isComposer
-            ),
-            isValidType
+        return extracted;
+    }
+
+    /// <summary>
+    /// Extracts the inner type for a modifier from a Func.
+    /// </summary>
+    public static ITypeSymbol? ExtractInnerTypeModify(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol
+        {
+            ContainingNamespace: {
+                ContainingNamespace.IsGlobalNamespace: true,
+                Name: "System",
+            },
+            Name: "Func",
+            IsGenericType: true,
+            TypeParameters.Length: 2
+        } funcTypeSymbol)
+        {
+            return funcTypeSymbol.TypeArguments[0];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+
+    public static bool IsValidTypeForInvocation(InvocationKind invocationKind, ExtractedType extracted)
+    {
+        if (extracted.IsInFunc && (invocationKind & InvocationKind.SupportsFunc) == 0)
+            return false;
+        if (extracted.IsInArray && (invocationKind & InvocationKind.SupportsArray) == 0)
+            return false;
+        if (extracted.IsInEnumerable && (invocationKind & InvocationKind.SupportsEnumerable) == 0)
+            return false;
+        if (!IsPrimitivePacketType(extracted.InnerType))
+        {
+            if ((invocationKind & InvocationKind.RequiresParser) > 0 && !ImplementsParser(extracted.InnerType))
+                return false;
+            if ((invocationKind & InvocationKind.RequiresComposer) > 0 && !IsOrImplementsInterface(extracted.InnerType, IsIComposerInterface))
+                return false;
+        }
+        return true;
+    }
+
+    public static VariadicType ToVariadicType(InvocationKind invocationKind, ExtractedType extractedType)
+    {
+        return new VariadicType(
+            FullyQualifiedName: extractedType.InnerType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "?",
+            IsParser: ImplementsInterface(extractedType.InnerType, IsIParserInterface),
+            IsComposer: IsOrImplementsInterface(extractedType.InnerType, IsIComposerInterface),
+            IsArray: extractedType.IsInArray,
+            IsValid: IsValidTypeForInvocation(invocationKind, extractedType)
         );
     }
 
-    public static DiagnosticDescriptor GetInvalidTypeDescriptor(InvocationKind kind)
+    public static DiagnosticDescriptor GetInvalidTypeDescriptorForInvocation(InvocationKind kind)
     {
         bool
             requiresParser = (kind & InvocationKind.RequiresParser) > 0,
             requiresComposer = (kind & InvocationKind.RequiresComposer) > 0;
+
         return requiresParser switch
         {
-            true when requiresParser => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
+            true when requiresComposer => DiagnosticDescriptors.NotPrimitiveOrParserComposerType,
             true => DiagnosticDescriptors.NotPrimitiveOrParserType,
             false when requiresComposer => DiagnosticDescriptors.NotPrimitiveOrComposerType,
             false => DiagnosticDescriptors.NotPrimitiveType

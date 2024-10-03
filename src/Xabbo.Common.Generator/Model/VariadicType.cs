@@ -4,7 +4,8 @@ internal sealed record VariadicType(
     string FullyQualifiedName,
     bool IsParser,
     bool IsComposer,
-    bool IsArray
+    bool IsArray,
+    bool IsValid
 )
 {
     public override string ToString() => FullyQualifiedName;

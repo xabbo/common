@@ -10,8 +10,11 @@ internal static partial class Executor
 {
     internal static class Interceptor
     {
-        internal static void Execute(SourceProductionContext context, InterceptorInfo interceptor)
+        internal static void Execute(SourceProductionContext context, InterceptorInfo? interceptor)
         {
+            if (interceptor is null)
+                return;
+
             string hintName = $"{interceptor.Name}.Interceptor.g.cs";
             if (interceptor.Namespace != "")
                 hintName = $"{interceptor.Namespace}.{hintName}";

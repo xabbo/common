@@ -1,9 +1,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Operations;
 
 using Xabbo.Common.Generator.Model;
-
+using Xabbo.Common.Generator.Utility;
 using static Xabbo.Common.Generator.Utility.AnalysisHelper;
 
 namespace Xabbo.Common.Generator;
@@ -14,7 +13,21 @@ internal static partial class Extractor
     {
         public static bool IsCandidateForGeneration(SyntaxNode node) => node is InvocationExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
+            // Expression: MemberAccessExpressionSyntax
+            // {
+            //     Name.Identifier.ValueText:
+            //         "Read" or "ReadAt" or
+            //         "Write" or "WriteAt" or
+            //         "Replace" or "ReplaceAt" or
+            //         "Modify" or "ModifyAt" or
+            //         "Send"
+            // }
+        };
+
+        public static VariadicInvocation? ExtractVariadicInvocation(GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
+        {
+            var invocationExpression = (InvocationExpressionSyntax)ctx.Node;
+            if (invocationExpression.Expression is not MemberAccessExpressionSyntax
             {
                 Name.Identifier.ValueText:
                     "Read" or "ReadAt" or
@@ -22,27 +35,12 @@ internal static partial class Extractor
                     "Replace" or "ReplaceAt" or
                     "Modify" or "ModifyAt" or
                     "Send"
+            } memberAccess)
+            {
+                return null;
             }
-        };
 
-        static InvocationKind GetInvocationKind(string methodName) => methodName switch
-        {
-            "Read" => InvocationKind.Read,
-            "ReadAt" => InvocationKind.ReadAt,
-            "Write" => InvocationKind.Write,
-            "WriteAt" => InvocationKind.WriteAt,
-            "Replace" => InvocationKind.Replace,
-            "ReplaceAt" => InvocationKind.ReplaceAt,
-            "Modify" => InvocationKind.Modify,
-            "ModifyAt" => InvocationKind.ModifyAt,
-            "Send" => InvocationKind.Send,
-            _ => (InvocationKind)(-1)
-        };
-
-        public static Result<VariadicInvocation?> ExtractVariadicInvocation(GeneratorSyntaxContext ctx, CancellationToken cancellationToken)
-        {
-            var invocationExpression = (InvocationExpressionSyntax)ctx.Node;
-            var memberAccess = (MemberAccessExpressionSyntax)invocationExpression.Expression;
+            // var memberAccess = (MemberAccessExpressionSyntax)invocationExpression.Expression;
             var simpleName = memberAccess.Name;
 
             InvocationKind invocationKind = GetInvocationKind(simpleName.Identifier.ValueText);
@@ -56,10 +54,10 @@ internal static partial class Extractor
                 memberType.TypeKind != TypeKind.Error)
             {
                 // Ensure the target implements IPacket or IConnection.
-                Func<INamedTypeSymbol, bool> checkInterface =
-                    isSend ? IsIConnectionInterface : IsIPacketInterface;
-                if (!checkInterface(memberType) && !memberType.AllInterfaces.Any(checkInterface))
-                    return null;
+                // Func<INamedTypeSymbol, bool> checkInterface =
+                //     isSend ? IsIConnectionInterface : IsIPacketInterface;
+                // if (!checkInterface(memberType) && !memberType.AllInterfaces.Any(checkInterface))
+                //     return null;
             }
 
             bool hasArguments = (invocationKind & InvocationKind.HasArguments) > 0;
@@ -69,22 +67,23 @@ internal static partial class Extractor
             bool isReplace = (invocationKind & InvocationKind.Replace) > 0;
             bool isModify = (invocationKind & InvocationKind.Modify) > 0;
 
-            VariadicType[] types;
-            List<DiagnosticInfo> diagnostics = [];
-
-            List<(SyntaxNode Node, TypeInfo TypeInfo)> syntaxTypes = [];
+            List<TypeInfo> typeInfos = [];
 
             var methodArgs = invocationExpression.ArgumentList.Arguments;
 
+            bool typesFromGenericTypeArgs = false;
+
             if (simpleName is GenericNameSyntax genericName)
             {
+                typesFromGenericTypeArgs = true;
+
                 // Get the types from the generic name syntax if we have it.
                 if ((isSend || isPositional) && methodArgs.Count > 0)
                 {
-                    syntaxTypes.Add((methodArgs[0], ctx.SemanticModel.GetTypeInfo(methodArgs[0].Expression)));
+                    typeInfos.Add(ctx.SemanticModel.GetTypeInfo(methodArgs[0].Expression));
                 }
                 foreach (var typeSyntax in genericName.TypeArgumentList.Arguments)
-                    syntaxTypes.Add((typeSyntax, ctx.SemanticModel.GetTypeInfo(typeSyntax)));
+                    typeInfos.Add(ctx.SemanticModel.GetTypeInfo(typeSyntax));
             }
             else
             {
@@ -97,22 +96,22 @@ internal static partial class Extractor
 
                     if (i == 0 && (isPositional || isSend))
                     {
-                        syntaxTypes.Add((argumentSyntax, typeInfo));
+                        typeInfos.Add(typeInfo);
                         continue;
                     }
 
-                    syntaxTypes.Add((argumentSyntax, typeInfo));
+                    typeInfos.Add(typeInfo);
                 }
             }
 
             if (isPositional || isSend)
             {
-                if (syntaxTypes.Count == 0)
+                if (typeInfos.Count == 0)
                     return null;
 
                 if (isSend)
                 {
-                    TypeInfo typeInfo = syntaxTypes[0].TypeInfo;
+                    TypeInfo typeInfo = typeInfos[0];
                     ITypeSymbol? typeSymbol = typeInfo.Type;
                     ITypeSymbol? convertedTypeSymbol = typeInfo.ConvertedType;
 
@@ -124,77 +123,25 @@ internal static partial class Extractor
                     else return null;
                 }
 
-                syntaxTypes.RemoveAt(0);
+                typeInfos.RemoveAt(0);
             }
 
-            types = new VariadicType[syntaxTypes.Count];
-            for (int i = 0; i < types.Length; i++)
+            var variadicTypes = new VariadicType[typeInfos.Count];
+            for (int i = 0; i < variadicTypes.Length; i++)
             {
-                var (syntax, typeInfo) = syntaxTypes[i];
+                var typeInfo = typeInfos[i];
 
                 ITypeSymbol? typeSymbol = typeInfo.ConvertedType;
 
-                // If this is a modifier, attempt to extract the parameter type from the Func<T, T> or method symbol
-                if (isModify)
-                    typeSymbol = ExtractModifyInnerType(ctx.SemanticModel, syntax, typeInfo);
+                var extractedType = ExtractPacketType(invocationKind, typeSymbol, typesFromGenericTypeArgs);
 
-                var (type, isValidType) = ToVariadicType(invocationKind, typeSymbol);
-
-                if (!isValidType)
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        GetInvalidTypeDescriptor(invocationKind),
-                        syntax.GetLocation(),
-                        typeSymbol?.ToDisplayString() ?? "?"
-                    ));
-                }
-
-                types[i] = type;
+                variadicTypes[i] = ToVariadicType(invocationKind, extractedType);
             }
 
-            return new Result<VariadicInvocation?>(
-                new VariadicInvocation(
-                    invocationKind,
-                    new EquatableArray<VariadicType>(types)
-                ),
-                diagnostics.ToEquatableArray()
+            return new VariadicInvocation(
+                invocationKind,
+                new EquatableArray<VariadicType>(variadicTypes)
             );
         }
-    }
-
-    static ITypeSymbol? ExtractModifyInnerType(SemanticModel semanticModel, SyntaxNode syntax, TypeInfo typeInfo)
-    {
-        ITypeSymbol? typeSymbol = typeInfo.ConvertedType;
-
-        if (typeSymbol is INamedTypeSymbol
-        {
-            ContainingNamespace: {
-                ContainingNamespace.IsGlobalNamespace: true,
-                Name: "System",
-            },
-            Name: "Func",
-            IsGenericType: true,
-            TypeParameters.Length: 2
-        } funcTypeSymbol)
-        {
-            typeSymbol = funcTypeSymbol.TypeArguments[0];
-        }
-        else if (syntax is ArgumentSyntax argumentSyntax)
-        {
-            var operation = semanticModel.GetOperation(argumentSyntax.Expression);
-            if (operation is IAnonymousFunctionOperation anonymousFunction)
-            {
-                if (anonymousFunction.Symbol.Parameters.Length > 0)
-                {
-                    typeSymbol = anonymousFunction.Symbol.Parameters[0].Type;
-                }
-            }
-            else
-            {
-                // ?
-            }
-        }
-
-        return typeSymbol;
     }
 }

@@ -5,6 +5,5 @@ internal sealed record InterceptorContextInfo(
     string Namespace,
     string Name,
     EquatableArray<int> SendHeaderArities,
-    EquatableArray<int> SendIdentifierArities,
-    EquatableArray<VariadicInvocation> Invocations
+    EquatableArray<int> SendIdentifierArities
 );

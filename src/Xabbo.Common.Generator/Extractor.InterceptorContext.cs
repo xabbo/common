@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using Xabbo.Common.Generator.Model;
-
+using Xabbo.Common.Generator.Utility;
 using static Xabbo.Common.Generator.Utility.AnalysisHelper;
 
 namespace Xabbo.Common.Generator;
@@ -12,25 +12,18 @@ internal static partial class Extractor
 {
     internal static partial class InterceptorContext
     {
-        internal static Result<InterceptorContextInfo?> ExtractInterceptorContextInfo(GeneratorAttributeSyntaxContext context)
+        internal static InterceptorContextInfo? ExtractInterceptorContextInfo(
+            GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (context.TargetSymbol is not INamedTypeSymbol namedType)
                 return null;
 
-            // Check if this class implements IInterceptorContext
-            if (!namedType.AllInterfaces.Any(it => it is
-            {
-                ContainingNamespace: {
-                    ContainingNamespace: {
-                        ContainingNamespace.IsGlobalNamespace: true,
-                        Name: "Xabbo"
-                    },
-                    Name: "Interceptor"
-                },
-                Name: "IInterceptorContext"
-            })) return null;
+            // Check if this class implements IInterceptorContext.
+            if (!AnalysisHelper.ImplementsInterface(namedType, IsIInterceptorContext))
+                return null;
 
-            List<DiagnosticInfo> diagnostics = [];
             List<VariadicInvocation> invocations = [];
 
             foreach (var member in namedType.GetMembers())
@@ -60,34 +53,26 @@ internal static partial class Extractor
                         else
                             continue;
 
-                        List<(SyntaxNode Node, ITypeSymbol? TypeSymbol)> syntaxTypes = [];
+                        bool typesFromGenericTypeArgs = false;
+
+                        List<ITypeSymbol?> argumentTypeSymbols = [];
                         if (simpleName is GenericNameSyntax genericName)
                         {
+                            typesFromGenericTypeArgs = true;
                             foreach (var typeSyntax in genericName.TypeArgumentList.Arguments)
-                                syntaxTypes.Add((typeSyntax, context.SemanticModel.GetTypeInfo(typeSyntax).ConvertedType));
+                                argumentTypeSymbols.Add(context.SemanticModel.GetTypeInfo(typeSyntax).ConvertedType);
                         }
                         else
                         {
                             for (int i = 1; i < args.Count; i++)
-                                syntaxTypes.Add((args[i], context.SemanticModel.GetTypeInfo(args[i].Expression).ConvertedType));
+                                argumentTypeSymbols.Add(context.SemanticModel.GetTypeInfo(args[i].Expression).ConvertedType);
                         }
 
-                        var types = new VariadicType[syntaxTypes.Count];
+                        var types = new VariadicType[argumentTypeSymbols.Count];
                         for (int i = 0; i < types.Length; i++)
                         {
-                            var (syntax, typeSymbol) = syntaxTypes[i];
-                            var (type, isValidType) = ToVariadicType(invocationKind, typeSymbol);
-
-                            if (!isValidType)
-                            {
-                                diagnostics.Add(new DiagnosticInfo(
-                                    GetInvalidTypeDescriptor(invocationKind),
-                                    syntax.GetLocation(),
-                                    typeSymbol?.ToDisplayString() ?? "?"
-                                ));
-                            }
-
-                            types[i] = type;
+                            var extractedType = AnalysisHelper.ExtractPacketType(InvocationKind.Send, argumentTypeSymbols[i], typesFromGenericTypeArgs);
+                            types[i] = ToVariadicType(invocationKind, extractedType);
                         }
 
                         invocations.Add(new VariadicInvocation(
@@ -98,23 +83,19 @@ internal static partial class Extractor
                 }
             }
 
-            return new Result<InterceptorContextInfo?>(
-                new InterceptorContextInfo(
-                    namedType.ContainingNamespace.ToString(),
-                    namedType.Name,
-                    invocations
-                        .Where(x => (x.Kind & InvocationKind.SendHeader) > 0)
-                        .Select(x => x.Types.Length)
-                        .Distinct()
-                        .ToEquatableArray(),
-                    invocations
-                        .Where(x => (x.Kind & InvocationKind.SendIdentifier) > 0)
-                        .Select(x => x.Types.Length)
-                        .Distinct()
-                        .ToEquatableArray(),
-                    invocations.ToEquatableArray()
-                ),
-                diagnostics.ToEquatableArray()
+            return new InterceptorContextInfo(
+                namedType.ContainingNamespace.ToString(),
+                namedType.Name,
+                invocations
+                    .Where(x => (x.Kind & InvocationKind.SendHeader) > 0)
+                    .Select(x => x.Types.Length)
+                    .Distinct()
+                    .ToEquatableArray(),
+                invocations
+                    .Where(x => (x.Kind & InvocationKind.SendIdentifier) > 0)
+                    .Select(x => x.Types.Length)
+                    .Distinct()
+                    .ToEquatableArray()
             );
         }
     }
