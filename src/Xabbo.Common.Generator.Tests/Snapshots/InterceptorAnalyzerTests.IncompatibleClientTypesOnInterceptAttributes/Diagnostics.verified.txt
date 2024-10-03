@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO007",
+    "Title": "The Intercepts attribute's target client is None",
+    "Severity": "Warning",
+    "Location": "(5,13)-(5,44)",
+    "LocationText": "Intercept(ClientType.Shockwave)",
+    "Message": "This interceptor will never be registered because the specified target client results in ClientType.None"
+  }
+]

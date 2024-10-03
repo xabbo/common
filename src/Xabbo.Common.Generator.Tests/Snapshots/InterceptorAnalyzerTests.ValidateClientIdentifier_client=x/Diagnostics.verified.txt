@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO002",
+    "Title": "Invalid single client specifier",
+    "Severity": "Error",
+    "Location": "(4,25)-(4,33)",
+    "LocationText": "\"x:Test\"",
+    "Message": "'x:' is not a valid client specifier. Use 'u:', 'f:' or 's:' to specify the Unity, Flash or Shockwave clients."
+  }
+]

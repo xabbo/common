@@ -1,0 +1,26 @@
+﻿[
+  {
+    "Id": "XABBO017",
+    "Title": "Method does not support arrays",
+    "Severity": "Error",
+    "Location": "(1,36)-(1,40)",
+    "LocationText": "Id[]",
+    "Message": "Replace does not support arrays"
+  },
+  {
+    "Id": "XABBO017",
+    "Title": "Method does not support arrays",
+    "Severity": "Error",
+    "Location": "(2,36)-(2,46)",
+    "LocationText": "(Id[])null",
+    "Message": "Replace does not support arrays"
+  },
+  {
+    "Id": "XABBO017",
+    "Title": "Method does not support arrays",
+    "Severity": "Error",
+    "Location": "(4,36)-(4,41)",
+    "LocationText": "array",
+    "Message": "Replace does not support arrays"
+  }
+]

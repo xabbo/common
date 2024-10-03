@@ -1,10 +1,6 @@
-using System.Collections.Immutable;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using Xabbo.Common.Generator.Diagnostics;
 using Xabbo.Common.Generator.Model;
 using Xabbo.Common.Generator.Utility;
 
@@ -21,57 +17,27 @@ internal static partial class Extractor
             _ => Direction.None,
         };
 
-        internal static Result<InterceptorInfo?> ExtractInfo(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+        internal static InterceptorInfo? ExtractInfo(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (context.SemanticModel.GetDeclaredSymbol(context.TargetNode) is not INamedTypeSymbol @class)
                 return null;
 
-            ImmutableArray<ISymbol> members = @class.GetMembers();
-
-            List<InterceptInfo> intercepts = [];
-            List<DiagnosticInfo> diagnostics = [];
-
-            // Add diagnostic if not partial.
-            bool isPartial = @class
-                .DeclaringSyntaxReferences
-                .Any(syntax =>
-                    syntax.GetSyntax() is BaseTypeDeclarationSyntax declaration &&
-                    declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)));
-
-            if (!isPartial)
-            {
-                diagnostics.Add(new DiagnosticInfo(
-                    DiagnosticDescriptors.InterceptorMustBePartial,
-                    @class.OriginalDefinition.Locations[0]
-                ));
-            }
-
             // Extract target clients.
             Client targetClients = Client.All;
 
-            var interceptsAttribute = @class.GetAttributes().FirstOrDefault(
-                x => x.AttributeClass?.ToDisplayString() == Constants.InterceptAttributeMetadataName);
+            var interceptAttribute = @class.GetAttributes().FirstOrDefault(
+                x => AnalysisHelper.IsInterceptAttribute(x.AttributeClass));
 
-            if (interceptsAttribute is not null &&
-                interceptsAttribute.ConstructorArguments.Length > 0 &&
-                interceptsAttribute.ConstructorArguments[0].Value is int targetClientValue)
-            {
-                targetClients = ((Client)targetClientValue) & Client.All;
-                if (targetClients == Client.None)
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
-                        interceptsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                }
-            }
+            if (interceptAttribute?.ConstructorArguments is [ { Value: int targetClientValue } ])
+                targetClients &= (Client)targetClientValue;
 
             // Extract intercept info.
-            foreach (ISymbol member in members)
+            List<InterceptInfo> intercepts = [];
+            foreach (ISymbol member in @class.GetMembers())
             {
-                if (ExtractInterceptInfo(targetClients, member, diagnostics) is { } interceptInfo)
+                if (ExtractInterceptInfo(targetClients, member) is { } interceptInfo)
                     intercepts.Add(interceptInfo);
             }
 
@@ -80,31 +46,24 @@ internal static partial class Extractor
             if (@class.ContainingNamespace.CanBeReferencedByName)
                 namespaceName = @class.ContainingNamespace.ToDisplayString();
 
-            return new Result<InterceptorInfo?>(
-                new InterceptorInfo(
-                    namespaceName,
-                    @class.Name,
-                    targetClients,
-                    intercepts.ToArray()
-                ),
-                diagnostics.ToArray()
+            return new InterceptorInfo(
+                namespaceName,
+                @class.Name,
+                targetClients,
+                intercepts.ToArray()
             );
         }
 
-        static InterceptInfo? ExtractInterceptInfo(Client targetClients, ISymbol member, List<DiagnosticInfo> diagnostics)
+        static InterceptInfo? ExtractInterceptInfo(Client targetClients, ISymbol member)
         {
             if (member is not IMethodSymbol method)
                 return null;
 
             List<Identifier> identifiers = [];
-            Client interceptsOn = targetClients;
 
             bool hasInterceptAttribute = false;
-            AttributeData?
-                interceptAttribute = null,
-                interceptInAttribute = null,
-                interceptOutAttribute = null;
 
+            // Collect directional intercept identifier names
             foreach (AttributeData attr in member.GetAttributes())
             {
                 if (attr.AttributeClass is null) continue;
@@ -112,8 +71,9 @@ internal static partial class Extractor
 
                 if (attributeName == Constants.InterceptAttributeMetadataName)
                 {
-                    interceptAttribute = attr;
                     hasInterceptAttribute = true;
+                    if (attr.ConstructorArguments is [ { Value: int targetClientValue } ])
+                        targetClients &= (Client)targetClientValue;
                     continue;
                 }
 
@@ -122,32 +82,12 @@ internal static partial class Extractor
 
                 hasInterceptAttribute = true;
 
-                if (direction == Direction.In) interceptInAttribute = attr;
-                else if (direction == Direction.Out) interceptOutAttribute = attr;
-
-                if (attr.ConstructorArguments.Length != 1)
+                if (attr.ConstructorArguments is not [ { Values: var identifierArgs } ])
                     continue;
 
-                var argument = attr.ConstructorArguments[0];
-                if (argument.Kind != TypedConstantKind.Array)
-                    continue;
-
-                if (argument.Values.Length == 0)
+                foreach (var identifierArg in identifierArgs)
                 {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.IdentifiersNotSpecified,
-                        attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                    continue;
-                }
-
-                Location[]? attributeParamLocations = null;
-                if (attr.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attrSyntax)
-                    attributeParamLocations = attrSyntax.ArgumentList?.Arguments.Select(x => x.GetLocation()).ToArray();
-
-                for (int i = 0; i < argument.Values.Length; i++)
-                {
-                    if (argument.Values[i].Value is not string name) continue;
+                    if (identifierArg.Value is not string name) continue;
 
                     Client client = Client.None;
 
@@ -157,32 +97,7 @@ internal static partial class Extractor
                         string clientIdentifier = name[..colonIndex];
                         if (clientIdentifier.Length == 1)
                             client = clientIdentifier[0].ToClient();
-
-                        if (client == Client.None)
-                        {
-                            diagnostics.Add(new DiagnosticInfo(
-                                DiagnosticDescriptors.InvalidSingleClientSpecifier,
-                                attributeParamLocations is null
-                                    ? attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                                    : attributeParamLocations[i],
-                                name[..(colonIndex + 1)]
-                            ));
-                            continue;
-                        }
-
                         name = name[(colonIndex + 1)..];
-                    }
-
-                    if (!Identifier.IsValid(name))
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.InvalidMessageIdentifier,
-                            attributeParamLocations is null
-                                ? attr.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                                : attributeParamLocations[i],
-                            name
-                        ));
-                        continue;
                     }
 
                     identifiers.Add(new Identifier(client, direction, name));
@@ -192,14 +107,6 @@ internal static partial class Extractor
             if (!hasInterceptAttribute) return null;
 
             string? messageHandlerType = null;
-
-            if (member.IsStatic)
-            {
-                diagnostics.Add(new DiagnosticInfo(
-                    DiagnosticDescriptors.InterceptHandlerMustNotBeStatic,
-                    member.Locations[0]
-                ));
-            }
 
             if (!AnalysisHelper.IsInterceptHandlerSignature(method))
             {
@@ -218,63 +125,13 @@ internal static partial class Extractor
                 }
                 else
                 {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.InvalidInterceptMethodSignature,
-                        member.Locations[0]
-                    ));
                     return null;
-                }
-            }
-
-            if (messageHandlerType is not null)
-            {
-                if (interceptAttribute is { ConstructorArguments.Length: > 0 })
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.ClientSpecifierOnMessageHandler,
-                        interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                }
-                if (interceptInAttribute is not null)
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
-                        interceptInAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                }
-                if (interceptOutAttribute is not null)
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.DirectionalInterceptOnMessageHandler,
-                        interceptOutAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                }
-            }
-            else
-            {
-                if (interceptAttribute is { ConstructorArguments.Length: 0 })
-                {
-                    diagnostics.Add(new DiagnosticInfo(
-                        DiagnosticDescriptors.NoTargetClientsOnInterceptsAttribute,
-                        interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                    ));
-                }
-                else if (interceptAttribute is { ConstructorArguments: [ { Value: int clientTypeValue } ] })
-                {
-                    interceptsOn &= (Client)clientTypeValue;
-                    if (interceptsOn == Client.None && targetClients != Client.None)
-                    {
-                        diagnostics.Add(new DiagnosticInfo(
-                            DiagnosticDescriptors.EmptyTargetClientOnInterceptsAttribute,
-                            interceptAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
-                        ));
-                    }
                 }
             }
 
             return new InterceptInfo(
                 identifiers.ToArray(),
-                interceptsOn,
+                targetClients,
                 member.Name,
                 messageHandlerType
             );

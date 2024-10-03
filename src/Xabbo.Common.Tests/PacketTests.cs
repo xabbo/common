@@ -6,6 +6,8 @@ using Xunit.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Common.Tests.Data;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Xabbo.Common.Tests;
 
@@ -291,4 +293,14 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         Assert.Throws<UnsupportedClientException>(() => packet.WriteContent(""));
     }
 
+    [Fact]
+    public void TestWriteDeconstructedVars()
+    {
+        var packet = new Packet(Header.Unknown);
+        packet.Write(1, 2);
+        packet.Position = 0;
+
+        var (a, b) = packet.Read<int, int>();
+        packet.Write(a, b);
+    }
 }

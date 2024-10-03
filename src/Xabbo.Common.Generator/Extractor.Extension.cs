@@ -8,7 +8,7 @@ internal static partial class Extractor
 {
     internal static class Extension
     {
-        internal static Result<ExtensionInfo?> ExtractInfo(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+        internal static ExtensionInfo? ExtractInfo(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

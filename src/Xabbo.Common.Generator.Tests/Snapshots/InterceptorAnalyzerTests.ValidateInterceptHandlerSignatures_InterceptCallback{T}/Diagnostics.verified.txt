@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO008",
+    "Title": "Invalid intercept method signature",
+    "Severity": "Error",
+    "Location": "(6,17)-(6,19)",
+    "LocationText": "Fn",
+    "Message": "Intercept method signature must be void(Intercept)"
+  }
+]

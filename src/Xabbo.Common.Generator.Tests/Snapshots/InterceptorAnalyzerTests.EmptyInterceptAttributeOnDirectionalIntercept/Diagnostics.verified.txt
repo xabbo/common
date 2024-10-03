@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO006",
+    "Title": "The Intercepts attribute does not specify a target client",
+    "Severity": "Warning",
+    "Location": "(4,13)-(4,22)",
+    "LocationText": "Intercept",
+    "Message": "This attribute will have no effect because no target clients were specified"
+  }
+]

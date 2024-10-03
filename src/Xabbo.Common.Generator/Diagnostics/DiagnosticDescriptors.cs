@@ -49,7 +49,7 @@ internal static class DiagnosticDescriptors
         isEnabledByDefault: true
     );
 
-    internal static readonly DiagnosticDescriptor NoTargetClientsOnInterceptsAttribute = new(
+    internal static readonly DiagnosticDescriptor NoTargetClientsOnInterceptAttribute = new(
         id: "XABBO006",
         title: "The Intercepts attribute does not specify a target client",
         messageFormat: "This attribute will have no effect because no target clients were specified",
@@ -70,7 +70,7 @@ internal static class DiagnosticDescriptors
     internal static readonly DiagnosticDescriptor InvalidInterceptMethodSignature = new(
         id: "XABBO008",
         title: "Invalid intercept method signature",
-        messageFormat: "Intercept method signature must be void(Intercept), void(Intercept<IMessage<T>>), void(IMessage<T>) or void(Intercept, IMessage<T>)",
+        messageFormat: "Intercept method signature must be void(Intercept)",
         category: "Xabbo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true
@@ -129,4 +129,32 @@ internal static class DiagnosticDescriptors
         DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
+
+    internal static readonly DiagnosticDescriptor InvalidMessageHandlerSignature = new(
+        id: "XABBO016",
+        title: "Invalid message handler method signature",
+        messageFormat: "Message handler signature must be void(IMessage<TMsg>), void(Intercept, IMessage<TMsg>), void(Intercept<IMessage<TMsg>>), or IMessage?(IMessage<TMsg>)",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor MethodDoesNotSupportArray = new(
+        id: "XABBO017",
+        title: "Method does not support arrays",
+        messageFormat: "{0} does not support arrays",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
+    internal static readonly DiagnosticDescriptor MethodDoesNotSupportEnumerable = new(
+        id: "XABBO017",
+        title: "Method does not support IEnumerable<T>",
+        messageFormat: "{0} does not support IEnumerable<{1}>",
+        category: "Xabbo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
 }

@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices.ComTypes;
+
 namespace Xabbo.Common.Generator.Model;
 
 [Flags]
@@ -26,5 +28,39 @@ internal enum InvocationKind
     HasArguments = Write | Replace | Modify | Send,
     RequiresParser = Read | Replace | Modify,
     RequiresComposer = Write | Replace | Modify | Send,
-    RequiresParserComposer = RequiresParser & RequiresComposer
+    RequiresParserComposer = RequiresParser & RequiresComposer,
+
+    SupportsArray = Read | Write | Send,
+    SupportsEnumerable = Send | Write,
+    SupportsFunc = Modify,
+
+    /// <summary>
+    /// Whether the invocation has a fixed first argument:
+    /// <list type="bullet">
+    /// <item>ReadAt(position, ...)</item>
+    /// <item>WriteAt(position, ...)</item>
+    /// <item>Send(header, ...)</item>
+    /// <item>Send(identifier, ...)</item>
+    /// </list>
+    /// </summary>
+    HasFixedFirstArg = At | Send
+}
+
+internal static class EnumExtensions
+{
+    public static string GetMethodName(this InvocationKind kind) => kind switch
+    {
+        InvocationKind.Read => "Read",
+        InvocationKind.ReadAt => "ReadAt",
+        InvocationKind.Write => "Write",
+        InvocationKind.WriteAt => "WriteAt",
+        InvocationKind.Replace => "Replace",
+        InvocationKind.ReplaceAt => "ReplaceAt",
+        InvocationKind.Modify => "Modify",
+        InvocationKind.ModifyAt => "ModifyAt",
+        InvocationKind.Send or
+        InvocationKind.SendHeader or
+        InvocationKind.SendIdentifier => "Send",
+        _ => "?"
+    };
 }

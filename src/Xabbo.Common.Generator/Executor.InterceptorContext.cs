@@ -7,60 +7,7 @@ namespace Xabbo.Common.Generator;
 
 internal static partial class Executor
 {
-    internal static partial class InterceptorContext
-    {
-        static void EmitSendArity(SourceWriter w, InvocationKind kind, int arity)
-        {
-            w.Write("protected void Send");
-            w.WriteTypeParams(arity);
-            w.Write('(');
-            if ((kind & InvocationKind.Header) > 0)
-                w.Write("global::Xabbo.Messages.Header header");
-            else if ((kind & InvocationKind.Identifier) > 0)
-                w.Write("global::Xabbo.Messages.Identifier identifier");
-            if (arity > 0)
-            {
-                w.Write(", ");
-                w.WriteTypeArgs(arity);
-            }
-            w.Write(")");
-
-            using (w.BraceScope())
-            {
-                w.WriteLine("global::Xabbo.Interceptor.IInterceptorContext context = (global::Xabbo.Interceptor.IInterceptorContext)this;");
-                if ((kind & InvocationKind.Identifier) > 0)
-                    w.WriteLine("global::Xabbo.Messages.Header header = context.Interceptor.Messages.Resolve(identifier);");
-                w.WriteLine("using global::Xabbo.Messages.Packet packet = new(header, context.Interceptor.Session.Client.Type);");
-                for (int i = 0; i < arity; i++)
-                {
-                    w.Write("packet.Write<");
-                    w.WriteTypeParam(i, arity);
-                    w.Write(">(");
-                    w.WriteTypeArgName(i, arity);
-                    w.WriteLine(");");
-                }
-                w.WriteLine("context.Interceptor.Send(packet);");
-            }
-        }
-
-        static void EmitSendArities(SourceWriter w, InvocationKind kind, EquatableArray<int> arities)
-        {
-            for (int i = 0; i < arities.Length; i++)
-            {
-                EmitSendArity(w, kind, arities[i]);
-            }
-        }
-
-        public static void Execute(SourceProductionContext context, InterceptorContextInfo info)
-        {
-            using SourceWriter w = new();
-
-            w.WriteLines(["#nullable enable", ""]);
-            using (w.NamespaceScope(info.Namespace))
-            {
-                using (w.BraceScope($"partial class {info.Name}"))
-                {
-                    w.WriteLine(@"
+    const string ContextBase = @"
         /// <inheritdoc cref=""global::Xabbo.ConnectionExtensions.Send(
         ///     global::Xabbo.Interceptor.IInterceptor,
         ///     global::Xabbo.Messages.IMessage
@@ -141,12 +88,94 @@ internal static partial class Executor
             global::Xabbo.ConnectionExtensions.Send(interceptor, request);
 
             return request.GetData(await response);
-        }");
+        }";
 
-                    w.WriteLine();
+    internal static partial class InterceptorContext
+    {
+        static void EmitSendArity(SourceWriter w, InvocationKind kind, int arity)
+        {
+            w.Write("protected void Send");
+            w.WriteTypeParams(arity);
+            w.Write('(');
+            if ((kind & InvocationKind.Header) > 0)
+                w.Write("global::Xabbo.Messages.Header header");
+            else if ((kind & InvocationKind.Identifier) > 0)
+                w.Write("global::Xabbo.Messages.Identifier identifier");
+            if (arity > 0)
+            {
+                w.Write(", ");
+                w.WriteTypeArgs(arity);
+            }
+            w.Write(")");
+
+            using (w.BraceScope())
+            {
+                w.WriteLine("global::Xabbo.Interceptor.IInterceptorContext context = (global::Xabbo.Interceptor.IInterceptorContext)this;");
+                if ((kind & InvocationKind.Identifier) > 0)
+                    w.WriteLine("global::Xabbo.Messages.Header header = context.Interceptor.Messages.Resolve(identifier);");
+                w.WriteLine("using global::Xabbo.Messages.Packet packet = new(header, context.Interceptor.Session.Client.Type);");
+                for (int i = 0; i < arity; i++)
+                {
+                    w.Write("packet.Write<");
+                    w.WriteTypeParam(i, arity);
+                    w.Write(">(");
+                    w.WriteTypeArgName(i, arity);
+                    w.WriteLine(");");
+                }
+                w.WriteLine("context.Interceptor.Send(packet);");
+            }
+        }
+
+        static void EmitSendArities(SourceWriter w, InvocationKind kind, EquatableArray<int> arities)
+        {
+            for (int i = 0; i < arities.Length; i++)
+            {
+                w.WriteLine();
+                EmitSendArity(w, kind, arities[i]);
+            }
+        }
+
+        public static void Execute(SourceProductionContext context, InterceptorContextInfo? info)
+        {
+            if (info is null)
+                return;
+
+            GenerateContextBase(context, info);
+            GenerateSendArtities(context, info);
+        }
+
+        static void GenerateContextBase(SourceProductionContext context, InterceptorContextInfo info)
+        {
+            using SourceWriter w = new();
+
+            w.WriteLine("#nullable enable");
+            w.WriteLine("");
+
+            using (w.NamespaceScope(info.Namespace))
+            {
+                using (w.BraceScope($"partial class {info.Name}"))
+                {
+                    w.WriteLine(ContextBase);
+                }
+            }
+
+            string ns = info.Namespace;
+            if (ns == "<global namespace>")
+                ns = "global";
+
+            context.AddSource($"{ns}.{info.Name}.InterceptorContext.Base.g.cs", w.ToSourceText());
+        }
+
+        static void GenerateSendArtities(SourceProductionContext context, InterceptorContextInfo info)
+        {
+            using SourceWriter w = new();
+
+            using (w.NamespaceScope(info.Namespace))
+            {
+                using (w.BraceScope($"partial class {info.Name}"))
+                {
                     w.WriteLine($"// Generating {info.SendHeaderArities.Length} send header method(s)");
                     EmitSendArities(w, InvocationKind.SendHeader, info.SendHeaderArities);
-                    w.WriteLine();
                     w.WriteLine($"// Generating {info.SendIdentifierArities.Length} send identifier method(s)");
                     EmitSendArities(w, InvocationKind.SendIdentifier, info.SendIdentifierArities);
                 }

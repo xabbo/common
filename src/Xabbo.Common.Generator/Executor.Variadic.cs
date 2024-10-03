@@ -333,7 +333,9 @@ internal static partial class Executor
                         // Write cases
                         w.WriteLine($"/* Generated {types.Length} case{(types.Length == 1 ? "" : "s")} */");
                         foreach (var type in types)
-                            w.WriteLine($"case {type.FullyQualifiedName} v: w.ReplaceStruct(v); break;");
+                        {
+                            w.WriteLine($"case {type.FullyQualifiedName} v: w.ReplaceStruct<{type.FullyQualifiedName}>(v); break;");
+                        }
                         w.WriteLine("default: throw new global::System.NotSupportedException($\"Cannot replace value of type '{typeof(T)}'.\");");
                     }
                 }

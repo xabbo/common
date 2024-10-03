@@ -18,22 +18,8 @@ public class Generator : IIncrementalGenerator
                 transform: static (ctx, _) => ctx
             );
 
-        // Extract ExtensionInfo
-        IncrementalValuesProvider<Result<ExtensionInfo?>> extensionResults = extensionContexts.Select(Extractor.Extension.ExtractInfo);
-
-        // Report extension diagnostics
-        context.RegisterSourceOutput(
-            extensionResults.Select(static (extensionResult, _) => extensionResult.Errors),
-            Executor.ReportDiagnostics
-        );
-
         // Generate IExtensionInfoInit implementations for [Extension] classes
-        context.RegisterSourceOutput(
-            extensionResults
-                .Where(static (m) => m.Value is not null)
-                .Select(static (m, _) => m.Value!),
-            Executor.Extension.Execute
-        );
+        context.RegisterSourceOutput(extensionContexts.Select(Extractor.Extension.ExtractInfo), Executor.Extension.Execute);
 
         // Select classes marked with [Intercept]
         IncrementalValuesProvider<GeneratorAttributeSyntaxContext> interceptorContexts = context.SyntaxProvider
@@ -54,61 +40,32 @@ public class Generator : IIncrementalGenerator
                 return x.Left.AddRange(x.Right.Where(x => seen.Add(x.TargetSymbol.ToDisplayString())));
             });
 
-        // Extract InterceptorInfo
-        IncrementalValuesProvider<Result<InterceptorInfo?>> interceptorResults = interceptorAndExtensionContexts
-            .Select(Extractor.Interceptor.ExtractInfo);
-
-        // Report interceptor diagnostics
+        // Extract interceptor info and generate intercept handlers
         context.RegisterSourceOutput(
-            interceptorResults
-                .Select(static (interceptorResult, _) => interceptorResult.Errors),
-            Executor.ReportDiagnostics
-        );
-
-        // Generate intercept handlers
-        context.RegisterSourceOutput(
-            interceptorResults
-                .Where(static (m) => m.Value is not null)
-                .Select(static (m, _) => m.Value!),
+            interceptorAndExtensionContexts
+                .Select(Extractor.Interceptor.ExtractInfo),
             Executor.Interceptor.Execute
         );
 
-        // Extract info for interceptor contexts
-        IncrementalValuesProvider<Result<InterceptorContextInfo?>> interceptorContextResults = interceptorAndExtensionContexts
-            .Select((context, _) => Extractor.InterceptorContext.ExtractInterceptorContextInfo(context));
-
-        // Report diagnostics
         context.RegisterSourceOutput(
-            interceptorContextResults.SelectMany((result, _) => result.Errors),
-            Executor.ReportDiagnostic
+            interceptorAndExtensionContexts
+                .Select(Extractor.InterceptorContext.ExtractInterceptorContextInfo),
+            Executor.InterceptorContext.Execute
         );
-
-        // Generate interceptor context methods
-        IncrementalValuesProvider<InterceptorContextInfo> interceptorContextInfos = interceptorContextResults
-            .Where(x => x.Value is not null)
-            .Select((x, _) => x.Value!);
-
-        context.RegisterSourceOutput(interceptorContextInfos, Executor.InterceptorContext.Execute);
 
         // Variadic source generation
         context.RegisterPostInitializationOutput(Executor.Variadic.RegisterPostInitializationOutput);
 
         // Collect all invocations of Read, Write, Replace, Modify and Send
-        IncrementalValuesProvider<Result<VariadicInvocation?>> invocationResults = context.SyntaxProvider.CreateSyntaxProvider(
+        IncrementalValuesProvider<VariadicInvocation?> variadicInvocations = context.SyntaxProvider.CreateSyntaxProvider(
             static (node, _) => Extractor.Variadic.IsCandidateForGeneration(node),
             Extractor.Variadic.ExtractVariadicInvocation
         );
 
-        // Report diagnostics
-        context.RegisterSourceOutput(
-            invocationResults.SelectMany((result, _) => result.Errors),
-            Executor.ReportDiagnostic
-        );
-
         // Extract invocations
-        IncrementalValuesProvider<VariadicInvocation> invocations = invocationResults
-            .Where(static (x) => x.Value is not null)
-            .Select(static (x, _) => x.Value!);
+        IncrementalValuesProvider<VariadicInvocation> invocations = variadicInvocations
+            .Where(static (x) => x is not null)
+            .Select(static (x, _) => x!);
 
         // Output source for each invocation kind / arity
         foreach (var invocationKind in Executor.Variadic.InvocationGenerationKinds)
@@ -133,6 +90,7 @@ public class Generator : IIncrementalGenerator
         IncrementalValueProvider<EquatableArray<VariadicType>> distinctReadTypes = invocations
             .Where(x => (x.Kind & (InvocationKind.RequiresParser)) > 0)
             .SelectMany((x, _) => x.Types)
+            .Where(x => x.IsValid)
             .Collect()
             .Select((types, _) =>
             {
@@ -153,6 +111,7 @@ public class Generator : IIncrementalGenerator
         IncrementalValueProvider<EquatableArray<VariadicType>> distinctParserComposerTypes = invocations
             .Where(x => (x.Kind & InvocationKind.RequiresParserComposer) > 0)
             .SelectMany((x, _) => x.Types)
+            .Where(x => x.IsValid)
             .Collect()
             .Select((types, _) =>
             {

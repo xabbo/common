@@ -1,5 +1,3 @@
-using System.Text;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -13,8 +11,11 @@ internal static partial class Executor
 {
     internal static class Extension
     {
-        internal static void Execute(SourceProductionContext context, ExtensionInfo extension)
+        internal static void Execute(SourceProductionContext context, ExtensionInfo? extension)
         {
+            if (extension is null)
+                return;
+
             string hintName = $"{extension.ClassName}.Extension.g.cs";
             if (extension.Namespace != "")
                 hintName = $"{extension.Namespace}.{hintName}";
