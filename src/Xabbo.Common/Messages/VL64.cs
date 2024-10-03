@@ -4,7 +4,7 @@ using System.Numerics;
 namespace Xabbo.Messages;
 
 /// <summary>
-/// Represents a signed variable length base64-encoded integer.
+/// Represents a signed variable-length radix-64 encoded integer.
 /// </summary>
 public readonly record struct VL64
 {
@@ -27,7 +27,7 @@ public readonly record struct VL64
     public static int EncodeLength(VL64 value) => (32 - BitOperations.LeadingZeroCount((uint)Math.Abs(value)) + 9) / 6;
 
     /// <summary>
-    /// Returns the number of bytes required to decode a variable-length base64-encoded integer, given (and including) the first byte.
+    /// Returns the number of bytes required to decode a VL64, given (and including) the first byte.
     /// </summary>
     public static int DecodeLength(byte value) => (value >> 3) & 7;
 
