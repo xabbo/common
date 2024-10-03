@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO001",
+    "Title": "Invalid message identifier",
+    "Severity": "Error",
+    "Location": "(4,41)-(4,48)",
+    "LocationText": "\"Test!\"",
+    "Message": "'Test!' is not a valid message identifier"
+  }
+]

@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO011",
+    "Title": "The type must be a packet primitive type or implement the IParser<T> interface",
+    "Severity": "Error",
+    "Location": "(1,33)-(1,39)",
+    "LocationText": "object",
+    "Message": "'object' is not a packet primitive or IParser<T> implementation"
+  }
+]

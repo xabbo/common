@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO017",
+    "Title": "Method does not support arrays",
+    "Severity": "Error",
+    "Location": "(1,35)-(1,40)",
+    "LocationText": "int[]",
+    "Message": "Modify does not support arrays"
+  }
+]

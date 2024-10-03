@@ -5,6 +5,24 @@ using Xabbo.Common.Tests.Fixtures;
 
 namespace Xabbo.Common.Tests;
 
+[Intercept]
+partial class Asdf
+{
+    [Intercept]
+    IMessage? Test(TestMsg msg)
+    {
+        return null;
+
+    }
+}
+
+class TestMsg : IMessage<TestMsg>
+{
+    public static Identifier Identifier => throw new System.NotImplementedException();
+    public static TestMsg Parse(in PacketReader p) => throw new System.NotImplementedException();
+    public void Compose(in PacketWriter p) => throw new System.NotImplementedException();
+}
+
 public class ConnectionTests
 {
     [Theory]

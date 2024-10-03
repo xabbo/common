@@ -1,0 +1,18 @@
+﻿[
+  {
+    "Id": "XABBO012",
+    "Title": "The type must be a packet primitive type or implement the IComposer interface",
+    "Severity": "Error",
+    "Location": "(1,34)-(1,59)",
+    "LocationText": "(IEnumerable<object>)null",
+    "Message": "'object' is not a packet primitive or IComposer implementation"
+  },
+  {
+    "Id": "XABBO012",
+    "Title": "The type must be a packet primitive type or implement the IComposer interface",
+    "Severity": "Error",
+    "Location": "(2,34)-(2,53)",
+    "LocationText": "IEnumerable<object>",
+    "Message": "'object' is not a packet primitive or IComposer implementation"
+  }
+]

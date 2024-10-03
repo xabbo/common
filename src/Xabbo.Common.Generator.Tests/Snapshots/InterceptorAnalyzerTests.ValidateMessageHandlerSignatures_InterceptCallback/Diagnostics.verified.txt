@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO016",
+    "Title": "Invalid message handler method signature",
+    "Severity": "Error",
+    "Location": "(5,17)-(5,19)",
+    "LocationText": "Fn",
+    "Message": "Message handler signature must be void(IMessage<TMsg>), void(Intercept, IMessage<TMsg>), void(Intercept<IMessage<TMsg>>), or IMessage?(IMessage<TMsg>)"
+  }
+]

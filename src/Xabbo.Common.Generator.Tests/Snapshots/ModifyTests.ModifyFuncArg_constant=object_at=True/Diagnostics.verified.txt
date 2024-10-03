@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO013",
+    "Title": "The type must be a packet primitive type or implement the IParserComposer<T> interface",
+    "Severity": "Error",
+    "Location": "(2,40)-(2,48)",
+    "LocationText": "modifier",
+    "Message": "'object' is not a packet primitive or IParserComposer<T> implementation"
+  }
+]

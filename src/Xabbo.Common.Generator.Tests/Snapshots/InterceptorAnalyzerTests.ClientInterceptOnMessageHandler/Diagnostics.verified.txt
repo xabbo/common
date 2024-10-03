@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO015",
+    "Title": "Message intercept handlers should not specify a target client",
+    "Severity": "Error",
+    "Location": "(4,13)-(4,44)",
+    "LocationText": "Intercept(ClientType.Shockwave)",
+    "Message": "Message intercept handlers should not specify a target client"
+  }
+]
