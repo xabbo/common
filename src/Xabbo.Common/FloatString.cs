@@ -16,4 +16,6 @@ public readonly struct FloatString(float value)
 
     public static implicit operator string(FloatString floatString) => Format(floatString.Value);
     public static explicit operator FloatString(string value) => new(float.Parse(value));
+
+    public override string ToString() => Format(Value);
 }
