@@ -149,7 +149,7 @@ internal static class DiagnosticDescriptors
     );
 
     internal static readonly DiagnosticDescriptor MethodDoesNotSupportEnumerable = new(
-        id: "XABBO017",
+        id: "XABBO018",
         title: "Method does not support IEnumerable<T>",
         messageFormat: "{0} does not support IEnumerable<{1}>",
         category: "Xabbo",

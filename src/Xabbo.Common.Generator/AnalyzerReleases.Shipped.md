@@ -1,5 +1,6 @@
-; Shipped analyzer releases
-; https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md
+## Release 1.0.0
+
+### New rules
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
@@ -17,5 +18,12 @@ XABBO012 | Xabbo | Error | DiagnosticDescriptors
 XABBO013 | Xabbo | Error | DiagnosticDescriptors
 XABBO014 | Xabbo | Error | DiagnosticDescriptors
 XABBO015 | Xabbo | Error | DiagnosticDescriptors
+
+## Release 1.0.1
+
+### New rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
 XABBO016 | Xabbo | Error | DiagnosticDescriptors
 XABBO017 | Xabbo | Error | DiagnosticDescriptors
