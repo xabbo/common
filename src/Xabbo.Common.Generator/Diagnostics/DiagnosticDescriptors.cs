@@ -151,7 +151,7 @@ internal static class DiagnosticDescriptors
     internal static readonly DiagnosticDescriptor MethodDoesNotSupportEnumerable = new(
         id: "XABBO018",
         title: "Method does not support IEnumerable<T>",
-        messageFormat: "{0} does not support IEnumerable<{1}>",
+        messageFormat: "{0} does not support IEnumerable<T>",
         category: "Xabbo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true

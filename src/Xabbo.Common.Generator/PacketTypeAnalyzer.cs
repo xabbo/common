@@ -121,8 +121,7 @@ public class PacketTypeAnalyzer : DiagnosticAnalyzer
                     ctx.ReportDiagnostic(Diagnostic.Create(
                         DiagnosticDescriptors.MethodDoesNotSupportEnumerable,
                         location,
-                        invocationKind.GetMethodName(),
-                        packetType.InnerType?.Name ?? "?"
+                        invocationKind.GetMethodName()
                     ));
                     return;
                 }

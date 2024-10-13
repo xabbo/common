@@ -67,6 +67,14 @@ public class ModifyTests
         severity: DiagnosticSeverity.Error
     );
 
+    [Fact]
+    public void ModifyEnumerable() => V.Diagnostic(
+        @"
+            ((IPacket)null).Modify<IEnumerable<int>>(x => x);
+        ",
+        severity: DiagnosticSeverity.Error
+    );
+
     /// <summary>
     /// This test ensures that a case for ParserComposer is emitted in ReadImpl.g.cs and ReplaceImpl.g.cs.
     /// </summary>

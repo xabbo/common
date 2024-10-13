@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Id": "XABBO018",
+    "Title": "Method does not support IEnumerable<T>",
+    "Severity": "Error",
+    "Location": "(1,36)-(1,52)",
+    "LocationText": "IEnumerable<int>",
+    "Message": "Replace does not support IEnumerable<T>"
+  }
+]

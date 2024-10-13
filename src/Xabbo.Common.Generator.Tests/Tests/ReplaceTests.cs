@@ -69,4 +69,12 @@ public class ReplaceTests
         testType: TestType.VariadicReplace,
         args: [at]
     );
+
+    [Fact]
+    public void ReplaceEnumerable() => V.Diagnostic(
+        @"
+            ((IPacket)null).Replace<IEnumerable<int>>(null);
+        ",
+        severity: DiagnosticSeverity.Error
+    );
 }

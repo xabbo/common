@@ -73,4 +73,12 @@ public class ReadTests
         testType: TestType.VariadicRead,
         args: [at]
     );
+
+    [Fact]
+    public void ReadEnumerable() => V.Diagnostic(
+        @"
+            ((IPacket)null).Read<IEnumerable<int>>();
+        ",
+        severity: DiagnosticSeverity.Error
+    );
 }

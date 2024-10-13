@@ -492,8 +492,7 @@ internal static partial class AnalysisHelper
                 InnerType = arrayType.ElementType
             };
         }
-        else if ((invocationKind & InvocationKind.SupportsEnumerable) > 0 &&
-            type is INamedTypeSymbol namedType)
+        else if (type is INamedTypeSymbol namedType)
         {
             if (!IsPrimitivePacketType(type) && !ImplementsComposer(type))
             {
