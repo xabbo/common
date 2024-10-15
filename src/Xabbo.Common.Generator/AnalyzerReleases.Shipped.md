@@ -32,4 +32,6 @@ XABBO017 | Xabbo | Error | DiagnosticDescriptors
 
 ### New rules
 
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
 XABBO018 | Xabbo | Error | DiagnosticDescriptors
