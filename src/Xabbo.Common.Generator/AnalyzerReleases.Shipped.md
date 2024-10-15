@@ -27,3 +27,9 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 XABBO016 | Xabbo | Error | DiagnosticDescriptors
 XABBO017 | Xabbo | Error | DiagnosticDescriptors
+
+## Release 1.0.2
+
+### New rules
+
+XABBO018 | Xabbo | Error | DiagnosticDescriptors
