@@ -13,7 +13,7 @@
 
   <PropertyGroup Label="Package">
     <PackageId>Xabbo.Common</PackageId>
-    <PackageProjectUrl>https://xabbo.b7c.io/common</PackageProjectUrl>
+    <PackageProjectUrl>https://xabbo.io</PackageProjectUrl>
     <Description>Provides common functionality for interfacing with Habbo packet interceptors.</Description>
     <RepositoryUrl>https://github.com/xabbo/common.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
