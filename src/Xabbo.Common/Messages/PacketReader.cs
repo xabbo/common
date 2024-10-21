@@ -17,6 +17,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     public ReadOnlySpan<byte> Span => Packet.Buffer.Span;
     public int Length => Packet.Length;
     public int Available => Packet.Length - Pos;
+    public Encoding Encoding => Client is ClientType.Shockwave ? Encoding.Latin1 : Encoding.UTF8;
 
     public PacketReader(IPacket packet) : this(packet, ref packet.Position) { }
 
@@ -134,19 +135,21 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// </summary>
     public string ReadString()
     {
-        if (Client == ClientType.Shockwave &&
-            Header.Direction == Direction.In)
+        if (Client is ClientType.Shockwave)
         {
-            if (Pos >= Span.Length)
-                throw new IndexOutOfRangeException("Attempted to read string at the end of the packet.");
-            int start = Pos;
-            int end = Span[Pos..].IndexOf<byte>(2);
-            if (end == -1)
-                throw new IndexOutOfRangeException("Attempted to read an unterminated string.");
-            Pos += end + 1;
-            return Encoding.UTF8.GetString(Span[start..(Pos - 1)]);
+            if (Header.Direction is Direction.In)
+            {
+                if (Pos >= Span.Length)
+                    throw new IndexOutOfRangeException("Attempted to read string at the end of the packet.");
+                int start = Pos;
+                int end = Span[Pos..].IndexOf<byte>(2);
+                if (end == -1)
+                    throw new IndexOutOfRangeException("Attempted to read an unterminated string.");
+                Pos += end + 1;
+                return Encoding.GetString(Span[start..(Pos - 1)]);
+            }
         }
-        return Encoding.UTF8.GetString(ReadSpan(ReadShort()));
+        return Encoding.GetString(ReadSpan(ReadShort()));
     }
 
     /// <summary>
@@ -234,7 +237,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
         if (Pos != 0)
             throw new Exception("Cannot read content: position must be at the start of the packet.");
         Pos = Length;
-        return Encoding.UTF8.GetString(Packet.Buffer.Span);
+        return Encoding.GetString(Packet.Buffer.Span);
     }
 
     /// <summary>

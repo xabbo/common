@@ -17,6 +17,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     public ClientType Client => Packet.Client;
     public Span<byte> Span => Packet.Buffer.Span;
     public int Length => Packet.Length;
+    public Encoding Encoding => Client is ClientType.Shockwave ? Encoding.Latin1 : Encoding.UTF8;
 
     public PacketWriter(IPacket packet) : this(packet, ref packet.Position) { }
 
@@ -179,7 +180,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        int len = Encoding.UTF8.GetByteCount(value);
+        int len = Encoding.GetByteCount(value);
         if (len > ushort.MaxValue)
             throw new ArgumentException("Cannot write string: length is too long.", nameof(value));
 
@@ -197,7 +198,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
             span = Allocate(len);
         }
 
-        Encoding.UTF8.GetBytes(value, span);
+        Encoding.GetBytes(value, span);
     }
 
     /// <summary>
@@ -302,7 +303,7 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
         UnsupportedClientException.ThrowIfNoneOr(Client, ~ClientType.Shockwave);
         if (Pos != 0)
             throw new Exception("Cannot write content: position must be at the start of the packet.");
-        Encoding.UTF8.GetBytes(content, Resize(Length, Encoding.UTF8.GetByteCount(content)));
+        Encoding.GetBytes(content, Resize(Length, Encoding.GetByteCount(content)));
     }
 
     /// <summary>
@@ -359,20 +360,20 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
             if (Pos >= Span.Length)
                 throw new IndexOutOfRangeException("Attempted to replace string at the end of the packet.");
             int end = Span[Pos..].IndexOf<byte>(0x02);
-            int newLen = Encoding.UTF8.GetByteCount(value);
+            int newLen = Encoding.GetByteCount(value);
             if (end < 0)
                 throw new IndexOutOfRangeException("Attempted to replace an unterminated string.");
-            Encoding.UTF8.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
+            Encoding.GetBytes(value, Resize(end + 1, newLen + 1)[..^1]);
             Span[Pos - 1] = 0x02;
         }
         else
         {
             int start = Pos;
             int preLen = Reader().ReadShort();
-            int postLen = Encoding.UTF8.GetByteCount(value);
+            int postLen = Encoding.GetByteCount(value);
             Pos = start;
             WriteShort((short)postLen);
-            Encoding.UTF8.GetBytes(value, Resize(preLen, postLen));
+            Encoding.GetBytes(value, Resize(preLen, postLen));
         }
     }
 
