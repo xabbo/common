@@ -1,4 +1,6 @@
-﻿namespace Xabbo;
+﻿using System;
+
+namespace Xabbo;
 
 /// <summary>
 /// Represents an array length.
@@ -11,7 +13,7 @@
 /// <item>On Shockwave as a <see cref="Messages.VL64"/>.</item>
 /// </list>
 /// </remarks>
-public readonly record struct Length
+public readonly record struct Length : IComparable<Length>, IComparable
 {
     private readonly ushort _value;
     private Length(ushort value) => _value = value;
@@ -24,4 +26,15 @@ public readonly record struct Length
     /// Returns the value of this <see cref="Length"/> as a string.
     /// </summary>
     public override string ToString() => _value.ToString();
+
+    /// <inheritdoc/>
+    public int CompareTo(Length other) => _value.CompareTo(other._value);
+
+    /// <inheritdoc/>
+    public int CompareTo(object? obj)
+    {
+        if (obj is not Length other)
+            throw new ArgumentException($"Object must be of type {typeof(Length).FullName}.", nameof(obj));
+        return CompareTo(other);
+    }
 }

@@ -13,7 +13,7 @@ namespace Xabbo;
 /// <item>On Shockwave as a <see cref="Messages.VL64"/>.</item>
 /// </list>
 /// </remarks>
-public readonly struct Id
+public readonly record struct Id : IComparable<Id>, IComparable
 {
     /// <summary>
     /// The minimum value of and <see cref="Id"/>.
@@ -62,4 +62,15 @@ public readonly struct Id
     /// Returns the value of this <see cref="Id"/> as a string.
     /// </summary>
     public override string ToString() => _value.ToString();
+
+    /// <inheritdoc/>
+    public int CompareTo(Id other) => _value.CompareTo(other._value);
+
+    /// <inheritdoc/>
+    public int CompareTo(object? obj)
+    {
+        if (obj is not Id other)
+            throw new ArgumentException($"Object must be of type {typeof(Id).FullName}.", nameof(obj));
+        return CompareTo(other);
+    }
 }
