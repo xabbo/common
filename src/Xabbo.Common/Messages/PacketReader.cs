@@ -28,8 +28,9 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// <exception cref="IndexOutOfRangeException">If the current position plus the specified length exceeds the length of the packet.</exception>
     public ReadOnlySpan<byte> ReadSpan(int n)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(n);
         if (Pos + n > Span.Length)
-            throw new IndexOutOfRangeException($"Cannot read past the packet length. Attempted to read {n} bytes from position {Pos} when length is {Length}.");
+            throw new IndexOutOfRangeException($"Attempted to read past the packet length: {n} bytes from position {Pos} when length is {Length}.");
         Pos += n;
         return Span[(Pos - n)..Pos];
     }
