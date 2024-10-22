@@ -150,7 +150,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
                 return Encoding.GetString(Span[start..(Pos - 1)]);
             }
         }
-        return Encoding.GetString(ReadSpan(ReadShort()));
+        return Encoding.GetString(ReadSpan((ushort)ReadShort()));
     }
 
     /// <summary>
