@@ -6,8 +6,6 @@ using Xunit.Abstractions;
 
 using Xabbo.Messages;
 using Xabbo.Common.Tests.Data;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Xabbo.Common.Tests;
 
@@ -122,11 +120,21 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
     }
 
     [Theory]
+    [ClassData(typeof(Matrix<Clients, Directions, StringData>))]
+    public void String_RoundTrip(ClientType client, Direction direction, string value)
+    {
+        var packet = new Packet((direction, 0), client);
+        packet.WriteAt(0, value);
+        Assert.Equal(value, packet.ReadAt<string>(0));
+    }
+
+    [Theory]
     [ClassData(typeof(Matrix<Clients, Directions, StringReplacements>))]
     public void String_Replacement(ClientType client, Direction direction, string value, string replacement)
     {
-        int valueByteCount = Encoding.UTF8.GetByteCount(value);
-        int replacementByteCount = Encoding.UTF8.GetByteCount(replacement);
+        Encoding encoding = client is ClientType.Shockwave ? Encoding.Latin1 : Encoding.UTF8;
+        int valueByteCount = encoding.GetByteCount(value);
+        int replacementByteCount = encoding.GetByteCount(replacement);
 
         var packet = new Packet((direction, 0), client);
 
@@ -152,6 +160,32 @@ public class PacketTests(ITestOutputHelper testOutputHelper)
         // There is no more data in the packet
         Assert.Equal(packet.Length, packet.Position);
     }
+
+    [Theory]
+    [ClassData(typeof(Matrix<Clients, Directions, StringLengthData>))]
+    public void String_Lengths(ClientType client, Direction direction, int length)
+    {
+        bool shouldThrow = client switch
+        {
+            ClientType.Shockwave => length > B64.MaxValue,
+            not ClientType.Shockwave => length > ushort.MaxValue
+        };
+
+        Packet packet = new((direction, 0), client);
+
+        string value = new('x', length);
+
+        if (shouldThrow)
+        {
+            Assert.Throws<ArgumentException>(() => packet.Write(value));
+        }
+        else
+        {
+            packet.WriteAt(0, value);
+            Assert.Equal(value, packet.ReadAt<string>(0));
+        }
+    }
+
 
     [Theory]
     [ClassData(typeof(Matrix<Clients, Directions>))]
