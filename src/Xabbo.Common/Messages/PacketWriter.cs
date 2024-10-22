@@ -181,8 +181,16 @@ public readonly ref struct PacketWriter(IPacket packet, ref int pos, IParserCont
         ArgumentNullException.ThrowIfNull(value);
 
         int len = Encoding.GetByteCount(value);
-        if (len > ushort.MaxValue)
-            throw new ArgumentException("Cannot write string: length is too long.", nameof(value));
+        if (Client is ClientType.Shockwave)
+        {
+            if (len > B64.MaxValue)
+                throw new ArgumentException($"String byte length ({len}) exceeds the maximum value ({B64.MaxValue}) of a {nameof(B64)}.", nameof(value));
+        }
+        else
+        {
+            if (len > ushort.MaxValue)
+                throw new ArgumentException($"String byte length ({len}) exceeds the maximum value ({ushort.MaxValue}) of a {nameof(UInt32)}.", nameof(value));
+        }
 
         Span<byte> span;
         if (Client == ClientType.Shockwave &&
