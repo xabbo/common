@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Project">
     <TargetFramework>net8.0</TargetFramework>
@@ -41,7 +41,7 @@
     <Content Include="Generated/**" />
   </ItemGroup>
 
-  <PropertyGroup Label="Rename paths">
+  <PropertyGroup Label="Rename paths" Condition="'$(Configuration)'=='Release'">
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
     <PathMap>$(AppOutputBase)=Xabbo.Common\</PathMap>
   </PropertyGroup>
