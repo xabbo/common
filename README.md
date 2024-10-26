@@ -2,4 +2,4 @@
 
 # Xabbo.Common
 Provides common functionality for xabbo extensions.\
-See [xabbo/gearth](https://github.com/xabbo/gearth) for information on creating [G-Earth](https://github.com/sirjonasxx/G-Earth) extensions with xabbo.
+See [Xabbo.GEarth](https://github.com/xabbo/gearth) for information on creating [G-Earth](https://github.com/sirjonasxx/G-Earth) extensions with xabbo.
