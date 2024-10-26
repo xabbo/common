@@ -10,7 +10,7 @@ namespace Xabbo.Interceptor.Tasks;
 /// A base class used to implement an asynchronous task that intercepts packets and returns a result.
 /// </summary>
 /// <typeparam name="TResult">The result type of the task.</typeparam>
-public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
+public abstract class InterceptorTask<TResult>(IInterceptor interceptor) : IInterceptorContext
 {
     const int DefaultTimeoutMs = 10000;
 
@@ -30,6 +30,7 @@ public abstract class InterceptorTask<TResult>(IInterceptor interceptor)
     /// The interceptor that this task is attached to.
     /// </summary>
     protected IInterceptor Interceptor { get; } = interceptor;
+    IInterceptor IInterceptorContext.Interceptor => Interceptor;
 
     /// <summary>
     /// Gets the current session information.
