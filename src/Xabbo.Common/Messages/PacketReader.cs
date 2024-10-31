@@ -109,7 +109,7 @@ public readonly ref struct PacketReader(IPacket packet, ref int pos, IParserCont
     /// </summary>
     public float ReadFloat() => Client switch
     {
-        ClientType.Flash or ClientType.Shockwave => float.Parse(ReadString()),
+        ClientType.Flash or ClientType.Shockwave => (float)(FloatString)ReadString(),
         _ => BinaryPrimitives.ReadSingleBigEndian(ReadSpan(4)),
     };
 
